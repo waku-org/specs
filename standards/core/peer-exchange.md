@@ -1,8 +1,6 @@
 ---
-slug: 34
-title: 34/WAKU2-PEER-EXCHANGE
+title: WAKU2-PEER-EXCHANGE
 name: Waku v2 Peer Exchange
-status:
 category: Standards Track
 tags: waku/core-protocol
 editor: Daniel Kaiser <danielkaiser@status.im>
