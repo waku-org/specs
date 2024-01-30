@@ -1,8 +1,6 @@
 ---
-slug: 35
-title: 35/WAKU2-NOISE
+title: WAKU2-NOISE
 name: Noise Protocols for Waku Payload Encryption
-status:
 tags: waku-core-protocol
 editor: Giuseppe <giuseppe@status.im>
 contributors: 
