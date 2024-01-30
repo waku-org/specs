@@ -3,7 +3,7 @@ title: RELAY-SHARDING
 name: Waku v2 Relay Sharding
 status: raw
 category: Standards Track
-tags: waku/core
+tags: informational
 editor: Daniel Kaiser <danielkaiser@status.im>
 contributors:
 - Simon-Pierre Vivier <simvivier@status.im>
