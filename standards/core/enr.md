@@ -1,21 +1,19 @@
 ---
-slug: 31
-title: 31/WAKU2-ENR
+title: WAKU2-ENR
 name: Waku v2 usage of ENR
-status:
-tags: waku/core
+tags: waku/core-protocol
 editor: Franck Royer <franck@status.im>
 contributors:
 ---
 
-# Abstract
+## Abstract
 
 This RFC describes the usage of the ENR (Ethereum Node Records) format for [10/WAKU2](/specs/10) purposes.
 The ENR format is defined in [EIP-778](https://eips.ethereum.org/EIPS/eip-778) [[3]](#references).
 
 This RFC is an extension of EIP-778, ENR used in Waku v2 MUST adhere to both EIP-778 and 31/WAKU2-ENR.
 
-# Motivation
+## Motivation
 
 EIP-1459 with the usage of ENR has been implemented [[1]](#references) [[2]](#references) as a discovery protocol for Waku v2.
 
@@ -25,7 +23,7 @@ such as Websocket.
 Currently, Waku v2 nodes running in a Browser only support websocket transport protocol.
 Hence, new ENR keys need to be defined to allow for the encoding of transport protocol other than raw TCP.
 
-## Usage of Multiaddr Format Rationale
+### Usage of Multiaddr Format Rationale
 
 One solution would be to define new keys such as `ws` to encode the websocket port of a node.
 However, we expect new transport protocols to be added overtime such as quic.
@@ -50,7 +48,7 @@ Directly storing one or several multiaddresses in the ENR would fix the issues l
   No new RFC would be needed to support encoding other transport protocols in an ENR.
 - multiaddr contains both the host and port information, allowing the ambiguity previously described to be resolved.
 
-# `multiaddrs` ENR key
+## `multiaddrs` ENR key
 
 We define a  `multiaddrs` key.
 
@@ -67,9 +65,9 @@ We define a  `multiaddrs` key.
 - The 300 bytes size limit as defined by [EIP-778](https://eips.ethereum.org/EIPS/eip-778) still applies;
   In practice, it is possible to encode 3 multiaddresses in ENR, more or less could be encoded depending on the size of each multiaddress.
 
-## Usage
+### Usage
 
-### Many connection types
+#### Many connection types
 
 Alice is a node operator, she runs a node that supports inbound connection for the following protocols:
 - TCP 10101 on `1.2.3.4`
@@ -99,7 +97,7 @@ Where:
 - `len2` is the length of `/dns4/quic.examle.com/tcp/443/quic` byte representation.
 - `len3` is the length of `/ip4/1.2.3.4/tcp/55555/p2p/QmRelay` byte representation. Notice that the `/p2p-circuit` component is not stored, but, since circuit relay addresses are the only one containing a `p2p` component, it's safe to assume that any address containing this component is a circuit relay address. Decoding this type of multiaddresses would require appending the `/p2p-circuit` component.
 
-### Raw TCP only
+#### Raw TCP only
 
 Bob is a node operator, he runs a node that supports inbound connection for the following protocols:
 - TCP 10101 on `1.2.3.4`
@@ -115,13 +113,13 @@ Bob SHOULD structure the ENR for her node as follows:
 Indeed, as Bob's node's connection details can be represented with EIP-778's pre-defined keys only
 then it is not needed to use the `multiaddrs` key.
 
-## Limitations
+### Limitations
 
 Supported key type is `secp256k1` only.
 
 In the future, an extension of this RFC could be made to support other elliptic curve cryptography such as `ed25519`.
 
-# `waku2` ENR key
+## `waku2` ENR key
 
 We define a `waku2` field key:
 
@@ -141,7 +139,7 @@ though it MAY be required by the relevant application or discovery process.
 - Flags marked as `undef` is not yet defined.
 These SHOULD be set to `false` by default.
 
-## Usage
+### Usage
 
 - A Waku v2 node MAY choose to populate the `waku2` field for enhanced discovery capabilities,
 such as indicating supported protocols.
@@ -153,11 +151,11 @@ MUST filter out participant records that do not implement this field or do not h
 - In addition, such nodes MAY choose to filter participants on specific flags (such as supported protocols),
 or further interpret the `waku2` field as required by the application.
 
-# Copyright
+## Copyright
 
 Copyright and related rights waived via [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
 
-# References
+## References
 
 - [1] https://github.com/status-im/nim-waku/pull/690
 - [2] https://github.com/vacp2p/rfc/issues/462#issuecomment-943869940 
