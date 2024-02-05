@@ -12,7 +12,7 @@ contributors:
 This document specifies a deanonymization mitigation technique,
 based on [Dandelion](https://arxiv.org/abs/1701.04439) and [Dandelion++](https://arxiv.org/abs/1805.11060),
 for Waku Relay.
-It mitigates mass deanonymization in the [multi-node (botnet) attacker model](/spec/45/#multi-node),
+It mitigates mass deanonymization in the [multi-node (botnet) attacker model](../../informational/adversarial-models.md/#multi-node),
 even when the number of malicious nodes is linear in the number of total nodes in the network.
 
 Based on the insight that symmetric message propagation makes deanonymization easier,
@@ -170,7 +170,7 @@ If this is the case, they have to be implemented on the libp2p gossipsub layer.
 
 ### Denial of Service: Black Hole Attack
 
-In a [black hole attack](/spec/45/#black-hole-internal), malicious nodes prevent messages from being spread,
+In a [black hole attack](../../informational/adversarial-models.md/#black-hole-internal), malicious nodes prevent messages from being spread,
 metaphorically not allowing messages to leave once they entered.
 This requires the attacker to control nodes on all dissemination paths.
 Since the number of dissemination paths is significantly reduced in the stem phase,
@@ -183,7 +183,7 @@ The fail-safe mechanism specified in this document (proposed in the Dandelion pa
 #### Attacker Model and Anonymity Goals
 
 44/WAKU2-DANDELION provides significant mitigation against mass deanonymization in the
-passive [scaling multi node model](/spec/45/#scaling-multi-node).
+passive [scaling multi node model](../../informational/adversarial-models.md/#scaling-multi-node).
 in which the attacker controls a certain percentage of nodes in the network.
 44/WAKU2-DANDELION provides significant mitigation against mass deanonymization
 even if the attacker knows the network topology, i.e. the anonymity graph and the relay mesh graph.
@@ -286,6 +286,7 @@ Copyright and related rights waived via [CC0](https://creativecommons.org/public
 
 * [Dandelion](https://arxiv.org/abs/1701.04439)
 * [Dandelion++](https://arxiv.org/abs/1805.11060)
+* [multi-node (botnet) attacker model](../../informational/adversarial-models.md/#multi-node)
 * [Waku Relay](https://rfc.vac.dev/spec/11/)
 * [Waku v2](https://rfc.vac.dev/spec/10/)
 * [d-regular graph](https://en.wikipedia.org/wiki/Regular_graph) 
