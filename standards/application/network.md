@@ -1,14 +1,12 @@
 ---
-slug: 64
-title: 64/WAKU2-NETWORK
+title: WAKU2-NETWORK
 name: Waku v2 Network
-status: raw
 category: Best Current Practice
 editor: Hanno Cornelius <hanno@status.im>
 contributors:
 ---
 
-# Abstract
+## Abstract
 
 This RFC specifies an opinionated deployment of [10/WAKU2](https://rfc.vac.dev/spec/10/) protocols
 to form a coherent and shared decentralized messaging network
@@ -21,18 +19,18 @@ We'll refer to this opinionated deployment simply as
 _the public Waku Network_, _the Waku Network_ or, if the context is clear, _the network_
 in the rest of this document.
 
-# Theory / Semantics
+## Theory / Semantics
 
-## Routing protocol
+### Routing protocol
 
 The Waku Network is built on the [17/WAKU2-RLN-RELAY](https://rfc.vac.dev/spec/17/) routing protocol,
 which in turn is an extension of [11/WAKU2-RELAY](https://rfc.vac.dev/spec/11/) with spam protection measures.
 
-## Network shards
+### Network shards
 
 Traffic in the Waku Network is sharded into eight [17/WAKU2-RLN-RELAY](https://rfc.vac.dev/spec/17/) pubsub topics.
 Each pubsub topic is named according to the static shard naming format
-defined in [51/WAKU2-RELAY-SHARDING](https://rfc.vac.dev/spec/51/)
+defined in [WAKU2-RELAY-SHARDING](../../core/relay-sharding.md)
 with:
 * `<cluster_id>` set to `1`
 * `<shard_number>` occupying the range `0` to `7`.
@@ -45,11 +43,11 @@ routed on the combination of the eight pubsub topics:
 /waku/2/rs/1/7
 ```
 
-A node MUST use [WAKU-METADATA](https://rfc.vac.dev/spec/66/) protocol to identify the `<cluster_id>` that every
+A node MUST use [WAKU-METADATA](./metadata.md) protocol to identify the `<cluster_id>` that every
 inbound/outbound peer that attempts to connect supports. In any of the following cases, the node MUST trigger a disconnection:
-* [WAKU-METADATA](https://rfc.vac.dev/spec/66/) dial fails.
-* [WAKU-METADATA](https://rfc.vac.dev/spec/66/) reports an empty `<cluster_id>`.
-* [WAKU-METADATA](https://rfc.vac.dev/spec/66/) reports a `<cluster_id>` different than `1`.
+* [WAKU-METADATA](./metadata.md) dial fails.
+* [WAKU-METADATA](./metadata.md) reports an empty `<cluster_id>`.
+* [WAKU-METADATA](./metadata.md) reports a `<cluster_id>` different than `1`.
 
 ## Roles
 
@@ -105,7 +103,7 @@ each relay node SHOULD enable and support the following protocols as a service n
 1. [12/WAKU2-FILTER](https://rfc.vac.dev/spec/12/) to allow resource-restricted peers to subscribe to messages matching a specific content filter.
 2. [13/WAKU2-STORE](https://rfc.vac.dev/spec/13/) to allow other peers to request historical messages from this node.
 3. [19/WAKU2-LIGHTPUSH](https://rfc.vac.dev/spec/19/) to allow resource-restricted peers to request publishing a message to the network on their behalf.
-4. [34/WAKU2-PEER-EXCHANGE](https://rfc.vac.dev/spec/34/) to allow resource-restricted peers to discover more peers in a resource efficient way.
+4. [34/WAKU2-PEER-EXCHANGE](../../core/peer-exchange/peer-exchange.md) to allow resource-restricted peers to discover more peers in a resource efficient way.
 
 #### Store service nodes
 
@@ -122,7 +120,7 @@ using any of the defined service protocols:
 1. [12/WAKU2-FILTER](https://rfc.vac.dev/spec/12/) to subscribe to messages matching a specific content filter.
 2. [13/WAKU2-STORE](https://rfc.vac.dev/spec/13/) to request historical messages matching a specific content filter.
 3. [19/WAKU2-LIGHTPUSH](https://rfc.vac.dev/spec/19/) to request publishing a message to the network.
-4. [34/WAKU2-PEER-EXCHANGE](https://rfc.vac.dev/spec/34/) to discover more peers in a resource efficient way.
+4. [34/WAKU2-PEER-EXCHANGE](../../core/peer-exchange/peer-exchange.md) to discover more peers in a resource efficient way.
 
 #### Store client nodes
 
@@ -286,13 +284,15 @@ from the content topics provided by the application
 using the hashing mechanism defined in [51/WAKU2-RELAY-SHARDING](https://rfc.vac.dev/spec/51/#automatic-sharding).
 
 
-# Copyright
+## Copyright
 
 Copyright and related rights waived via [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
 
-# References
+## References
 
-(TBD)
+* [WAKU2-RELAY-SHARDING](../../core/relay-sharding.md)
+* [Peer-exchange](../../core/peer-exchange/peer-exchange.md)
+
 
 ## normative
 (TBD)
