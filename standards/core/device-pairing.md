@@ -15,7 +15,7 @@ and securely exchange (arbitrary) information over the Waku network.
 
 ## Background / Rationale / Motivation
 
-In order to implement multi-device communications using one of the Noise session management mechanisms proposed in [37/WAKU2-NOISE-SESSIONS](https://rfc.vac.dev/spec/37/), 
+In order to implement multi-device communications using one of the Noise session management mechanisms proposed in [WAKU2-NOISE-SESSIONS](./noise-sessions/noise-sessions.md), 
 we require a protocol to securely exchange (cryptographic) information between 2 or more devices possessed by a user.
 
 Since, in this scenario, the devices would be close to each other, 
@@ -96,7 +96,7 @@ d.   -> sA, sAeB, sAsB  {s}
 
 3. The device `B`:
     - sets `contentTopic = /{application-name}/{application-version}/wakunoise/1/sessions_shard-{shard-id}/proto`;
-    - listens to messages sent to `contentTopic` and locally filters only those with [Waku payload](https://rfc.vac.dev/spec/35/#abnf) starting with `messageNametag`. If any, continues.
+    - listens to messages sent to `contentTopic` and locally filters only those with [Waku payload](./noise.md/#abnf) starting with `messageNametag`. If any, continues.
     - initializes the Noise handshake by passing `contentTopicParams`, `messageNametag` and `Hash(sB||r)` to the handshake prologue;
     - executes the pre-handshake message, i.e. processes its ephemeral key `eB`;
     - executes the first handshake message, i.e.
@@ -243,7 +243,7 @@ TransferPhase:
 ### Messages Nametag Derivation
 
 To reduce metadata leakages and increase devices's anonymity over the p2p network, 
-[35/WAKU2-NOISE](https://rfc.vac.dev/spec/37/#session-states) suggests to use some common secrets `mntsInbound, mntsOutbound` (e.g. `mntsInbound, mntsOutbound = HKDF(h)` 
+[WAKU2-NOISE](./noise.md/#session-states) suggests to use some common secrets `mntsInbound, mntsOutbound` (e.g. `mntsInbound, mntsOutbound = HKDF(h)` 
 where `h` is the [handshake hash value](https://noiseprotocol.org/noise.html#overview-of-handshake-state-machine) of the Handshake State at some point of the pairing phase) 
 in order to frequently and deterministically change the `messageNametag` of messages exchanged during the pairing and transfer phase - 
 ideally, at each message exchanged. 
@@ -315,13 +315,13 @@ unless `mntsInbound`, `mntsOutbound` or the `messageNametag` buffer lists were c
 
 ### The N11M session management mechanism
 
-In the [`N11M` session management mechanism](https://rfc.vac.dev/spec/37/#the-n11m-session-management-mechanism), 
+In the [`N11M` session management mechanism](./noise-sessions/noise-sessions.md/#the-n11m-session-management-mechanism), 
 one of Alice's devices is already communicating with one of Bob's devices within an active Noise session, 
 e.g. after a successful execution of a Noise handshake.
 
 Alice and Bob would then share some cryptographic key material, 
 used to encrypt their communications. 
-According to [37/WAKU2-NOISE-SESSIONS](https://rfc.vac.dev/spec/37/) this information consists of:
+According to [WAKU2-NOISE-SESSIONS](./noise-sessions/noise-sessions.md) this information consists of:
 - A `session-id` (32 bytes)
 - Two cipher state `CSOutbound`, `CSInbound`, where each of them contains:
     - an encryption key `k` (2x32bytes)
@@ -330,7 +330,7 @@ According to [37/WAKU2-NOISE-SESSIONS](https://rfc.vac.dev/spec/37/) this inform
         
 for a total of **176 bytes** of information.
 
-In a [`N11M`](https://rfc.vac.dev/spec/37/#the-n11m-session-management-mechanism) session mechanism scenario, 
+In a [`N11M`](./noise-sessions/noise-sessions.md/#the-n11m-session-management-mechanism) session mechanism scenario, 
 all (synced) Alice's devices that are communicating with Bob 
 share the same Noise session cryptographic material.
 Hence, if Alice wishes to add a new device, 
@@ -348,8 +348,8 @@ Copyright and related rights waived via [CC0](https://creativecommons.org/public
 ## References
 
 ### Normative
-- [35/WAKU2-NOISE](https://rfc.vac.dev/spec/37/#session-states)
-- [37/WAKU2-NOISE-SESSIONS](https://rfc.vac.dev/spec/37/)
+- [35/WAKU2-NOISE](./noise.md/#session-states)
+- [WAKU2-NOISE-SESSIONS](./noise-sessions/noise-sessions.md/)
 
 ### Informative
 - [26/WAKU2-PAYLOAD](https://rfc.vac.dev/spec/35/#abnf)
