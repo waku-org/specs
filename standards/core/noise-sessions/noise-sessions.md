@@ -8,7 +8,7 @@ contributors:
 
 ## Introduction
 
-In [35/WAKU2-NOISE](https://rfc.vac.dev/35/) we defined how Waku messages' payloads can be encrypted using key material derived from key agreements based on the [Noise Protocol Framework](http://www.noiseprotocol.org/noise.html). 
+In [WAKU2-NOISE](../noise.md) we defined how Waku messages' payloads can be encrypted using key material derived from key agreements based on the [Noise Protocol Framework](http://www.noiseprotocol.org/noise.html). 
 
 Once two users complete a Noise handshake, 
 an encryption/decryption session - _or a Noise session_ - would be instantiated.
@@ -37,14 +37,14 @@ since it is required to either retrieve and encrypt/decrypt any further exchange
 Once a Noise session is instantiated, 
 any further encrypted message between Alice and Bob within this session is exchanged on a `contentTopic` with name `/{application-name}/{application-version}/wakunoise/1/sessions/{ct-id}/proto`, 
 where `ct-id = Hash(Hash(session-id))` 
-and `/{application-name}/{application-version}/` identifies the application currently employing [35/WAKU2-NOISE](https://rfc.vac.dev/35/).
+and `/{application-name}/{application-version}/` identifies the application currently employing [WAKU2-NOISE](../noise.md).
 
 ## Session states
 
 A Noise session corresponding to a certain `session-id`:
 - is always **active** as long as it is not marked as **stale**. 
 For an active `session-id`, new messages are published on the content topic `/{application-name}/{application-version}/wakunoise/1/sessions/{ct-id}/proto`;  
-- is marked as **stale** if a [session termination message](https://rfc.vac.dev/spec/35/#session-termination-message) containing `Hash(session-id)` is published on the content topic `/{application-name}/{application-version}/wakunoise/1/sessions/{ct-id}/proto`. 
+- is marked as **stale** if a [session termination message](../noise.md/#session-termination-message) containing `Hash(session-id)` is published on the content topic `/{application-name}/{application-version}/wakunoise/1/sessions/{ct-id}/proto`. 
 Session information relative to stale sessions  MAY be deleted from users' device, unless required for later channel binding purposes.
 
 When a Noise session is marked as stale, it means that one party requested its termination while being online, 
@@ -68,7 +68,7 @@ and parties are required to instantiate a new Noise session if they wish to comm
 However, parties can optionally persist and include the `session-id` corresponding to a stale Noise session in the [prologue information](https://noiseprotocol.org/noise.html#prologue) employed in the Noise handshake they execute to instantiate their new Noise session. 
 This effectively emulates a mechanism to _"re-activate"_ a stale Noise session by binding it to a newly created active Noise session.
 
-In order to reduce users' metadata leakage, it is desirable (as suggested in [35/WAKU2-NOISE](https://rfc.vac.dev/spec/35/#after-handshake)) that content topics used for communications change every time a new message is exchanged.
+In order to reduce users' metadata leakage, it is desirable (as suggested in [WAKU2-NOISE](../noise.md/#after-handshake)) that content topics used for communications change every time a new message is exchanged.
 This can be easily realized by employing a key derivation function to compute a new `session-id` from the previously employed one (e.g. `session-id = HKDF(prev-session-id)`),
 while keeping the Inbound/outbound Cipher States, the content topic derivation mechanism and the stale mechanism the same as above.
 In this case, when one party sends **and** receives at least one message, 
@@ -113,7 +113,7 @@ such two devices stop to reciprocally propagate any information regarding Noise 
 
 As regards security, an attacker that compromises an encrypted message propagating session information,
 might be able to compromise one or multiple messages exchanged within the session such information refers to. 
-This can be mitigated by adopting techniques similar to the the ones proposed in [35/WAKU2-NOISE](https://rfc.vac.dev/spec/35/#after-handshake), 
+This can be mitigated by adopting techniques similar to the the ones proposed in [WAKU2-NOISE](../noise.md/#after-handshake), 
 where encryption keys are changed every time a new message is exchanged.
 
 This session management mechanism is loosely based on the paper ["Multi-Device for Signal"](https://eprint.iacr.org/2019/1363.pdf).
@@ -149,7 +149,7 @@ This session management mechanism is loosely based on [Signal's Sesame Algorithm
 
 # References
 - [13/WAKU2-STORE](https://rfc.vac.dev/spec/13/)
-- [35/WAKU2-NOISE](https://rfc.vac.dev/35/)
+- [WAKU2-NOISE](../noise.md)
 - [The Noise Protocol Framework](http://www.noiseprotocol.org/noise.html)
 - [The Sesame Algorithm: Session Management for Asynchronous Message Encryption](https://signal.org/docs/specifications/sesame/)
 - ["Multi-Device for Signal"](https://eprint.iacr.org/2019/1363.pdf)
