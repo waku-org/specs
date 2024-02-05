@@ -68,7 +68,7 @@ shard clusters are divided into ranges:
 |        0 - 15 |   reserved               |
 |     16 - 65535|   app-defined networks   |
 
-The informational RFC [52/WAKU2-RELAY-STATIC-SHARD-ALLOC](/spec/52) lists the current index allocations.
+The informational RFC [WAKU2-RELAY-STATIC-SHARD-ALLOC](../../informational/relay-static-shard-alloc.md) lists the current index allocations.
 
 The global shard with index 0 and the "all app protocols" range are treated in the same way,
 but choosing shards in the global cluster has a higher probability of sharing the shard with other apps.
@@ -100,7 +100,7 @@ And for shard 43 of the Status app (which has allocated index 16):
 Waku v2 supports the discovery of peers within static shards,
 so app protocols do not have to implement their own discovery method.
 
-Nodes add information about their shard participation in their [31/WAKU2-ENR](https://rfc.vac.dev/spec/31/).
+Nodes add information about their shard participation in their [WAKU2-ENR](./enr.md/).
 Having a static shard participation indication as part of the ENR allows nodes
 to discover peers that are part of shards via [33/WAKU2-DISCV5](/spec/33/) as well as via DNS.
 
@@ -111,7 +111,7 @@ Static relay sharding supports 1024 shards per cluster, leading to a flag field 
 This already takes half (including index and key) of the ENR space of 300 bytes.
 For this reason, the current specification only supports a single shard cluster per node.
 In future versions, we will add further (hierarchical) discovery methods.
-We will update [31/WAKU2-ENR](https://rfc.vac.dev/spec/31/) accordingly, once this RFC moves forward.
+We will update [WAKU2-ENR](./enr.md) accordingly, once this RFC moves forward.
 
 This document specifies two ways of indicating shard cluster participation.
 The index list SHOULD be used for nodes that participante in fewer than 64 shards,
@@ -252,7 +252,7 @@ The transition to the second method will be seamless and fully backwards compati
 
 ## Security/Privacy Considerations
 
-See [45/WAKU2-ADVERSARIAL-MODELS](/spec/45), especially the parts on k-anonymity.
+See [WAKU2-ADVERSARIAL-MODELS](../../informational/adersarial-models.md), especially the parts on k-anonymity.
 We will add more on security considerations in future versions of this document.
 
 ### Receiver Anonymity
@@ -270,10 +270,9 @@ Copyright and related rights waived via [CC0](https://creativecommons.org/public
 * [11/WAKU2-RELAY](/spec/11/)
 * [Unstructured P2P network](https://en.wikipedia.org/wiki/Peer-to-peer#Unstructured_networks)
 * [33/WAKU2-DISCV5](/spec/33/)
-* [31/WAKU2-ENR](https://rfc.vac.dev/spec/31/)
+* [WAKU2-ENR](./enr.md)
 * [23/WAKU2-TOPICS](/spec/23/)
-* [51/WAKU2-RELAY-SHARDING](/spec/51/)
 * [Ethereum ENR sharding bit vector](https://github.com/ethereum/consensus-specs/blob/dev/specs/altair/p2p-interface.md#metadata)
 * [Ethereum discv5 specification](https://github.com/ethereum/devp2p/blob/master/discv5/discv5-theory.md)
 * [Research log: Waku Discovery](https://vac.dev/wakuv2-apd)
-* [45/WAKU2-ADVERSARIAL-MODELS](/spec/45)
+* [WAKU2-RELAY-STATIC-SHARD-ALLOC](../../informational/relay-static-shard-alloc.md)
