@@ -147,7 +147,7 @@ Nodes controlled by the attacker can efficiently communicate out-of-band to coor
 ### External
 
 An external attacker can only see encrypted traffic.
-Waku protocols are protected by a secure channel set up with [Noise](/spec/35/).
+Waku protocols are protected by a secure channel set up with [Noise](../standards/core/noise.md).
 
 #### Local
 
@@ -203,7 +203,7 @@ This section lists attacks that aim at deanonymizing a message sender.
 
 We assume that protocol messages are transmitted within a secure channel set up using the [Noise Protocol Framework](https://noiseprotocol.org/).
 For [Waku Relay](/spec/11) this means we only consider messages with version field `2`,
-which indicates that the payload has to be encoded using [35/WAKU2-NOISE](/spec/35/).
+which indicates that the payload has to be encoded using [Noise](../standards/core/noise.md).
 
 Note: The currently listed attacks are against libp2p in general.
 The [data field of Waku v2 relay](/spec/11/#message-fields) must be a [Waku v2 message](/spec/14/).
@@ -299,8 +299,8 @@ While *single node* and smaller *multi node* attackers can have a negative effec
 A *scaling multi node* attacker, however, can significantly disrupt the network with such an attack.
 
 The effects of this attack are especially severe in conjunction with deanonymization mitigation techniques that reduce the out-degree of the overlay,
-such as [Waku Dandelion](/spec/44/).
-([Waku Dandelion](/spec/44/) also discusses mitigation techniques compensating the amplified black hole potential.)
+such as [Waku Dandelion](../standards/application/dandelion.md).
+[Waku Dandelion](../standards/application/dandelion.md)) also discusses mitigation techniques compensating the amplified black hole potential.)
 
 #### Traffic Filtering (external)
 
@@ -328,8 +328,9 @@ Copyright and related rights waived via [CC0](https://creativecommons.org/public
 * [Sybil attack](https://en.wikipedia.org/wiki/Sybil_attack)
 * [Dolev-Yao model](https://en.wikipedia.org/wiki/Dolev%E2%80%93Yao_model)
 * [Noise Protocol Framework](https://noiseprotocol.org/)
-* [35/WAKU2-NOISE](/spec/35/)
+* [Noise](../standards/core/noise.md)
 * [17/WAKU-RLN-RELAY](/spec/17/)
 * [18/WAKU2-SWAP](/spec/18/)
 * [Dandelion++](https://arxiv.org/abs/1805.11060)
 * [On the Anonymity of Peer-To-Peer Network Anonymity Schemes Used by Cryptocurrencies](https://arxiv.org/pdf/2201.11860)
+* [Waku Dandelion](../standards/application/dandelion.md))
