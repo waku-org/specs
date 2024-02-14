@@ -13,7 +13,7 @@ This document lists adversarial models and attack-based threats relevant in the 
 
 ## Motivation and Background
 
-Future versions of this document will serve as a comprehensive list of adversarial models and attack based threats relevant for [Waku v2](/spec/10/).
+Future versions of this document will serve as a comprehensive list of adversarial models and attack based threats relevant for [Waku v2](https://rfc.vac.dev/spec/10/).
 The main purpose of this document is being a linkable resource for specifications that address protection as well as mitigation mechanisms within the listed models.
 
 Discussing and introducing countermeasures to specific attacks in specific models is out of scope for this document.
@@ -73,7 +73,7 @@ We subdivide anonymity into *receiver anonymity* and *sender anonymity*.
 #### Receiver Anonymity
 
 We define receiver anonymity as *unlinkability of users' identities and the data they receive and/or related actions*.
-Because each [Waku message](/spec/14/) is associated with a content topic, and each receiver is interested in messages with specific content topics,
+Because each [Waku message](https://rfc.vac.dev/spec/14/) is associated with a content topic, and each receiver is interested in messages with specific content topics,
 receiver anonymity in the context of Waku corresponds to *subscriber-topic unlinkability*.
 An example for the "action" part of our receiver anonymity definition is subscribing to a specific topic.
 
@@ -175,7 +175,7 @@ An entity with this power would, in practice, also have the power of the interna
 
 ## Attack-based Threats
 
-The following lists various attacks against [Waku v2](/spec/10/) protocols.
+The following lists various attacks against [Waku v2](https://rfc.vac.dev/spec/10/) protocols.
 If not specifically mentioned, the attacks refer to [Waku relay](/spec/11) and the underlying [libp2p GossipSub](https://github.com/libp2p/specs/blob/master/pubsub/gossipsub/README.md).
 We also list the weakest attacker model in which the attack can be successfully performed against.
 
@@ -202,11 +202,11 @@ which in turn significantly increases the probability of attacker nodes ending u
 This section lists attacks that aim at deanonymizing a message sender.
 
 We assume that protocol messages are transmitted within a secure channel set up using the [Noise Protocol Framework](https://noiseprotocol.org/).
-For [Waku Relay](/spec/11) this means we only consider messages with version field `2`,
+For [Waku Relay](https://rfc.vac.dev/spec/11/) this means we only consider messages with version field `2`,
 which indicates that the payload has to be encoded using [Noise](../standards/core/noise.md).
 
 Note: The currently listed attacks are against libp2p in general.
-The [data field of Waku v2 relay](/spec/11/#message-fields) must be a [Waku v2 message](/spec/14/).
+The [data field of Waku v2 relay](https://rfc.vac.dev/spec/11/#message-fields) must be a [Waku v2 message](https://rfc.vac.dev/spec/14/).
 The attacks listed in the following do not leverage that fact.
 
 #### Replay Attack
@@ -217,7 +217,7 @@ Waku relay is inherently safe against replay attack,
 because GossipSub nodes, and by extension Waku relay nodes,
 feature a `seen` cache, and only relay messages they have not seen before.
 
-Further, replay attacks will be punished by [RLN Relay](/spec/17/).
+Further, replay attacks will be punished by [RLN Relay](https://rfc.vac.dev/spec/17/).
 
 #### Observing Messages
 
@@ -287,8 +287,8 @@ which can be learned via *graph learning* attacks.
 
 In a flooding attack, attackers flood the network with bogus messages.
 
-Waku employs [RLN Relay](/spec/17/) as the main countermeasure to flooding.
-[SWAP](/spec/18/) also helps mitigating DoS attacks.
+Waku employs [RLN Relay](https://rfc.vac.dev/spec/17/) as the main countermeasure to flooding.
+[SWAP](https://rfc.vac.dev/spec/18/) also helps mitigating DoS attacks.
 
 #### Black Hole (internal)
 
@@ -317,20 +317,20 @@ Copyright and related rights waived via [CC0](https://creativecommons.org/public
 
 ## References
 
-* [10/WAKU2](/spec/10/)
-* [11/WAKU2-RELAY](/spec/11/)
+* [10/WAKU2](https://rfc.vac.dev/spec/10/)
+* [11/WAKU2-RELAY](https://rfc.vac.dev/spec/11/)
 * [libp2p GossipSub](https://github.com/libp2p/specs/blob/master/pubsub/gossipsub/README.md)
 * [Security](https://en.wikipedia.org/wiki/Information_security)
 * [Authentication](https://en.wikipedia.org/wiki/Authentication)
 * [Anonymity Trilemma](https://freedom.cs.purdue.edu/projects/trilemma.html)
-* [Waku v2 message](/spec/14/)
+* [Waku v2 message](https://rfc.vac.dev/spec/14/)
 * [Pluggable Transports](https://www.pluggabletransports.info/about/)
 * [Sybil attack](https://en.wikipedia.org/wiki/Sybil_attack)
 * [Dolev-Yao model](https://en.wikipedia.org/wiki/Dolev%E2%80%93Yao_model)
 * [Noise Protocol Framework](https://noiseprotocol.org/)
 * [Noise](../standards/core/noise.md)
-* [17/WAKU-RLN-RELAY](/spec/17/)
-* [18/WAKU2-SWAP](/spec/18/)
+* [17/WAKU-RLN-RELAY](https://rfc.vac.dev/spec/17/)
+* [18/WAKU2-SWAP](https://rfc.vac.dev/spec/18/)
 * [Dandelion++](https://arxiv.org/abs/1805.11060)
 * [On the Anonymity of Peer-To-Peer Network Anonymity Schemes Used by Cryptocurrencies](https://arxiv.org/pdf/2201.11860)
 * [Waku Dandelion](../standards/application/dandelion.md))
