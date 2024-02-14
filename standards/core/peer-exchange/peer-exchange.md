@@ -17,7 +17,7 @@ The main purpose of this protocol is providing resource restricted devices with 
 
 ## Background and Motivation
 
-It may not be feasible on resource restricted devices to take part in distributed random sampling ambient peer discovery protocols such as [33/WAKU2-DISCV5](/spec/33/).
+It may not be feasible on resource restricted devices to take part in distributed random sampling ambient peer discovery protocols such as [33/WAKU2-DISCV5](https://rfc.vac.dev/spec/33/).
 The Waku peer discovery protocol specified in this document allows resource restricted devices to request a list of peers from a service node.
 Network parameters necessary to connect to this service node COULD be learned from a static bootstrapping method or using [EIP-1459: Node Discovery via DNS](https://eips.ethereum.org/EIPS/eip-1459).
 The advantage of using Waku peer exchange to discover new peers over using a static peer list or DNS discovery is a more even load distribution.
@@ -25,7 +25,7 @@ If a lot of (resource restricted) nodes would use the same service nodes as rela
 Heavily used static nodes also add a centralized element. Downtime of such a node might significantly impact the network.
 
 However, the resource efficiency of this protocol comes at an anonymity cost, which is explained in the [Security/Privacy Considerations](#securityprivacy-considerations) section.
-This protocol SHOULD only be used if [33/WAKU2-DISCV5](/spec/33/) is infeasible.
+This protocol SHOULD only be used if [33/WAKU2-DISCV5](https://rfc.vac.dev/spec/33/) is infeasible.
 
 ## Theory and Protocol Semantics
 
@@ -38,7 +38,7 @@ The [multiaddresses](https://docs.libp2p.io/concepts/addressing/) used to connec
 
 In order to protect its anonymity, the responder MUST NOT provide peers from its actively used peer list as this opens pathways to *Neighbourhood Surveillance* attacks, as described in the
 [Security/Privacy Considerations Section](#securityprivacy-considerations).
-The responder SHOULD provide a set of peers that has been retrieved using ambient peer discovery methods supporting random sampling, e.g. [33/WAKU2-DISCV5](/spec/33/).
+The responder SHOULD provide a set of peers that has been retrieved using ambient peer discovery methods supporting random sampling, e.g. [33/WAKU2-DISCV5](https://rfc.vac.dev/spec/33/).
 This both protects the responder's anonymity as well as helps distributing load.
 
 To allow for fast responses, responders SHOULD retrieve peers unsolicited (before receiving a query)
@@ -98,7 +98,7 @@ Implementations can implement the libp2p discovery interface (e.g. [nim](https:/
 The size of the (optional) exchange peer cache discussed in [Theory and Protocol Semantics](#theory-and-protocol-semantics)
 depends on the average number of requested peers, which is expected to be the outbound degree of the underlying
 [libp2p gossipsub](https://github.com/libp2p/specs/blob/master/pubsub/gossipsub/gossipsub-v1.1.md) mesh network.
-The recommended value for this outbound degree is 6 (see parameter `D` in [29/WAKU2-CONFIG](/spec/29/)).
+The recommended value for this outbound degree is 6 (see parameter `D` in [29/WAKU2-CONFIG](https://rfc.vac.dev/spec/29/)).
 It is recommended for the cache to hold at least 10 times as many peers (60).
 
 The recommended cache size also depends on the number of requesters a responder is expected to serve within a *refresh cycle*.
@@ -134,7 +134,7 @@ As a weak mitigation the requester MAY ask several peers and select a subset of 
 Responders that answer with active mesh peers are more vulnerable to a *neighbourhood surveillance* attack.
 Responding with the set of active mesh peers allows a malicious requester to get into the required position more easily.
 It takes away the first hurdle of the *neighbourhood surveillance* attack: The attacker knows which peers to try to connect to.
-This increased vulnerability can be avoided by only responding with randomly sampled sets of peers, e.g. by requesting a random peer set via [33/WAKU2-DISCV5](/spec/33/).
+This increased vulnerability can be avoided by only responding with randomly sampled sets of peers, e.g. by requesting a random peer set via [33/WAKU2-DISCV5](https://rfc.vac.dev/spec/33/).
 (As stated in the [Theory and Protocol Semantics Section](#theory-and-protocol-semantics),
 these peer sets SHOULD be retrieved unsolicitedly before receiving requests to achieve faster response times.)
 
@@ -147,7 +147,7 @@ Still, frequent queries can tigger the refresh cycle more often. The `seen cache
 ### Further Considerations
 
 The response field contains ENRs as specified in [WAKU2-ENR](../enr.md).
-While ENRs contain signatures, they do not violate the [Waku relay no-sign policy](/spec/11/#signature-policy)),
+While ENRs contain signatures, they do not violate the [Waku relay no-sign policy](https://rfc.vac.dev/spec/11/#signature-policy)),
 because they are part of the discovery domain and are not propagated in the relay domain.
 However, there might still be some form of leakage:
 ENRs could be used to track peers and facilitate linking attacks.
@@ -159,10 +159,10 @@ Copyright and related rights waived via [CC0](https://creativecommons.org/public
 
 ## References
 
-* [33/WAKU2-DISCV5](/spec/33/)
+* [33/WAKU2-DISCV5](https://rfc.vac.dev/spec/33/)
 * [WAKU2-ENR](../enr.md)
 * [multiaddress](https://docs.libp2p.io/concepts/addressing/)
 * [libp2p discovery interface](https://github.com/status-im/nim-libp2p/issues/140)
 * [libp2p gossipsub](https://github.com/libp2p/specs/blob/master/pubsub/gossipsub/gossipsub-v1.1.md)
-* [29/WAKU2-CONFIG](/spec/29/)
+* [29/WAKU2-CONFIG](https://rfc.vac.dev/spec/29/)
 * [Waku relay anonymity](https://vac.dev/wakuv2-relay-anon)
