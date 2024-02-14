@@ -21,8 +21,8 @@ instead of disseminating messages as per usual relay operation.
 
 ## Background and Motivation
 
-[Waku Relay](/spec/11/), offers privacy, pseudonymity, and a first layer of anonymity protection by design.
-Being a modular protocol family [Waku v2](/spec/10/)
+[Waku Relay](https://rfc.vac.dev/spec/11/), offers privacy, pseudonymity, and a first layer of anonymity protection by design.
+Being a modular protocol family [Waku v2](https://rfc.vac.dev/spec/10/)
 offers features that inherently carry trade-offs as separate building blocks.
 Anonymity protection is such a feature.
 The [Anonymity Trilemma](https://freedom.cs.purdue.edu/projects/trilemma.html)
@@ -37,7 +37,7 @@ and [Dandelion++](https://arxiv.org/abs/1805.11060).
 
 Dandelion is a message spreading method, which, compared to other methods,
 increases the uncertainty of an attacker when trying to link messages to senders.
-Libp2p gossipsub aims at spanning a [d-regular graph](https://en.wikipedia.org/wiki/Regular_graph) topology, with d=6 as the [default value](/spec/29/#gossipsub-v10-parameters).
+Libp2p gossipsub aims at spanning a [d-regular graph](https://en.wikipedia.org/wiki/Regular_graph) topology, with d=6 as the [default value](https://rfc.vac.dev/spec/29/#gossipsub-v10-parameters).
 Messages are forwarded within this (expected) symmetric topology,
 which reduces uncertainty when trying to link messages to senders.
 Dandelion breaks this symmetry by subdividing message spreading into a "stem" and a "fluff" phase.
@@ -65,7 +65,7 @@ Further information on Waku anonymity may be found in our [Waku Privacy and Anon
 which is based on [libp2p gossipsub](https://github.com/libp2p/specs/blob/master/pubsub/gossipsub/README.md).
 44/WAKU2-DANDELION subdivides message dissemination into a "stem" and a "fluff" phase.
 This specification is mainly concerned with specifying the stem phase.
-The fluff phase corresponds to [Waku Relay](/spec/11/),
+The fluff phase corresponds to [Waku Relay](https://rfc.vac.dev/spec/11/),
 with optional fluff phase augmentations such as random delays.
 Adding random delay in the fluff phase further reduces symmetry in dissemination patterns and
 introduces more uncertainty for the attacker.
@@ -92,7 +92,7 @@ are always sent as stem messages.
 
 The stem phase can be seen as a different protocol, and messages are introduced into Waku Relay, and by extension gossipsub,
 once they arrive at a node in fluff state for the first time.
-44/WAKU2-DANDELION uses [19/WAKU2-LIGHTPUSH](/spec/19/) as the protocol for relaying stem messages.
+44/WAKU2-DANDELION uses [19/WAKU2-LIGHTPUSH](https://rfc.vac.dev/spec/19/) as the protocol for relaying stem messages.
 
 There are no negative effects on gossipsub peer scoring,
 because Dandelion nodes in *stem state* still normally relay Waku Relay (gossipsub) messages.
@@ -116,16 +116,16 @@ corresponding to 10 minute epochs.
 On entering stem state,
 nodes supporting 44/WAKU2-DANDELION MUST randomly select two nodes for each pubsub topic from the respective gossipsub mesh node set.
 These nodes are referred to as stem relays.
-Stem relays MUST support [19/WAKU2-LIGHTPUSH](/spec/19/).
-If a chosen peer does not support [19/WAKU2-LIGHTPUSH](/spec/19/),
+Stem relays MUST support [19/WAKU2-LIGHTPUSH](https://rfc.vac.dev/spec/19/).
+If a chosen peer does not support [19/WAKU2-LIGHTPUSH](https://rfc.vac.dev/spec/19/),
 the node SHOULD switch to fluff state.
 (We may update this strategy in future versions of this document.)
 
 Further, the node establishes a map that maps each incoming stem connection
 to one of its stem relays chosen at random (but fixed per epoch).
 Incoming stem connections are identified by the [Peer IDs](https://docs.libp2p.io/concepts/peers/#peer-id/)
-of peers the node receives [19/WAKU2-LIGHTPUSH](/spec/19/) messages from.
-Incoming [19/WAKU2-LIGHTPUSH](/spec/19/) connections from peers that do not support 44/WAKU2-DANDELION are identified and mapped in the same way.
+of peers the node receives [19/WAKU2-LIGHTPUSH](https://rfc.vac.dev/spec/19/) messages from.
+Incoming [19/WAKU2-LIGHTPUSH](https://rfc.vac.dev/spec/19/) connections from peers that do not support 44/WAKU2-DANDELION are identified and mapped in the same way.
 This makes the protocol simpler, increases the anonymity set, and offers Dandelion anonymity properties to such peers, too.
 
 The node itself is mapped in the same way, so that all messages originated by the node are relayed via a per-epoch-fixed Dandelion relay, too.
@@ -133,7 +133,7 @@ The node itself is mapped in the same way, so that all messages originated by th
 While in stem state, nodes MUST relay stem messages to the respective stem relay.
 Received fluff messages MUST be relayed as specified in the fluff state section.
 
-The stem protocol ([19/WAKU2-LIGHTPUSH](/spec/19/)) is independent of the fluff protocol ([Waku Relay](/spec/11/)).
+The stem protocol ([19/WAKU2-LIGHTPUSH](https://rfc.vac.dev/spec/19/)) is independent of the fluff protocol ([Waku Relay](https://rfc.vac.dev/spec/11/)).
 While in stem state, nodes MUST NOT gossip about stem messages,
 and MUST NOT send control messages related to stem messages.
 (An existing gossipsub implementation does *not* have to be adjusted to not send gossip about stem messages,
@@ -161,7 +161,7 @@ this regular forwarding already comprises random delays.
 
 ## Implementation Notes
 
-Handling of the 44/WAKU2-DANDELION stem phase can be implemented as an extension to an existing [19/WAKU2-LIGHTPUSH](/spec/19/) implementation.
+Handling of the 44/WAKU2-DANDELION stem phase can be implemented as an extension to an existing [19/WAKU2-LIGHTPUSH](https://rfc.vac.dev/spec/19/) implementation.
 
 Fluff phase augmentations might alter gossipsub message dissemination (e.g. adding random delays).
 If this is the case, they have to be implemented on the libp2p gossipsub layer.
@@ -197,7 +197,7 @@ We will elaborate on this in future versions of this document.
 
 Stem relays receiving messages can either be in stem state or in fluff state themselves.
 They might also not support 44/WAKU2-DANDELION,
-and interpret the message as classical [19/WAKU2-LIGHTPUSH](/spec/19/),
+and interpret the message as classical [19/WAKU2-LIGHTPUSH](https://rfc.vac.dev/spec/19/),
 which effectively makes them act as fluff state relays.
 While such peers lower the overall anonymity properties,
 the [Dandelion++ paper](https://arxiv.org/abs/1805.11060)
@@ -234,9 +234,9 @@ We will quantify the resulting loss of anonymity in future versions of this docu
 #### Stem Relay Selection
 
 In its current version, 44/WAKU2-DANDELION nodes default to fluff state
-if the random stem relay selection yields at least one peer that does not support [19/WAKU2-LIGHTPUSH](/spec/19/) (which is the stem protocol used in 44/WAKU2-DANDELION).
-If nodes would reselect peers until they find peers supporting [19/WAKU2-LIGHTPUSH](/spec/19/),
-malicious nodes would get an advantage if a significant number of honest nodes would not support [19/WAKU2-LIGHTPUSH](/spec/19/).
+if the random stem relay selection yields at least one peer that does not support [19/WAKU2-LIGHTPUSH](https://rfc.vac.dev/spec/19/) (which is the stem protocol used in [44/WAKU2-DANDELION](https://rfc.vac.dev/spec/44/).
+If nodes would reselect peers until they find peers supporting [19/WAKU2-LIGHTPUSH](https://rfc.vac.dev/spec/19/),
+malicious nodes would get an advantage if a significant number of honest nodes would not support [19/WAKU2-LIGHTPUSH](https://rfc.vac.dev/spec/19).
 Even though this causes messages to enter fluff phase earlier,
 we choose the trade-off in favour of protocol stability and sacrifice a bit of anonymity.
 (We will look into improving this in future versions of this document.)
@@ -267,14 +267,14 @@ Note: Introducing random delays can have a negative effect on
 #### Stem Flag
 
 While 44/WAKU2-DANDELION without fluff augmentation does not effect Waku Relay nodes,
-messages sent by nodes that only support [19/WAKU2-LIGHTPUSH](/spec/19/) might be routed through a Dandelion stem without them knowing.
+messages sent by nodes that only support [19/WAKU2-LIGHTPUSH](https://rfc.vac.dev/spec/19/) might be routed through a Dandelion stem without them knowing.
 While this improves anonymity, as discussed above, it also introduces additional latency and lightpush nodes cannot opt out of this.
 
 In future versions of this specification we might
 
-* add a flag to [14/WAKU2-MESSAGE](/spec/14/) indicating a message should be routed over a Dandelion stem (opt-in), or
-* add a flag to [14/WAKU2-MESSAGE](/spec/14/) indicating a message should *not* be routed over a Dandelion stem (opt-out), or
-* introducing a fork of [19/WAKU2-LIGHTPUSH](/spec/19/) exclusively used for Dandelion stem.
+* add a flag to [14/WAKU2-MESSAGE](https://rfc.vac.dev/spec/14/) indicating a message should be routed over a Dandelion stem (opt-in), or
+* add a flag to [14/WAKU2-MESSAGE](https://rfc.vac.dev/spec/14/) indicating a message should *not* be routed over a Dandelion stem (opt-out), or
+* introducing a fork of [19/WAKU2-LIGHTPUSH](https://rfc.vac.dev/spec/19/) exclusively used for Dandelion stem.
 
 In the current version, we decided against these options in favour of a simpler protocol and an increased anonymity set.
 
@@ -293,5 +293,5 @@ Copyright and related rights waived via [CC0](https://creativecommons.org/public
 * [Anonymity Trilemma](https://freedom.cs.purdue.edu/projects/trilemma.html)
 * [Waku Privacy and Anonymity Analysis](https://vac.dev/wakuv2-relay-anon).
 * [On the Anonymity of Peer-To-Peer Network Anonymity Schemes Used by Cryptocurrencies](https://arxiv.org/pdf/2201.11860.pdf)
-* [Adversarial Models](/spec/45/)
-* [14/WAKU2-MESSAGE](/spec/14/)
+* [Adversarial Models](https://rfc.vac.dev/spec/45/)
+* [14/WAKU2-MESSAGE](https://rfc.vac.dev/spec/14/)
