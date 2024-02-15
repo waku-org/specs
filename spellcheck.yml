@@ -1,6 +1,6 @@
 - name: markdown
   sources:
-  - README.md
+  - '**/*.md'
   aspell:
     lang: en
     d: en_US
