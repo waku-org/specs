@@ -1,7 +1,7 @@
-matrix:
-  - name: Python Source
-    aspell:
-      lang: en
-      d: en_US
-    sources:
-      - pyspelling/**/*.py
+- name: markdown
+  sources:
+  - README.md
+  aspell:
+    lang: en
+    d: en_US
+    mode: markdown
