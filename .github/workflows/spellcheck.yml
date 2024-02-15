@@ -1,6 +1,6 @@
 # This is workflow for spell checking using PySpelling lib (https://pypi.org/project/pyspelling/)
-name: Spellcheck
-# Controls when the action will run.
+name: GitHub Spellcheck
+# Controls when the action will run.       
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
@@ -21,5 +21,5 @@ jobs:
     steps:
       # Spellcheck
       - uses: actions/checkout@v2
-      - uses: igsekor/pyspelling-any@v0.0.2
+      - uses: igsekor/pyspelling-any@v1.0.4
         name: Spellcheck
