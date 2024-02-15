@@ -11,7 +11,7 @@ contributors:
 
 ## Abstract
 
-This document describes ways of sharding the [Waku relay](/spec/11/) topic,
+This document describes ways of sharding the [Waku relay](https://rfc.vac.dev/spec/11/) topic,
 allowing Waku networks to scale in the number of content topics.
 
 > *Note*: Scaling in the size of a single content topic is out of scope for this document.
@@ -25,7 +25,7 @@ However, they do not scale to large traffic loads.
 A single [libp2p gossipsub mesh](https://github.com/libp2p/specs/blob/master/pubsub/gossipsub/gossipsub-v1.0.md#gossipsub-the-gossiping-mesh-router),
 which carries messages associated with a single pubsub topic, can be seen as a separate unstructured P2P network
 (control messages go beyond these boundaries, but at its core, it is a separate P2P network).
-With this, the number of [Waku relay](/spec/11/) content topics that can be carried over a pubsub topic is limited.
+With this, the number of [Waku relay](https://rfc.vac.dev/spec/11/) content topics that can be carried over a pubsub topic is limited.
 This prevents app protocols that aim to span many multicast groups (realized by content topics) from scaling.
 
 This document specifies three pubsub topic sharding methods (with varying degrees of automation),
@@ -35,7 +35,7 @@ This document also covers discovery of topic shards.
 ## Named Sharding
 
 *Named sharding* offers apps to freely choose pubsub topic names.
-It is RECOMMENDED for App protocols to follow the naming structure detailed in [23/WAKU2-TOPICS](/spec/23/).
+It is RECOMMENDED for App protocols to follow the naming structure detailed in [23/WAKU2-TOPICS](https://rfc.vac.dev/spec/23/).
 With named sharding, managing discovery falls into the responsibility of apps.
 
 From an app protocol point of view, a subscription to a content topic `waku2/xxx` on a shard named /mesh/v1.1.1/xxx would look like:
@@ -82,7 +82,7 @@ an example for the 2nd shard in the global shard cluster:
 
 `/waku/2/rs/0/2`.
 
-> *Note*: Because *all* shards distribute payload defined in [14/WAKU2-MESSAGE](spec/14/) via [protocol buffers](https://developers.google.com/protocol-buffers/),
+> *Note*: Because *all* shards distribute payload defined in [14/WAKU2-MESSAGE](https://rfc.vac.dev/spec/14/) via [protocol buffers](https://developers.google.com/protocol-buffers/),
 the pubsub topic name does not explicitly add `/proto` to indicate protocol buffer encoding.
 We use `rs` to indicate these are *relay shard* clusters; further shard types might follow in the future.
 
@@ -102,7 +102,7 @@ so app protocols do not have to implement their own discovery method.
 
 Nodes add information about their shard participation in their [WAKU2-ENR](./enr.md/).
 Having a static shard participation indication as part of the ENR allows nodes
-to discover peers that are part of shards via [33/WAKU2-DISCV5](/spec/33/) as well as via DNS.
+to discover peers that are part of shards via [33/WAKU2-DISCV5](https://rfc.vac.dev/spec/33/) as well as via DNS.
 
 > *Note:* In the current version of this document,
 sharding information is directly added to the ENR.
@@ -267,11 +267,11 @@ Copyright and related rights waived via [CC0](https://creativecommons.org/public
 
 ## References
 
-* [11/WAKU2-RELAY](/spec/11/)
+* [11/WAKU2-RELAY](https://rfc.vac.dev/spec/11/)
 * [Unstructured P2P network](https://en.wikipedia.org/wiki/Peer-to-peer#Unstructured_networks)
-* [33/WAKU2-DISCV5](/spec/33/)
+* [33/WAKU2-DISCV5](https://rfc.vac.dev/spec/33/)
 * [WAKU2-ENR](./enr.md)
-* [23/WAKU2-TOPICS](/spec/23/)
+* [23/WAKU2-TOPICS](https://rfc.vac.dev/spec/23/)
 * [Ethereum ENR sharding bit vector](https://github.com/ethereum/consensus-specs/blob/dev/specs/altair/p2p-interface.md#metadata)
 * [Ethereum discv5 specification](https://github.com/ethereum/devp2p/blob/master/discv5/discv5-theory.md)
 * [Research log: Waku Discovery](https://vac.dev/wakuv2-apd)
