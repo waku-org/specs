@@ -3,11 +3,11 @@
 Waku builds a family of privacy-preserving, censorship-resistant communication protocols for web3 applications.
 This repository contains specifications for the Waku suite of protocols.
 
-## Index:
-- Informational: 
+## List of Specifications:
+- Informational: Waku design issues, general guidelines or background information that does not constitute a new feature.
 - Standards
-  - Core: 
-  - Application: 
+  - Core: Standards and protocols for the core Waku p2p communications offering.
+  - Application: Standards and protocols that describe various applications or encryption use cases built on top of a Waku network.
 
 | Waku Specifications | Description |
 | ---- | -------------- |
@@ -59,7 +59,7 @@ Relevant Waku resources related to the specifications located in this repository
 Contributions are welcome from any party. 
 Contributors can create specifications relating to the Waku domain and
 create a pull request to begin discussion.
-The recommended template may be used for new proposed specifications.
+The recommended [template](./template.md) may be used for new proposed specifications.
 
 New specifications are considered a proof of concept.
 Once a rough consensus is reached towards stabilization, 
