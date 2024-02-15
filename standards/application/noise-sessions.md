@@ -88,7 +88,7 @@ This is achieved through two main supported session management mechanisms that w
 
 In a $N11M$ setting, each party's device shares the same Noise session information used to encrypt and decrypt messages exchanged with the other party.
 
-![](./images/N11M.png)
+![](../../images/N11M.png)
 
 More precisely, once the first Noise session between any of Alice's and Bob's device is instantiated, 
 its session information is securely propagated to all other devices, 
@@ -123,7 +123,7 @@ This session management mechanism is loosely based on the paper ["Multi-Device f
 In a $NM$ setting, we require all of $N$ Alice's devices to have an active Noise session with each of Bob's $M$ devices, 
 for a total of $NM$ concurrently active Noise sessions between Alice and Bob.
 
-![](./images/NM.png)
+![](../../images/NM.png)
 
 A message is sent from the currently-in-use sender's device to all recipent's devices, 
 by properly encrypting and sending it to the content topics of each corresponding active Noise session. 
