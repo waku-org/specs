@@ -4,10 +4,10 @@ name: Spellcheck
 on:
   push:
     branches: 
-      - '**'
+      - ${{ github.ref }}
   pull_request:
     branches: 
-      - '**'
+      - ${{ github.head_ref }}
   workflow_dispatch:
 
 jobs:
