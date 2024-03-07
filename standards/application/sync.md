@@ -1,8 +1,6 @@
 ---
-slug: "75"
-title: 75/WAKU2-SYNC
+title: WAKU2-SYNC
 name: Synchronization protocol for Waku messages
-status: raw
 category: Standards Track
 tags:
   - sync-protocol
@@ -201,4 +199,4 @@ Copyright and related rights waived via [CC0](https://creativecommons.org/public
 
 RFCs of request-response protocols:
 
-- [13/WAKU2-STORE](/spec/13)
+- [13/WAKU2-STORE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/10/waku2.md)
