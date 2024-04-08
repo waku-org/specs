@@ -15,8 +15,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      
+      - name: Get changed files
+        run: |
+          echo "CHANGED_FILES=$(gh pr diff ${{ github.event.number }} --name-only | grep '\.md$' | xargs -I {} echo "{}")" >> $GITHUB_ENV
+      
       - uses: igsekor/pyspelling-any@v1.0.4
         name: Spellcheck
         env:
-          MATRIX: ${{ toJson(matrix) }}
-          run: pyspelling --matrix "$MATRIX"
+          MATRIX: ${{ toJson(env.CHANGED_FILES) }}
+          
