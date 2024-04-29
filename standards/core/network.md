@@ -30,12 +30,14 @@ which in turn is an extension of [11/WAKU2-RELAY](https://rfc.vac.dev/spec/11/) 
 
 Traffic in the Waku Network is sharded into eight [17/WAKU2-RLN-RELAY](https://rfc.vac.dev/spec/17/) pubsub topics.
 Each pubsub topic is named according to the static shard naming format
-defined in [WAKU2-RELAY-SHARDING](../../core/relay-sharding.md)
+defined in [WAKU2-RELAY-SHARDING](./relay-sharding.md)
 with:
-* `<cluster_id>` set to `1`
-* `<shard_number>` occupying the range `0` to `7`.
-In other words, the Waku Network is a [17/WAKU2-RLN-RELAY](https://rfc.vac.dev/spec/17/) network
-routed on the combination of the eight pubsub topics:
+
+- `<cluster_id>` set to `1`
+- `<shard_number>` occupying the range `0` to `7`.
+  In other words, the Waku Network is a [17/WAKU2-RLN-RELAY](https://rfc.vac.dev/spec/17/) network
+  routed on the combination of the eight pubsub topics:
+
 ```
 /waku/2/rs/1/0
 /waku/2/rs/1/1
@@ -45,15 +47,17 @@ routed on the combination of the eight pubsub topics:
 
 A node MUST use [WAKU-METADATA](./metadata.md) protocol to identify the `<cluster_id>` that every
 inbound/outbound peer that attempts to connect supports. In any of the following cases, the node MUST trigger a disconnection:
-* [WAKU-METADATA](./metadata.md) dial fails.
-* [WAKU-METADATA](./metadata.md) reports an empty `<cluster_id>`.
-* [WAKU-METADATA](./metadata.md) reports a `<cluster_id>` different than `1`.
+
+- [WAKU-METADATA](./metadata.md) dial fails.
+- [WAKU-METADATA](./metadata.md) reports an empty `<cluster_id>`.
+- [WAKU-METADATA](./metadata.md) reports a `<cluster_id>` different than `1`.
 
 ## Roles
 
 There are two distinct roles evident in the network, those of:
-1) nodes, and
-2) applications.
+
+1. nodes, and
+2. applications.
 
 ### Nodes
 
@@ -100,10 +104,11 @@ A relay node MAY support unsecure websockets if required by the application or r
 
 For each supported shard,
 each relay node SHOULD enable and support the following protocols as a service node:
+
 1. [12/WAKU2-FILTER](https://rfc.vac.dev/spec/12/) to allow resource-restricted peers to subscribe to messages matching a specific content filter.
 2. [13/WAKU2-STORE](https://rfc.vac.dev/spec/13/) to allow other peers to request historical messages from this node.
 3. [19/WAKU2-LIGHTPUSH](https://rfc.vac.dev/spec/19/) to allow resource-restricted peers to request publishing a message to the network on their behalf.
-4. [34/WAKU2-PEER-EXCHANGE](../../core/peer-exchange/peer-exchange.md) to allow resource-restricted peers to discover more peers in a resource efficient way.
+4. [34/WAKU2-PEER-EXCHANGE](./peer-exchange.md) to allow resource-restricted peers to discover more peers in a resource efficient way.
 
 #### Store service nodes
 
@@ -117,10 +122,11 @@ Store service nodes SHOULD only store messages with a valid [`rate_limit_proof`]
 Nodes MAY opt out of relay functionality on any network shard
 and instead request services from relay nodes as clients
 using any of the defined service protocols:
+
 1. [12/WAKU2-FILTER](https://rfc.vac.dev/spec/12/) to subscribe to messages matching a specific content filter.
 2. [13/WAKU2-STORE](https://rfc.vac.dev/spec/13/) to request historical messages matching a specific content filter.
 3. [19/WAKU2-LIGHTPUSH](https://rfc.vac.dev/spec/19/) to request publishing a message to the network.
-4. [34/WAKU2-PEER-EXCHANGE](../../core/peer-exchange/peer-exchange.md) to discover more peers in a resource efficient way.
+4. [34/WAKU2-PEER-EXCHANGE](./peer-exchange.md) to discover more peers in a resource efficient way.
 
 #### Store client nodes
 
@@ -167,7 +173,7 @@ moderated in the Sepolia registry contract with address [0xF1935b338321013f11068
 Initial memberships are registered in the Sepolia RLN storage contract with address [0x58322513A35a8f747AF5A385bA14C2AbE602AA59](https://sepolia.etherscan.io/address/0x58322513A35a8f747AF5A385bA14C2AbE602AA59#code).
 RLN membership setup and registration MUST follow [17/WAKU-RLN-RELAY](https://rfc.vac.dev/spec/17/#setup-and-registration),
 with the `staked_fund` set to `0`.
-In other words, the Waku Network does not use RLN staking. 
+In other words, the Waku Network does not use RLN staking.
 
 ### RLN Proofs
 
@@ -209,6 +215,7 @@ Relay nodes MUST apply [gossipsub v1.1 validation](https://github.com/libp2p/spe
 SHOULD apply all of the rules set out in the section below to determine the validity of a message.
 Validation has one of three outcomes,
 repeated here from the [gossipsub specification](https://github.com/libp2p/specs/blob/c96c9ec5909d64fe020d7630f3fd982bc18fd06a/pubsub/gossipsub/gossipsub-v1.1.md#extended-validators) for ease of reference:
+
 1. Accept - the message is considered valid and it MUST be delivered and forwarded to the network.
 2. Reject - the message is considered invalid, MUST be rejected and SHOULD trigger a gossipsub scoring penalty against the transmitting peer.
 3. Ignore - the message SHOULD NOT be delivered and forwarded to the network, but this MUST NOT trigger a gossipsub scoring penalty against the transmitting peer.
@@ -283,22 +290,22 @@ the underlying node MUST determine the target pubsub topic(s)
 from the content topics provided by the application
 using the hashing mechanism defined in [51/WAKU2-RELAY-SHARDING](https://rfc.vac.dev/spec/51/#automatic-sharding).
 
-
 ## Copyright
 
 Copyright and related rights waived via [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
 
 ## References
 
-* [WAKU2-RELAY-SHARDING](../../core/relay-sharding.md)
-* [Peer-exchange](../../core/peer-exchange/peer-exchange.md)
-
+- [WAKU2-RELAY-SHARDING](./relay-sharding.md)
+- [Peer-exchange](./peer-exchange.md)
 
 ## normative
+
 (TBD)
 A list of references that MUST be read to fully understand and/or implement this protocol.
 See [RFC3967 Section 1.1](https://datatracker.ietf.org/doc/html/rfc3967#section-1.1).
 
 ## informative
+
 (TBD)
 A list of additional references.

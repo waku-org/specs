@@ -2,7 +2,7 @@
 title: WAKU2-PEER-EXCHANGE
 name: Waku v2 Peer Exchange
 category: Standards Track
-tags: waku/core-protocol
+tags: [waku/core-protocol]
 editor: Daniel Kaiser <danielkaiser@status.im>
 contributors:
 ---
@@ -31,12 +31,12 @@ This protocol SHOULD only be used if [33/WAKU2-DISCV5](https://rfc.vac.dev/spec/
 
 The peer exchange protocol specified in this document is a simple request-response protocol.
 As Figure 1 illustrates, the requesting node sends a request to a peer, which acts as the responder.
-The responder replies with a list of ENRs as specified in [WAKU2-ENR](../enr.md).
+The responder replies with a list of ENRs as specified in [WAKU2-ENR](./enr.md).
 The [multiaddresses](https://docs.libp2p.io/concepts/addressing/) used to connect to the respective peers can be extracted from the ENRs.
 
 ![Figure 1: The responder provides a list of ENRs to the requester. These ENRs contain the information necessary for connecting to the respective peers.](../../images/protocol.svg)
 
-In order to protect its anonymity, the responder MUST NOT provide peers from its actively used peer list as this opens pathways to *Neighbourhood Surveillance* attacks, as described in the
+In order to protect its anonymity, the responder MUST NOT provide peers from its actively used peer list as this opens pathways to _Neighbourhood Surveillance_ attacks, as described in the
 [Security/Privacy Considerations Section](#securityprivacy-considerations).
 The responder SHOULD provide a set of peers that has been retrieved using ambient peer discovery methods supporting random sampling, e.g. [33/WAKU2-DISCV5](https://rfc.vac.dev/spec/33/).
 This both protects the responder's anonymity as well as helps distributing load.
@@ -54,8 +54,8 @@ This document provides recommended choices for the cache size in the [Implementa
 Requesters, in the context of the specified peer exchange protocol, SHOULD be resource restricted devices.
 While any node could technically act as a requester, using the peer exchange protocol comes with two drawbacks:
 
-* reducing [anonymity](#securityprivacy-considerations)
-* causing load on responder nodes
+- reducing [anonymity](#securityprivacy-considerations)
+- causing load on responder nodes
 
 ## Wire Format Specification
 
@@ -81,7 +81,7 @@ message PeerExchangeRPC {
 
 ```
 
-The `enr` field contains a Waku ENR as specified in [WAKU2-ENR](../enr.md).
+The `enr` field contains a Waku ENR as specified in [WAKU2-ENR](./enr.md).
 
 Requesters send a `PeerExchangeQuery` to a peer.
 Responders SHOULD include a maximum of `num_peers` `PeerInfo` instances into a response.
@@ -101,7 +101,7 @@ depends on the average number of requested peers, which is expected to be the ou
 The recommended value for this outbound degree is 6 (see parameter `D` in [29/WAKU2-CONFIG](https://rfc.vac.dev/spec/29/)).
 It is recommended for the cache to hold at least 10 times as many peers (60).
 
-The recommended cache size also depends on the number of requesters a responder is expected to serve within a *refresh cycle*.
+The recommended cache size also depends on the number of requesters a responder is expected to serve within a _refresh cycle_.
 A refresh cycle is the time interval in which all peers in the cache are expected to be replaced.
 If the number of requests expected per refresh cycle exceeds 600 (10 times the above recommended 60),
 it is recommended to increase the cache size to at least a tenth of that number.
@@ -116,13 +116,13 @@ We differentiate these implications into the requester and responder side, respe
 
 ### Requester
 
-With a simple peer exchange protocol, the requester is inherently susceptible to both *neighbourhood surveillance* and *controlled neighbourhood* attacks.
+With a simple peer exchange protocol, the requester is inherently susceptible to both _neighbourhood surveillance_ and _controlled neighbourhood_ attacks.
 
-To mount a *neighbourhood surveillance* attack, an attacker has to connect to the peers of the victim node.
+To mount a _neighbourhood surveillance_ attack, an attacker has to connect to the peers of the victim node.
 The peer exchange protocol allows a malicious responder to easily get into this position.
 The responder connects to a set of peers and simply returns this set of peers to the requester.
 
-The peer exchange protocol also makes it much easier to get into the position required for the *controlled neighbourhood* attack:
+The peer exchange protocol also makes it much easier to get into the position required for the _controlled neighbourhood_ attack:
 A malicious responder provides controlled peers in the response peer list.
 
 More on these attacks may be found in our [research log article](https://vac.dev/wakuv2-relay-anon).
@@ -131,9 +131,9 @@ As a weak mitigation the requester MAY ask several peers and select a subset of 
 
 ### Responder
 
-Responders that answer with active mesh peers are more vulnerable to a *neighbourhood surveillance* attack.
+Responders that answer with active mesh peers are more vulnerable to a _neighbourhood surveillance_ attack.
 Responding with the set of active mesh peers allows a malicious requester to get into the required position more easily.
-It takes away the first hurdle of the *neighbourhood surveillance* attack: The attacker knows which peers to try to connect to.
+It takes away the first hurdle of the _neighbourhood surveillance_ attack: The attacker knows which peers to try to connect to.
 This increased vulnerability can be avoided by only responding with randomly sampled sets of peers, e.g. by requesting a random peer set via [33/WAKU2-DISCV5](https://rfc.vac.dev/spec/33/).
 (As stated in the [Theory and Protocol Semantics Section](#theory-and-protocol-semantics),
 these peer sets SHOULD be retrieved unsolicitedly before receiving requests to achieve faster response times.)
@@ -146,7 +146,7 @@ Still, frequent queries can tigger the refresh cycle more often. The `seen cache
 
 ### Further Considerations
 
-The response field contains ENRs as specified in [WAKU2-ENR](../enr.md).
+The response field contains ENRs as specified in [WAKU2-ENR](./enr.md).
 While ENRs contain signatures, they do not violate the [Waku relay no-sign policy](https://rfc.vac.dev/spec/11/#signature-policy)),
 because they are part of the discovery domain and are not propagated in the relay domain.
 However, there might still be some form of leakage:
@@ -159,10 +159,10 @@ Copyright and related rights waived via [CC0](https://creativecommons.org/public
 
 ## References
 
-* [33/WAKU2-DISCV5](https://rfc.vac.dev/spec/33/)
-* [WAKU2-ENR](../enr.md)
-* [multiaddress](https://docs.libp2p.io/concepts/addressing/)
-* [libp2p discovery interface](https://github.com/status-im/nim-libp2p/issues/140)
-* [libp2p gossipsub](https://github.com/libp2p/specs/blob/master/pubsub/gossipsub/gossipsub-v1.1.md)
-* [29/WAKU2-CONFIG](https://rfc.vac.dev/spec/29/)
-* [Waku relay anonymity](https://vac.dev/wakuv2-relay-anon)
+- [33/WAKU2-DISCV5](https://rfc.vac.dev/spec/33/)
+- [WAKU2-ENR](./enr.md)
+- [multiaddress](https://docs.libp2p.io/concepts/addressing/)
+- [libp2p discovery interface](https://github.com/status-im/nim-libp2p/issues/140)
+- [libp2p gossipsub](https://github.com/libp2p/specs/blob/master/pubsub/gossipsub/gossipsub-v1.1.md)
+- [29/WAKU2-CONFIG](https://rfc.vac.dev/spec/29/)
+- [Waku relay anonymity](https://vac.dev/wakuv2-relay-anon)
