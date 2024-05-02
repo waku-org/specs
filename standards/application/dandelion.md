@@ -2,7 +2,7 @@
 title: DANDELION
 name: Waku v2 Dandelion
 category: Standards Track
-tags: waku/anonymity
+tags: [waku/anonymity]
 editor: Daniel Kaiser <danielkaiser@status.im>
 contributors:
 ---
@@ -71,12 +71,12 @@ Adding random delay in the fluff phase further reduces symmetry in dissemination
 introduces more uncertainty for the attacker.
 Specifying fluff phase augmentations is out of scope for this document.
 
-*Note:
+_Note:
 We plan to add a separate specification for fluff phase augmentations.
 We envision stem and fluff phase as abstract concepts.
 The Dandelion stem and fluff phases instantiate these concepts.
 Future stem specifications might comprise: none (standard relay), Dandelion stem, Tor, and mix-net.
-As for future fluff specifications: none (standard relay), diffusion (random delays), and mix-net.*
+As for future fluff specifications: none (standard relay), diffusion (random delays), and mix-net._
 
 Messages relayed by nodes supporting 44/WAKU2-DANDELION are either in stem phase or in fluff phase.
 We refer to the former as a stem message and to the latter as a fluff message.
@@ -95,7 +95,7 @@ once they arrive at a node in fluff state for the first time.
 44/WAKU2-DANDELION uses [19/WAKU2-LIGHTPUSH](https://rfc.vac.dev/spec/19/) as the protocol for relaying stem messages.
 
 There are no negative effects on gossipsub peer scoring,
-because Dandelion nodes in *stem state* still normally relay Waku Relay (gossipsub) messages.
+because Dandelion nodes in _stem state_ still normally relay Waku Relay (gossipsub) messages.
 
 ## Specification
 
@@ -136,7 +136,7 @@ Received fluff messages MUST be relayed as specified in the fluff state section.
 The stem protocol ([19/WAKU2-LIGHTPUSH](https://rfc.vac.dev/spec/19/)) is independent of the fluff protocol ([Waku Relay](https://rfc.vac.dev/spec/11/)).
 While in stem state, nodes MUST NOT gossip about stem messages,
 and MUST NOT send control messages related to stem messages.
-(An existing gossipsub implementation does *not* have to be adjusted to not send gossip about stem messages,
+(An existing gossipsub implementation does _not_ have to be adjusted to not send gossip about stem messages,
 because these messages are only handed to gossipsub once they enter fluff phase.)
 
 #### Fail Safe
@@ -144,8 +144,8 @@ because these messages are only handed to gossipsub once they enter fluff phase.
 Nodes $v$ in stem state SHOULD store messages attached with a random timer between $t_1 = 5 * 100ms$ and $t_2 = 2 * t_1$.
 This time interval is chosen because
 
-* we assume $100\,ms$ as an average per hop delay, and
-* using $q=0.2$ will lead to an expected number of 5 stem hops per message.
+- we assume $100\,ms$ as an average per hop delay, and
+- using $q=0.2$ will lead to an expected number of 5 stem hops per message.
 
 If $v$ does not receive a given message via Waku Relay (fluff) before the respective timer runs out,
 $v$ will disseminate the message via Waku Relay.
@@ -188,7 +188,7 @@ in which the attacker controls a certain percentage of nodes in the network.
 44/WAKU2-DANDELION provides significant mitigation against mass deanonymization
 even if the attacker knows the network topology, i.e. the anonymity graph and the relay mesh graph.
 
-Mitigation in stronger models, including the *active scaling multi-node* model, is weak.
+Mitigation in stronger models, including the _active scaling multi-node_ model, is weak.
 We will elaborate on this in future versions of this document.
 
 44/WAKU2-DANDELION does not protect against targeted deanonymization attacks.
@@ -211,10 +211,10 @@ This is still work in progress and will be elaborated on in future versions of t
 
 Generally, there are several design choices to be made for the stem phase of a Dandelion-based specification:
 
-1) the probability of continuing the stem phase, which determines the expected stem lengh,
-2) the out degree in the stem phase, which set to 1 in this document (also in the Dandelion papers),
-3) the rate of re-selecting stem relays among all gossipsub mesh peers (for a given pubsub topic), and
-4) the mapping of incoming connections to outgoing connections.
+1. the probability of continuing the stem phase, which determines the expected stem lengh,
+2. the out degree in the stem phase, which set to 1 in this document (also in the Dandelion papers),
+3. the rate of re-selecting stem relays among all gossipsub mesh peers (for a given pubsub topic), and
+4. the mapping of incoming connections to outgoing connections.
 
 #### Bound Stem Length
 
@@ -272,9 +272,9 @@ While this improves anonymity, as discussed above, it also introduces additional
 
 In future versions of this specification we might
 
-* add a flag to [14/WAKU2-MESSAGE](https://rfc.vac.dev/spec/14/) indicating a message should be routed over a Dandelion stem (opt-in), or
-* add a flag to [14/WAKU2-MESSAGE](https://rfc.vac.dev/spec/14/) indicating a message should *not* be routed over a Dandelion stem (opt-out), or
-* introducing a fork of [19/WAKU2-LIGHTPUSH](https://rfc.vac.dev/spec/19/) exclusively used for Dandelion stem.
+- add a flag to [14/WAKU2-MESSAGE](https://rfc.vac.dev/spec/14/) indicating a message should be routed over a Dandelion stem (opt-in), or
+- add a flag to [14/WAKU2-MESSAGE](https://rfc.vac.dev/spec/14/) indicating a message should _not_ be routed over a Dandelion stem (opt-out), or
+- introducing a fork of [19/WAKU2-LIGHTPUSH](https://rfc.vac.dev/spec/19/) exclusively used for Dandelion stem.
 
 In the current version, we decided against these options in favour of a simpler protocol and an increased anonymity set.
 
@@ -284,14 +284,14 @@ Copyright and related rights waived via [CC0](https://creativecommons.org/public
 
 ## References
 
-* [Dandelion](https://arxiv.org/abs/1701.04439)
-* [Dandelion++](https://arxiv.org/abs/1805.11060)
-* [multi-node (botnet) attacker model](../../informational/adversarial-models.md/#multi-node)
-* [Waku Relay](https://rfc.vac.dev/spec/11/)
-* [Waku v2](https://rfc.vac.dev/spec/10/)
-* [d-regular graph](https://en.wikipedia.org/wiki/Regular_graph) 
-* [Anonymity Trilemma](https://freedom.cs.purdue.edu/projects/trilemma.html)
-* [Waku Privacy and Anonymity Analysis](https://vac.dev/wakuv2-relay-anon).
-* [On the Anonymity of Peer-To-Peer Network Anonymity Schemes Used by Cryptocurrencies](https://arxiv.org/pdf/2201.11860.pdf)
-* [Adversarial Models](https://rfc.vac.dev/spec/45/)
-* [14/WAKU2-MESSAGE](https://rfc.vac.dev/spec/14/)
+- [Dandelion](https://arxiv.org/abs/1701.04439)
+- [Dandelion++](https://arxiv.org/abs/1805.11060)
+- [multi-node (botnet) attacker model](../../informational/adversarial-models.md/#multi-node)
+- [Waku Relay](https://rfc.vac.dev/spec/11/)
+- [Waku v2](https://rfc.vac.dev/spec/10/)
+- [d-regular graph](https://en.wikipedia.org/wiki/Regular_graph)
+- [Anonymity Trilemma](https://freedom.cs.purdue.edu/projects/trilemma.html)
+- [Waku Privacy and Anonymity Analysis](https://vac.dev/wakuv2-relay-anon).
+- [On the Anonymity of Peer-To-Peer Network Anonymity Schemes Used by Cryptocurrencies](https://arxiv.org/pdf/2201.11860.pdf)
+- [Adversarial Models](https://rfc.vac.dev/spec/45/)
+- [14/WAKU2-MESSAGE](https://rfc.vac.dev/spec/14/)

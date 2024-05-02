@@ -2,7 +2,7 @@
 title: TOR-PUSH
 name: Waku v2 Tor Push
 category: Best Current Practice
-tags: waku/application
+tags: [waku/application]
 editor: Daniel Kaiser <danielkaiser@status.im>
 contributors:
 ---
@@ -20,7 +20,6 @@ Note: Waku Tor Push does not have a dedicated protocol identifier.
 It uses the same identifier as Waku relay.
 This allows Waku relay nodes that are oblivious to Tor Push to process messages received via Tor Push.
 
-
 ## Functional Operation
 
 In its current version, Waku Tor Push corresponds to [46/GOSSIPSUB-TOR-PUSH](https://rfc.vac.dev/spec/46)
@@ -37,7 +36,7 @@ Copyright and related rights waived via [CC0](https://creativecommons.org/public
 
 ## References
 
-* [11/WAKU2-RELAY](https://rfc.vac.dev/spec/11)
-* [libp2p gossipsub](https://github.com/libp2p/specs/blob/master/pubsub/gossipsub/README.md)
-* [46/GOSSIPSUB-TOR-PUSH](https://rfc.vac.dev/spec/46)
-* [Tor](https://www.torproject.org/)
+- [11/WAKU2-RELAY](https://rfc.vac.dev/spec/11)
+- [libp2p gossipsub](https://github.com/libp2p/specs/blob/master/pubsub/gossipsub/README.md)
+- [46/GOSSIPSUB-TOR-PUSH](https://rfc.vac.dev/spec/46)
+- [Tor](https://www.torproject.org/)
