@@ -8,7 +8,7 @@ contributors:
 
 ## Abstrct
 
-Waku provides a decentralized [relay](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md) network for routing messages. It's not possible to garantee a meesage is reached to its receivers without introduce any centralized coordinator. [MVDS](https://github.com/vacp2p/rfc-index/blob/e5b859abfb3e42fde4336e5fc5b4e7250126f8ce/vac/2/mvds.md) is a way to ensure message delivery by sending acks by recipents frequently. It's not efficient in low-bandwith environments like IoT devices or mobile phones. If the group or community becomes big enough, the cost of bandwith also increase dramatically.
+Waku provides a decentralized [relay](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md) network for routing messages. It's not possible to garantee a meesage is reached to its receivers without introduce any centralized coordinator. [MVDS](https://github.com/vacp2p/rfc-index/blob/main/vac/2/mvds.md) is a way to ensure message delivery by sending acks by recipents frequently. It's not efficient in low-bandwith environments like IoT devices or mobile phones. If the group or community becomes big enough, the cost of bandwith also increase dramatically.
 
 The present documentation proposes a way to reference messages from group members when sending a new message. In this way, the messages of the group compose a Directed Acyclic Graph (aka. DAG) effectively. By looking into the tips of the graph, the member in the group can get the missing messages from [store]() node with the refrence specified in the tip message. Each member also send a checkpoint message periodically.
 
@@ -89,9 +89,9 @@ def weighted_choose(group1, group2, prob_group1, k):
 
 # Example usage
 active_group = ['Alice', 'Bob', 'Charlie']
-inactive_group = ['Diana', 'Eve', 'Frank']
+inactive_group = ['Dave', 'Eve', 'Frank']
 prob_active = 0.7  # 70% chance of picking a member from active group
-k = 4  # Number of unique members to pick
+k = 3  # Number of unique members to pick
 
 picked_members = weighted_choose(active_group, inactive_group, prob_active, k)
 
