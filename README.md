@@ -26,7 +26,7 @@ This repository contains specifications for the Waku suite of protocols.
 |[WAKU2-PEER-EXCHANGE](standards/core/peer-exchange.md)| Waku Peer Exchange |
 |[WAKU2-ENR](standards/core/enr.md)| Waku Usage of ENR |
 |[WAKU2-INCENTIVIZATION](standards/core/incentivization.md)| Waku Incentivization |
-|[WAKU2-METADATA](standards/core/metadata.md)| Waku Metadata |
+|[66/WAKU2-METADATA](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/66/metadata.md)| Waku Metadata |
 |[WAKU2-NETWORK](standards/core/network.md)| Waku Network |
 |[RELAY-SHARDING](standards/core/relay-sharding.md)| Waku Relay Sharding |
 | WAKU2-STOREV3 | Coming Soon |
