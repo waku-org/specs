@@ -27,7 +27,7 @@ The message which is not input by user, but create and send automatically in app
 It's a type of control message from a group member, which only contains references. Such message should not be persistent in any nodes, instead it's only used to find out if the referenced message is missing or not by other group members.
 
 **Request message**
-It's another type of control message for asking a message by its reference id. It can be persistent in store and sender node but not others. Group members will only fulfill the request message if store node doesn't have it. The sender node regularly check if pending request message gets fulfilled or not. To avoid the same request message flood by many members in one group, the sender node should not send new messages if there already exists such request message in the store node (using payload based query for such check).
+It's another type of control message for asking a message by its reference id. It can be persistent in store and sender node but not others. Group members will only fulfill the request message if store node doesn't have it. The sender node regularly check if pending request message gets fulfilled or not. To avoid the same request message flood by many members in one group, the sender node should not send the same request message if it already exists in the store node (using payload based query for such check).
 
 ## Message Flows
 
