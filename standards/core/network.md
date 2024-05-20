@@ -45,12 +45,12 @@ with:
 /waku/2/rs/1/7
 ```
 
-A node MUST use [WAKU-METADATA](./metadata.md) protocol to identify the `<cluster_id>` that every
+A node MUST use [66/WAKU-METADATA](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/66/metadata.md) protocol to identify the `<cluster_id>` that every
 inbound/outbound peer that attempts to connect supports. In any of the following cases, the node MUST trigger a disconnection:
 
-- [WAKU-METADATA](./metadata.md) dial fails.
-- [WAKU-METADATA](./metadata.md) reports an empty `<cluster_id>`.
-- [WAKU-METADATA](./metadata.md) reports a `<cluster_id>` different than `1`.
+- [66/WAKU-METADATA](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/66/metadata.md) dial fails.
+- [66/WAKU-METADATA](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/66/metadata.md) reports an empty `<cluster_id>`.
+- [66/WAKU-METADATA](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/66/metadata.md) reports a `<cluster_id>` different than `1`.
 
 ## Roles
 
@@ -298,6 +298,7 @@ Copyright and related rights waived via [CC0](https://creativecommons.org/public
 
 - [WAKU2-RELAY-SHARDING](./relay-sharding.md)
 - [Peer-exchange](./peer-exchange.md)
+- [66/WAKU-METADATA](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/66/metadata.md)
 
 ## normative
 
