@@ -6,28 +6,28 @@ editor: Kaichao <kaichao@status.im>
 contributors: 
 ---
 
-## Abstrct
+## Abstract
 
-Waku provides a decentralized [relay](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md) network for routing messages. It's not possible to garantee a meesage is reached to its receivers without introduce any centralized coordinator. [MVDS](https://github.com/vacp2p/rfc-index/blob/main/vac/2/mvds.md) is a way to ensure message delivery by sending acks by recipents frequently. It's not efficient in low-bandwith environments like IoT devices or mobile phones. If the group or community becomes big enough, the cost of bandwith also increase dramatically.
+Waku provides a decentralized [relay](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md) network for routing messages. It's not possible to guarantee a message is reached to its receivers without introduce any centralized coordinator. [MVDS](https://github.com/vacp2p/rfc-index/blob/main/vac/2/mvds.md) is a way to ensure message delivery by sending acknowledgements by recipients frequently. It's not efficient in low-bandwidth environments like IoT devices or mobile phones. If the group or community becomes big enough, the cost of bandwidth also increase dramatically.
 
-The present documentation proposes a way to reference messages from group members when sending a new message. In this way, the messages of the group compose a Directed Acyclic Graph (aka. DAG) effectively. By looking into the tips of the graph, the member in the group can get the missing messages from [store]() node with the refrence specified in the tip message. Each member also send a checkpoint message periodically.
+The present documentation proposes a way to reference messages from group members when sending a new message. In this way, the messages of the group compose a Directed Acyclic Graph (aka. DAG) effectively. By looking into the tips of the graph, the member in the group can get the missing messages from [store]() node with the reference specified in the tip message. Each member also send a checkpoint message periodically.
 
 ## Terms 
 
 **Reference of a message (reference id)**
-The hash of the message define in [Deterministic Message Hashing](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/14/message.md#deterministic-message-hashing). However, current implementation of message hash can not be used reliably in scenarios like message retransimission. The realy protocol expects a "recent" timestamp in the `WakuMessage`, retransmission will failed if passed the time window. Either we introduce payload hash as the reference id or modify the calculation of message hash to exclude timestamp. In the first option, the payload hash based query of message to store node is requried to fulfill our requirements.
+The hash of the message define in [Deterministic Message Hashing](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/14/message.md#deterministic-message-hashing). However, current implementation of message hash can not be used reliably in scenarios like message retransmission. The relay protocol expects a "recent" timestamp in the `WakuMessage`, retransmission will failed if passed the time window. Either we introduce payload hash as the reference id or modify the calculation of message hash to exclude timestamp. In the first option, the payload hash based query of message to store node is required to fulfill our requirements.
 
 **Tip message**
 The latest message from a member. It can choose to reference or not reference the sender's previous message. It must reference the last seen messages from other `n` members in the group.
 
 **Control message**
-The message which is not input by user, but create and send automatically in application to facilate our design.
+The message which is not input by user, but create and send automatically in application to facilitate our design.
 
 **Checkpoint message**
 It's a type of control message from a group member, which only contains references. Such message should not be persistent in any nodes, instead it's only used to find out if the referenced message is missing or not by other group members.
 
 **Request message**
-It's another type of control message for asking a message by its reference id. It can be persistent in store and sender node but not others. Group members will only fulfill the request message if store node doesn't have it. The sender node regularly check if pending request message gets fulfilled or not.
+It's another type of control message for asking a message by its reference id. It can be persistent in store and sender node but not others. Group members will only fulfill the request message if store node doesn't have it. The sender node regularly check if pending request message gets fulfilled or not. To avoid the same request message flood by many members in one group, the sender node should not send new messages if there already exists such request message in the store node (using payload based query for such check).
 
 ## Message Flows
 
@@ -42,12 +42,14 @@ It's another type of control message for asking a message by its reference id. I
 - Charlie receives `a2`, finds out that `d1` is not exist in local, he wants to retrieve the message from store node by the reference id.
 - If the `d1` did not exist in store node, charlie broadcasts a `request` message in the group.
 - Dave gets the `request` message and check if `d1` exists in local or not. 
-- Dave has `d1` and broardcast it to the network.
+- Dave has `d1` and broadcast it to the network.
 
 
 ## Payload Format
 
-The references are generally encrypted in `WakuMessage.payload`. 
+### Tip Message
+
+The references for a message and checkpoint messages are generally encrypted in `WakuMessage.payload`. The first reference is always the previous message from the sender. The following references are the latest messages from other group members. The payload for `Tip Message` is defined as following,
 
 ```python
 class Payload:
@@ -60,6 +62,20 @@ For test purpose, it can also be encoded in `WakuMessage.meta` for public analys
 
 ```python
 concat(message_hash_1, message_hash_2, message_hash_3)
+```
+
+### Checkpoint Message
+
+The payload for `Checkpoint Message` is similar to Tip Message, but it only contains references, no other attributes.
+
+### Request Message
+
+The payload for `Request Message` is defiled as following,
+
+```python
+class Payload:
+    def __init__(self, request_hash):
+        self.request_hash = request_hash
 ```
 
 ## Principle
