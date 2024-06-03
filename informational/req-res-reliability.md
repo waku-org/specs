@@ -1,33 +1,18 @@
 ---
-title: TEMPLATE
-name: Specification Template
-category: (Standards Track|Informational|Best Current Practice)
-tags: an optional list of tags, not standard
-editor: Jimmy Debe <jimmy@status.im>
+title: REQ-RES-RELIABILITY
+name: Request-response protocols reliability
+category: Best Current Practice
+tags: [informational]
+editor: Oleksandr Kozlov <oleksandr@status.im>
 contributors:
 ---
 
-### (Info, remove this section)
-
-This section contains meta info about writing specifications.
-This section (including its subsections) MUST be removed.
-
-[COSS](https://rfc.vac.dev/spec/1/) explains the Vac RFC process.
-
-### Tags
-
-The `tags` metadata SHOULD contain a list of tags if applicable.
-
-* `core` for Waku protocol definitions
-* `application` for applications built on top of Waku protocol,
-* `informational` for general guidelines, background information etc. 
-
 ## Abstract
+This RFC describes set of instructions used across different [WAKU2](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/10/waku2.md?plain=1#L3) implementations for improved reliability in request-response protocols such as [WAKU2-LIGHTPUSH](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/19/lightpush.md?plain=1#L3C11-L3C26), [WAKU2-FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md?plain=1#L3) and [WAKU2-STORE](https://github.com/waku-org/specs/blob/a637d4bb34243dbd8f6771e0dee65669764f6798/standards/core/store.md?plain=1#L2).
 
+## Motivation
 
-## Background / Rationale / Motivation
-
-This section serves as an introduction providing background information and a motivation/rationale for the specification.
+Descriptions of mentioned protocols do not define some of the real world use cases that are oftenly observed in unreliable network environment. Such use cases can be: recovery from offline state, decrease rate of missed messages, increase probability of messages being broadcasted.
 
 ## Theory / Semantics
 
