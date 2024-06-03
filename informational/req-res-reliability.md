@@ -14,31 +14,25 @@ This RFC describes set of instructions used across different [WAKU2](https://git
 
 Descriptions of mentioned protocols do not define some of the real world use cases that are oftenly observed in unreliable network environment. Such use cases can be: recovery from offline state, decrease rate of missed messages, increase probability of messages being broadcasted.
 
-## Theory / Semantics
+## Suggestions
 
-This section SHOULD explain in detail how the proposed protocol works.
-It may touch on the wire format where necessary for the explanation.
-This section MAY also specify endpoint behaviour when receiving specific messages, e.g. the behaviour of certain caches etc.
+### Peer and connection management
 
-## Wire Format Specification / Syntax
-The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, 
-“NOT RECOMMENDED”, “MAY”, and “OPTIONAL” in this document are to be interpreted as described in [RFC 2119](https://www.ietf.org/rfc/rfc2119.txt).
+Each protocols should retain a pool of reliable peers. In case a protocol failed to use any peer more than once - connection to it should be dropped and new peer should be added to the pool instead. 
 
-This section SHOULD not contain explanations of semantics and focus on concisely defining the wire format.
-Implementations SHOULD adhere to these exact formats to interoperate with other implementations.
-It is fine, if parts of the previous section that touch on the wire format are repeated.
-The purpose of this section is having a concise definition of what an implementation sends and accepts.
-Parts that are not specified here are considered implementation details. 
-Implementors are free to decide on how to implement these details.
+### Light Push 
 
+In case sending message failed - node should try to re-send message after some interval. 
 
-## Implementation Suggestions (optional)
-An optional *implementation suggestions* section may provide suggestions on how to approach implementation details, and, 
-if available, point to existing implementations for reference.
+### Filter
 
+- To decrease chances of missing messages a node can initiate more than one subscription through Filter protocol to the same content topic and filter out duplicates. This will increase bandwidth consumption and would depend on the information exchanged under content topic in use.
 
-## (Further Optional Sections)
+- In case a node goes offline while having an active subscription - it is important to do ping again right after node appears online. In case ping fails - re-subscribe request should be fired. 
 
+### Store
+
+- none for now
 
 ## Security/Privacy Considerations
 
