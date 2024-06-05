@@ -29,7 +29,7 @@ This repository contains specifications for the Waku suite of protocols.
 |[WAKU2-METADATA](standards/core/metadata.md)| Waku Metadata |
 |[WAKU2-NETWORK](standards/core/network.md)| Waku Network |
 |[RELAY-SHARDING](standards/core/relay-sharding.md)| Waku Relay Sharding |
-| WAKU2-STOREV3 | Coming Soon |
+|[WAKU2-STORE](standards/core/store.md) | Waku Store Query |
 
 ### Application standards
 
