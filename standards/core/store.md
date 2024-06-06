@@ -390,4 +390,4 @@ Copyright and related rights waived via
 2. [protocol buffers v3](https://developers.google.com/protocol-buffers/)
 3. [11/WAKU2-RELAY](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/11/relay.md)
 4. [Open timestamps](https://opentimestamps.org/) 
-
+5. [13/WAKU2-STORE v2 previous version](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/13/store.md)
