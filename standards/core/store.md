@@ -1,7 +1,6 @@
 ---
 title: WAKU2-STORE
 name: Waku Store Query
-status: draft
 editor: Hanno Cornelius <hanno@status.im>
 contributors:
   - Dean Eigenmann <dean@status.im>
