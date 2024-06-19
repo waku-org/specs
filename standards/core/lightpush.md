@@ -1,7 +1,6 @@
 ---
 title: WAKU2-LIGHTPUSH
-name: Waku v2 Light Push
-status: draft
+name: Waku Light Push
 editor: Zoltan Nagy <zoltan@status.im> 
 contributors: 
   - Hanno Cornelius <hanno@status.im>
@@ -21,7 +20,7 @@ A common use case is to request that service node to publish the message to a `1
 Additionally, there is sometimes a need for confirmation that a message has been received "by the network"
 (here, at least one node).
 
-`WAKU2-LIGHTPUSH` is a request/response protocol for this.
+`WAKU-LIGHTPUSH` is a request/response protocol for this.
 
 ## Payloads
 
@@ -29,9 +28,9 @@ Additionally, there is sometimes a need for confirmation that a message has been
 syntax = "proto3";
 
 message LightPushRequest {
-        string request_id = 1;
-    uin32 request_type = 10;  // reserved for future request type selection, currently it is always RELAY (0)
-    string topic = 20;
+    string request_id = 1;
+    uin32 request_type = 10;  // 10 Reserved for future `request_type`. Currently RELAY is only available service.
+    optional string pubsub_topic = 20;
     WakuMessage message = 21;
 }
 
@@ -45,18 +44,18 @@ message LightPushResponse {
 
 ### Message Relaying
 
-Nodes that respond to `LightPushRequest` MUST either relay the encapsulated message via [11/WAKU2-RELAY](https://rfc.vac.dev/waku/standards/core/11/relay) protocol on the specified `pubsub_topic` or `shard` ([WAKU2-RELAY-SHARDING](https://github.com/waku-org/specs/blob/master/standards/core/relay-sharding.md)) depending on the network configuration.
+Nodes that respond to `LightPushRequest` MUST either relay the encapsulated message via [11/WAKU2-RELAY](https://rfc.vac.dev/waku/standards/core/11/relay) protocol on the specified `pubsub_topic`. Depending on the network configuration, user may not need to provide `pubsub_topic` ([WAKU2-RELAY-SHARDING](https://github.com/waku-org/specs/blob/master/standards/core/relay-sharding.md)).
 If they are unable to do so for some reason, they SHOULD return an error code in `LightPushResponse`.
 
 ### Examples of possible error codes
 
 | Result | Code | Note |
 |--------|------|------|
-| SUCCESS  | 0 | Successfull push, response's relay_peer_count holds the number of peers the message is pushed.    |
-| BAD_REQUEST | 400   |     |
-| NO_PEERS_TO_RELAY | 404 | Service node has no relay peers  |
+| SUCCESS  | 200 | Successfull push, response's relay_peer_count holds the number of peers the message is pushed.    |
+| BAD_REQUEST | 400   | Wrong request payload.    |
+| NO_PEERS_TO_RELAY | 404 | Service node has no relay peers.   |
 | PAYLOAD_TOO_LARGE | 413 | Message exceeds certain size limit, it can depend on network configuration, see status_desc for details.  |
-| UNSUPPORTED_TOPIC | 415 | Requested push on pubsub_topic or shard is not possible as the service node is not subscibed to. |
+| UNSUPPORTED_TOPIC | 421 | Requested push on pubsub_topic is not possible as the service node does not support it. |
 | TOO_MANY_REQUESTS | 429 | DOS protection prevented this request as the current request exceeds the configured request rate. |
 | INTERNAL_SERVER_ERROR  | 500 | status_desc holds explanation of the error.  |
 | SERVICE_UNAVAILABLE | 503 | Lightpush service not available  |
@@ -66,7 +65,7 @@ If they are unable to do so for some reason, they SHOULD return an error code in
 ## Security Considerations
 
 Since this can introduce an amplification factor, it is RECOMMENDED for the node relaying to the rest of the network to take extra precautions.
-Therefore Waku2 applies or will apply:
+Therefore Waku applies or will apply:
 - DOS protection through request rate limitation on the service itself.
 - message rate limiting via [17/WAKU2-RLN-RELAY](https://rfc.vac.dev/waku/standards/core/17/rln-relay), applied via network membership subscription.
 
