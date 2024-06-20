@@ -53,12 +53,11 @@ If they are unable to do so for some reason, they SHOULD return an error code in
 |--------|------|------|
 | SUCCESS  | 200 | Successfull push, response's relay_peer_count holds the number of peers the message is pushed.    |
 | BAD_REQUEST | 400   | Wrong request payload.    |
-| NO_PEERS_TO_RELAY | 404 | Service node has no relay peers.   |
 | PAYLOAD_TOO_LARGE | 413 | Message exceeds certain size limit, it can depend on network configuration, see status_desc for details.  |
 | UNSUPPORTED_TOPIC | 421 | Requested push on pubsub_topic is not possible as the service node does not support it. |
 | TOO_MANY_REQUESTS | 429 | DOS protection prevented this request as the current request exceeds the configured request rate. |
 | INTERNAL_SERVER_ERROR  | 500 | status_desc holds explanation of the error.  |
-| SERVICE_UNAVAILABLE | 503 | Lightpush service not available  |
+| NO_PEERS_TO_RELAY | 503 | Lightpush service not available as node has no relay peers. |
 
 > The list of error codes are not complete and can be extended in the future.
 
