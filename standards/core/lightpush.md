@@ -16,7 +16,7 @@ previous version: `/vac/waku/lightpush/2.0.0-beta1` [19/WAKU2-LIGHTPUSH](https:/
 ## Motivation and Goals
 
 Light nodes with short connection windows and limited bandwidth wish to push messages to other nodes in the Waku network to request message services.
-A common use case is to request that service node to publish the message to a `11/WAKU2-RELAY` pubsub topic.
+A common use case is to request that the service node publish the message to an `11/WAKU2-RELAY` pubsub-topic.
 Additionally, there is sometimes a need for confirmation that a message has been received "by the network"
 (here, at least one node).
 
@@ -29,7 +29,7 @@ syntax = "proto3";
 
 message LightPushRequest {
     string request_id = 1;
-    uin32 request_type = 10;  // 10 Reserved for future `request_type`. Currently RELAY is only available service.
+    uin32 request_type = 10;  // 10 Reserved for future `request_type`. Currently, RELAY is the only available service.
     optional string pubsub_topic = 20;
     WakuMessage message = 21;
 }
@@ -38,14 +38,15 @@ message LightPushResponse {
     string request_id = 1;
     uint32 status_code = 10; // non zero in case of failure, see appendix
     optional string status_desc = 11;
-    uint32 relay_peer_count = 12;
+    uint32 relay_peer_count = 12; // number of peers, message is successfully relayed to 
 }
 ```
 
 ### Message Relaying
 
-Nodes that respond to `LightPushRequest` MUST either relay the encapsulated message via [11/WAKU2-RELAY](https://rfc.vac.dev/waku/standards/core/11/relay) protocol on the specified `pubsub_topic`. Depending on the network configuration, user may not need to provide `pubsub_topic` ([WAKU2-RELAY-SHARDING](https://github.com/waku-org/specs/blob/master/standards/core/relay-sharding.md)).
+Nodes that respond to `LightPushRequest` MUST either relay the encapsulated message via [11/WAKU2-RELAY](https://rfc.vac.dev/waku/standards/core/11/relay) protocol on the specified `pubsub_topic`. Depending on the network configuration, the user may not need to provide `pubsub_topic` ([WAKU2-RELAY-SHARDING](https://github.com/waku-org/specs/blob/master/standards/core/relay-sharding.md)).
 If they are unable to do so for some reason, they SHOULD return an error code in `LightPushResponse`.
+Once the relay is successful, the `relay_peer_count` will indicate the number of peers that the node has managed to relay the message to. It's important to note that this number may vary depending on the node subscriptions and support for the requested pubsub_topic. The client can use this information to either consider the relay as successful or take further action, such as switching to a lightpush service peer with better connectivity.
 
 ### Examples of possible error codes
 
@@ -57,9 +58,9 @@ If they are unable to do so for some reason, they SHOULD return an error code in
 | UNSUPPORTED_TOPIC | 421 | Requested push on pubsub_topic is not possible as the service node does not support it. |
 | TOO_MANY_REQUESTS | 429 | DOS protection prevented this request as the current request exceeds the configured request rate. |
 | INTERNAL_SERVER_ERROR  | 500 | status_desc holds explanation of the error.  |
-| NO_PEERS_TO_RELAY | 503 | Lightpush service not available as node has no relay peers. |
+| NO_PEERS_TO_RELAY | 503 | Lightpush service is not available as the node has no relay peers. |
 
-> The list of error codes are not complete and can be extended in the future.
+> The list of error codes is not complete and can be extended in the future.
 
 ## Security Considerations
 
