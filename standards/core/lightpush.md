@@ -45,7 +45,7 @@ message LightPushResponse {
 ### Message Relaying
 
 Nodes that respond to `LightPushRequest` MUST either relay the encapsulated message via [11/WAKU2-RELAY](https://rfc.vac.dev/waku/standards/core/11/relay) protocol on the specified `pubsub_topic`. Depending on the network configuration, the user may not need to provide `pubsub_topic` ([WAKU2-RELAY-SHARDING](https://github.com/waku-org/specs/blob/master/standards/core/relay-sharding.md)).
-If they are unable to do so for some reason, they SHOULD return an error code in `LightPushResponse`.
+If the node is unable to do so for some reason, they SHOULD return an error code in `LightPushResponse`.
 Once the relay is successful, the `relay_peer_count` will indicate the number of peers that the node has managed to relay the message to. It's important to note that this number may vary depending on the node subscriptions and support for the requested pubsub_topic. The client can use this information to either consider the relay as successful or take further action, such as switching to a lightpush service peer with better connectivity.
 
 ### Examples of possible error codes
@@ -55,7 +55,7 @@ Once the relay is successful, the `relay_peer_count` will indicate the number of
 | SUCCESS  | 200 | Successfull push, response's relay_peer_count holds the number of peers the message is pushed.    |
 | BAD_REQUEST | 400   | Wrong request payload.    |
 | PAYLOAD_TOO_LARGE | 413 | Message exceeds certain size limit, it can depend on network configuration, see status_desc for details.  |
-| UNSUPPORTED_TOPIC | 421 | Requested push on pubsub_topic is not possible as the service node does not support it. |
+| UNSUPPORTED_PUBSUB_TOPIC | 421 | Requested push on pubsub_topic is not possible as the service node does not support it. |
 | TOO_MANY_REQUESTS | 429 | DOS protection prevented this request as the current request exceeds the configured request rate. |
 | INTERNAL_SERVER_ERROR  | 500 | status_desc holds explanation of the error.  |
 | NO_PEERS_TO_RELAY | 503 | Lightpush service is not available as the node has no relay peers. |
