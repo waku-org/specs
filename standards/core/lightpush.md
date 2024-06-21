@@ -1,5 +1,5 @@
 ---
-title: WAKU2-LIGHTPUSH
+title: WAKU-LIGHTPUSH
 name: Waku Light Push
 editor: Zoltan Nagy <zoltan@status.im> 
 contributors: 
