@@ -16,6 +16,17 @@ Descriptions of mentioned protocols do not define some of the real world use cas
 
 ## Suggestions
 
+### Node health
+
+As a useful metric to define and implement for determining quality of provided service by a node:
+- unhealthy - no peer connections are available regardless of protocol;
+- minimally healthy:
+  - Relay has less than 4 peers connected;
+  - Filter and LightPush has one per each peer connection available;
+- sufficiently healthy:
+  - Relay has minimum 4 peers connected;
+  - more than 1 connection in Filter and at least 2 connections available in LightPush;
+
 ### Peer and connection management
 
 Each protocols should retain a pool of reliable peers. In case a protocol failed to use any peer more than once - connection to it should be dropped and new peer should be added to the pool instead. 
