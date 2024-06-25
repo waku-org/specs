@@ -26,7 +26,7 @@ this document lists static shard index assignments (see [WAKU2-RELAY-SHARDING](.
 | index | Protocol/App | Description                                                     |
 | ----- | ------------ | --------------------------------------------------------------- |
 | 0     | global       | global use                                                      |
-| 1     | reserved     | [The Waku Network](https://rfc.vac.dev/spec/64/#network-shards) |
+| 1     | reserved     | [The Waku Network](https://rfc.vac.dev/waku/standards/core/64/network/#network-shards) |
 | 2     | reserved     |                                                                 |
 | 3     | reserved     |                                                                 |
 | 4     | reserved     |                                                                 |
