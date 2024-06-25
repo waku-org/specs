@@ -60,7 +60,7 @@ The above mechanism allows a Noise session to be marked as stale either privatel
 depending if `Hash(session-id)` is sent on `/{application-name}/{application-version}/wakunoise/1/sessions/{ct-id}/proto` to the other party in encrypted form or not, respectively.
 
 When a Noise session is publicly marked as stale,
-network peers MAY discard all [stored](https://rfc.vac.dev/spec/13/) messages addressed to the content topic `/{application-name}/{application-version}/wakunoise/1/sessions/{ct-id}/proto`.
+network peers MAY discard all [stored](https://rfc.vac.dev/waku/standards/core/13/store) messages addressed to the content topic `/{application-name}/{application-version}/wakunoise/1/sessions/{ct-id}/proto`.
 In this the case and in order for parties to retrieve any eventually delayed message,
 peers SHOULD wait a fixed amount of time before discarding stored messages corresponding to a stale Noise session.
 
@@ -150,7 +150,7 @@ This session management mechanism is loosely based on [Signal's Sesame Algorithm
 
 # References
 
-- [13/WAKU2-STORE](https://rfc.vac.dev/spec/13/)
+- [13/WAKU2-STORE](https://rfc.vac.dev/waku/standards/core/13/store)
 - [WAKU2-NOISE](./noise.md)
 - [The Noise Protocol Framework](http://www.noiseprotocol.org/noise.html)
 - [The Sesame Algorithm: Session Management for Asynchronous Message Encryption](https://signal.org/docs/specifications/sesame/)
