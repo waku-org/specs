@@ -26,7 +26,7 @@ this document lists static shard index assignments (see [WAKU2-RELAY-SHARDING](.
 | index | Protocol/App | Description                                                     |
 | ----- | ------------ | --------------------------------------------------------------- |
 | 0     | global       | global use                                                      |
-| 1     | reserved     | [The Waku Network](https://rfc.vac.dev/spec/64/#network-shards) |
+| 1     | reserved     | [The Waku Network](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/64/network.md) |
 | 2     | reserved     |                                                                 |
 | 3     | reserved     |                                                                 |
 | 4     | reserved     |                                                                 |
@@ -53,3 +53,4 @@ Copyright and related rights waived via [CC0](https://creativecommons.org/public
 
 - [WAKU2-RELAY-SHARDING](../standards/core/relay-sharding.md)
 - [IANA port allocation](https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml)
+- [The Waku Network](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/64/network.md)
