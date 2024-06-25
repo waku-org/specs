@@ -33,20 +33,21 @@ The node may have connection issues to *receive* messages via relay network. Thi
 
 By leveraging the store node to provide such query services, the application can mitigate the reliability issue of relay protocol.
 
+## Implementation Suggestions 
+
+TODO
+
+
 
 ## Security and Performance Considerations
 
-The message query exposes the metadata of clients to the store nodes, and the store node can easily associate the messages with interested clents.
+The message query request exposes the metadata of clients to the store nodes, and the store node can easily associate the messages with interested clents.
+
 The query requests add a fair mount of load to store services, and increased linearly with more users onboarded. Store nodes should be able to scale up and scale down itself by monitoring or predicting the workload. 
+
 The store node can also be a target for DDoS attack. The store node should have a mechanism to prevent such attack.
-Application should provide user options to configure different store nodes, such nodes can either be self-hosted or public with better reputation.
 
-
-## Implementation Suggestions (optional)
-
-An optional *implementation suggestions* section may provide suggestions on how to approach implementation details, and, 
-if available, point to existing implementations for reference.
-
+Application should provide options to configure different store nodes for its users, such nodes can either be self-hosted or public with better reputation.
 
 
 ## Copyright
