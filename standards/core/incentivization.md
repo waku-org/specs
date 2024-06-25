@@ -84,7 +84,7 @@ Note: this section may later be moved to Store RFC.
 Store is one of Waku's request-response protocols.
 A Store client queries the server for historic messages.
 A Store server responds with a list of messages that pass the user's filter.
-See [13/WAKU2-STORE](https://rfc.vac.dev/spec/13/) for the definitions of `HistoryQuery` and `HistoryResponse`.
+See [13/WAKU2-STORE](https://rfc.vac.dev/waku/standards/core/13/store) for the definitions of `HistoryQuery` and `HistoryResponse`.
 
 The PoC Store incentivization makes the following simplifying assumptions:
 
@@ -216,17 +216,17 @@ Copyright and related rights waived via [CC0](https://creativecommons.org/public
 ### normative
 
 - A high-level [incentivization outline](https://github.com/waku-org/research/blob/master/incentivization.md)
-- [13/WAKU2-STORE](https://rfc.vac.dev/spec/13/) (for Store-specific sections)
+- [13/WAKU2-STORE](https://rfc.vac.dev/waku/standards/core/13/store) (for Store-specific sections)
 
 ### informative
 
 RFCs of request-response protocols:
 
-- [12/WAKU2-FILTER](https://rfc.vac.dev/spec/12)
-- [13/WAKU2-STORE](https://rfc.vac.dev/spec/13/)
-- [19/WAKU2-LIGHTPUSH](https://rfc.vac.dev/spec/19/)
+- [12/WAKU2-FILTER](https://rfc.vac.dev/waku/standards/core/12/filter)
+- [13/WAKU2-STORE](https://rfc.vac.dev/waku/standards/core/13/store)
+- [19/WAKU2-LIGHTPUSH](https://rfc.vac.dev/waku/standards/core/19/lightpush)
 
 RFCs of Relay and RLN-Relay:
 
-- [11/WAKU2-RELAY](https://rfc.vac.dev/spec/11)
-- [17/WAKU2-RLN-RELAY](https://rfc.vac.dev/spec/17)
+- [11/WAKU2-RELAY](https://rfc.vac.dev/waku/standards/core/11/relay)
+- [17/WAKU2-RLN-RELAY](https://rfc.vac.dev/waku/standards/core/17/rln-relay)
