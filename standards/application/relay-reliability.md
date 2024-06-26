@@ -26,11 +26,11 @@ The [store protocol](https://github.com/waku-org/specs/blob/master/standards/cor
 
 **Search criteria with message hash**
 
-The node may have connection issues to *publish* messages via relay network. This search criteria can be used to check whether a message is populated in the network or not. The message exists in store node can be marked from `outgoing` to `sent` by application. If the message is not found in the store node, the application can resend the message.
+For the nodes that may have connection issues to *publish* messages via relay network, this search criteria can be used to check whether a message is populated in the network or not. The message exists in store node can be marked from `outgoing` to `sent` by application. If the message is not found in the store node, the application can resend the message.
 
 **Search criteria with topics and time range**
 
-The node may have connection issues to *receive* messages via relay network. This search criteria can be used to fetch missing messages from store nodes when network resumes.
+For the nodes that may have connection issues to *receive* messages via relay network, this search criteria can be used to fetch missing messages from store nodes when network resumes.
 
 By leveraging the store node to provide such query services, the application can mitigate the reliability issue of relay protocol.
 
@@ -84,7 +84,7 @@ When persistent network issue happens, you may not want to resend the failed mes
 
 The message query request exposes the metadata of clients to the store nodes, and the store node can easily associate the messages with interested clents.
 
-The query requests add a fair mount of load to store services, and increased linearly with more users onboarded. Store nodes should be able to scale up and scale down itself by monitoring or predicting the workload. 
+The query requests add a fair mount of load to store nodes, and increased linearly with more users onboarded. Store nodes should be able to scale up and scale down itself by monitoring or predicting the workload. 
 
 The store node can also be a target for DDoS attack. The store node should have a mechanism to prevent such attack.
 
