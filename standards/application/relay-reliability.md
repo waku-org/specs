@@ -36,8 +36,6 @@ By leveraging the store node to provide such query services, the application can
 
 ## Implementation Suggestions 
 
-TODO
-
 ### Query with Message Hash
 
 ```python
@@ -71,7 +69,7 @@ def checkOutgoingMessages():
                 waku.relay.post(message)
 ```
 
-Function `checkOutgoingMessages` is called periodically. Message hashes can be queried in batch to reduce the number of requests to store nodes, the size in a batch shoud not exceed the max supported size by store node.
+Function `checkOutgoingMessages` is called periodically, most likely every a few seconds. Message hashes can be queried in batch to reduce the number of requests to store nodes, the size in a batch shoud not exceed the max supported size by store node.
 
 The store node can be set and updated directly by application or selected from peer discovery protocol like [discv5](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/33/discv5.md) or [peer exchange](https://github.com/waku-org/specs/blob/master/standards/core/peer-exchange.md).
 
@@ -81,7 +79,6 @@ When persistent network issue happens, you may not want to resend the failed mes
 
 ### Query with Topics and Time Range
 
-```python
 
 ## Security and Performance Considerations
 
