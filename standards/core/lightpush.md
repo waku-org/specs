@@ -38,7 +38,7 @@ message LightPushResponse {
     string request_id = 1;
     uint32 status_code = 10; // non zero in case of failure, see appendix
     optional string status_desc = 11;
-    uint32 relay_peer_count = 12; // number of peers, message is successfully relayed to 
+    optional uint32 relay_peer_count = 12; // number of peers, message is successfully relayed to 
 }
 ```
 
@@ -47,6 +47,7 @@ message LightPushResponse {
 Nodes that respond to `LightPushRequest` MUST either relay the encapsulated message via [11/WAKU2-RELAY](https://rfc.vac.dev/waku/standards/core/11/relay) protocol on the specified `pubsub_topic`. Depending on the network configuration, the user may not need to provide `pubsub_topic` ([WAKU2-RELAY-SHARDING](https://github.com/waku-org/specs/blob/master/standards/core/relay-sharding.md)).
 If the node is unable to do so for some reason, they SHOULD return an error code in `LightPushResponse`.
 Once the relay is successful, the `relay_peer_count` will indicate the number of peers that the node has managed to relay the message to. It's important to note that this number may vary depending on the node subscriptions and support for the requested pubsub_topic. The client can use this information to either consider the relay as successful or take further action, such as switching to a lightpush service peer with better connectivity.
+The field `relay_peer_count` may not present or has the value zero in case of error or in other future use cases, where no relay is involved.
 
 ### Examples of possible error codes
 
