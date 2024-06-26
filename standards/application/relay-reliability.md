@@ -1,10 +1,11 @@
 ---
 title: RELIABILITY-RELAY
 name: Reliability for Relay Protocol
-category: (Standards Track|Informational|Best Current Practice)
+category: Standards Track
 tags: [reliability, application]
 editor: Kaichao Sun <kaichao@status.im>
 contributors:
+  - Richard Ramos <richard@status.im>
 ---
 
 ## Abstract
@@ -37,7 +38,50 @@ By leveraging the store node to provide such query services, the application can
 
 TODO
 
+### Query with Message Hash
 
+```python
+outgoingMessageHashes = []
+
+class Message:
+    hash: str
+    postTime: int
+    status: str
+    content: str
+
+def send(message):
+    # send message via relay or lightpush protocol, here use relay as example
+    waku.relay.post(message)
+    outgoingMessageHashes.append(message.hash)
+
+    message.status = 'outgoing'
+    database.saveMessage(message)
+
+def checkOutgoingMessages():
+    for messageHash in outgoingMessageHashes:
+        message = database.getMessage(messageHash)
+        # only query store node for ongoing message, and posted more than 3 seconds ago
+        if message.status == 'ongoing' && time.now() - message.postTime > 3:
+            response = waku.store.queryMessage(messageHash)
+            if response.exists():
+                database.updateMessageStatus(messageHash, 'sent')
+                outgoingMessageHashes.remove(messageHash)
+            elif time.now() - message.postTime > 10:
+                # resend the message if it's not stored in store node after 10 seconds
+                waku.relay.post(message)
+```
+
+Function `checkOutgoingMessages` is called periodically. Message hashes can be queried in batch to reduce the number of requests to store nodes, the size in a batch shoud not exceed the max supported size by store node.
+
+The store node can be set and updated directly by application or selected from peer discovery protocol like [discv5](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/33/discv5.md) or [peer exchange](https://github.com/waku-org/specs/blob/master/standards/core/peer-exchange.md).
+
+The store node may only support specific pubsub topics, and the application should group message hashes by pubsub topics before querying the store node. 
+
+When persistent network issue happens, you may not want to resend the failed messages indefinitely, the application should have a mechanism to clean the cache with failed message hashes and trigger other retry logic after a few attempts.
+
+### Query with Topics and Time Range
+
+```python
 
 ## Security and Performance Considerations
 
