@@ -5,6 +5,8 @@ category: Best Current Practice
 tags: [informational]
 editor: Oleksandr Kozlov <oleksandr@status.im>
 contributors:
+- Prem Chaitanya Prathi <prem@status.im>
+- Danish Arora <danish@status.im>
 ---
 
 ## Abstract
@@ -37,7 +39,9 @@ As a useful metric to define and implement for determining quality of provided s
 
 ### Light Push 
 
-In case sending message failed - node should try to re-send message after some interval. 
+- While sending message with Light Push - it is advised to use more than 1 peer in order to increase changes of delivering message.
+
+- If sending message is failed to all of the peers - node should try to re-send message after some interval and continue doing so while OK response is received. 
 
 ### Filter
 
@@ -51,13 +55,8 @@ In case sending message failed - node should try to re-send message after some i
 
 ## Security/Privacy Considerations
 
-If there are none, this section MAY state that fact.
-This section MAY contain additional relevant information, e.g. an explanation as to why there are no security consideration for the respective document.
+None of the mentioned recommendations incur privacy or security tradeoffs and in some cases increase k-anonymity (e.g having unique peers for Filter subscriptions).
 
 ## Copyright
 
 Copyright and related rights waived via [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
-
-## References
-
-A list of references.
