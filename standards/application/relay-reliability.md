@@ -32,7 +32,7 @@ For the nodes that may have connection issues to **publish** messages via relay 
 
 For the nodes that may have connection issues to **receive** messages via relay network, this search criteria can be used to fetch missing messages from store nodes when network resumes. 
 
-By leveraging the store node to provide such query services, the applications are able to mitigate the reliability issue of relay protocol. But this approach also introduces new challenges like centralization, privacy, and scalability. It should be viewed as a temporary solution and deprecated when e2e reliability is ready.
+By leveraging the store node to provide such query services, the applications are able to mitigate the reliability issue of relay protocol. But this approach also introduces new challenges like centralization, privacy, and scalability. It should be viewed as a temporary solution and deprecated when e2e reliability solution is ready.
 
 ## Implementation Suggestions 
 
