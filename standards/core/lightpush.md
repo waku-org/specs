@@ -29,7 +29,7 @@ syntax = "proto3";
 
 message LightPushRequest {
     string request_id = 1;
-    uin32 request_type = 10;  // 10 Reserved for future `request_type`. Currently, RELAY is the only available service.
+    // 10 Reserved for future `request_type`. Currently, RELAY is the only available service.
     optional string pubsub_topic = 20;
     WakuMessage message = 21;
 }
@@ -44,10 +44,13 @@ message LightPushResponse {
 
 ### Message Relaying
 
-Nodes that respond to `LightPushRequest` MUST either relay the encapsulated message via [11/WAKU2-RELAY](https://rfc.vac.dev/waku/standards/core/11/relay) protocol on the specified `pubsub_topic`. Depending on the network configuration, the user may not need to provide `pubsub_topic` ([WAKU2-RELAY-SHARDING](https://github.com/waku-org/specs/blob/master/standards/core/relay-sharding.md)).
+Nodes that respond to `LightPushRequest` SHOULD either relay the encapsulated message via [11/WAKU2-RELAY](https://rfc.vac.dev/waku/standards/core/11/relay) protocol on the specified `pubsub_topic`
+or perform another requested service.
+Services beyond [11/WAKU2-RELAY](https://rfc.vac.dev/waku/standards/core/11/relay) are as yet underdefined.
+Depending on the network configuration, the lightpush client may not need to provide `pubsub_topic` ([WAKU2-RELAY-SHARDING](https://github.com/waku-org/specs/blob/master/standards/core/relay-sharding.md)).
 If the node is unable to do so for some reason, they SHOULD return an error code in `LightPushResponse`.
 Once the relay is successful, the `relay_peer_count` will indicate the number of peers that the node has managed to relay the message to. It's important to note that this number may vary depending on the node subscriptions and support for the requested pubsub_topic. The client can use this information to either consider the relay as successful or take further action, such as switching to a lightpush service peer with better connectivity.
-The field `relay_peer_count` may not present or has the value zero in case of error or in other future use cases, where no relay is involved.
+The field `relay_peer_count` may not be present or has the value zero in case of error or in other future use cases, where no relay is involved.
 
 ### Examples of possible error codes
 
