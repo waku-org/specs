@@ -1,4 +1,37 @@
 matrix:
-- name: markdown
-  sources:
-  - '**/*.md'
+  default:
+    dictionary: 
+    - en_US
+    - en_GB
+    encoding: utf-8
+    pipeline:
+      - pyspelling.filters.markdown:
+          extensions:
+            - .md
+    sources:
+      - '**/*.md'
+    suggest: true
+    whitelist:
+      - ALLOC
+      - IANA
+      - SHARDING
+      - WAKU
+      - Waku
+      - danielkaiser
+      - creativecommons
+      - github
+      - GITHUB
+      - https
+      - iana
+      - md
+      - rfc
+      - RFC
+      - www
+      - DHT
+      - DoS
+      - GossipSub
+      - gossipsub
+      - Waku's
+      - libp2p
+      - pubsub
+      - subnets
