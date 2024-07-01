@@ -39,7 +39,7 @@ As a useful metric to define and implement for determining quality of provided s
 
 ### Light Push 
 
-- While sending message with Light Push - it is advised to use more than 1 peer in order to increase changes of delivering message.
+- While sending message with Light Push - it is advised to use more than 1 peer in order to increase chances of delivering message.
 
 - If sending message is failed to all of the peers - node should try to re-send message after some interval and continue doing so while OK response is received. 
 
