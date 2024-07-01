@@ -14,7 +14,7 @@ This RFC describes set of instructions used across different [WAKU2](https://git
 
 ## Motivation
 
-Descriptions of mentioned protocols do not define some of the real world use cases that are oftenly observed in unreliable network environment. Such use cases can be: recovery from offline state, decrease rate of missed messages, increase probability of messages being broadcasted within the network.
+Descriptions of mentioned protocols do not define some of the real world use cases that are often observed in unreliable network environment. Such use cases can be: recovery from offline state, decrease rate of missed messages, increase probability of messages being broadcasted within the network.
 
 ## Suggestions
 
