@@ -111,7 +111,7 @@ def fetchMissingMessages(queryParams):
         response.Next()
     
     # fetch missing messages with hashes in batch
-    response = waku.store.queryMessages(queryParams, missingMessageHashes)
+    response = waku.store.queryMessagesByHash(peerID, missingMessageHashes)
     response.messages().forEach(message -> {
         processMessage(message)
     })
