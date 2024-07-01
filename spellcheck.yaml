@@ -1,4 +1,7 @@
 matrix:
+- name: markdown
+  sources:
+  - '**/*.md'
   default:
     dictionary: 
     - en_US
@@ -31,7 +34,6 @@ matrix:
       - DoS
       - GossipSub
       - gossipsub
-      - Waku's
       - libp2p
       - pubsub
       - subnets
