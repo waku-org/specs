@@ -33,7 +33,7 @@ As a useful metric to define and implement for determining quality of provided s
 
 - Each protocols should retain a pool of reliable peers. In case a protocol failed to use any peer more than once - connection to it should be dropped and new peer should be added to the pool instead. 
 
-- During discovery of new peers it is better to filter unwonted out based on ENR / multiaddress. For example in some cases `circuit-relay` addresses are not needed when we try to find and connect to peers directly.
+- During discovery of new peers it is better to filter out based on ENR / multiaddress. For example in some cases `circuit-relay` addresses are not needed when we try to find and connect to peers directly.
 
 - When peer is discovered second time, we need to be sure to keep connection information up to date in Peer Store.
 
