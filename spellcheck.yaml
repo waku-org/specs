@@ -16,7 +16,7 @@ matrix:
       - '**/*.md'
     suggest: true
     whitelist:
-      - ALLOC
+    - ALLOC
       - IANA
       - SHARDING
       - WAKU
