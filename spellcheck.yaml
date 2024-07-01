@@ -11,6 +11,7 @@ matrix:
       - pyspelling.filters.markdown:
           extensions:
             - .md
+      - pyspelling.filters.text
     sources:
       - '**/*.md'
     suggest: true
