@@ -2,11 +2,11 @@
 title: WAKU2-INCENTIVIZATION
 name: Incentivization for Waku Light Protocols
 category: Standards Track
-tags:
-  - incentivization
+tags: [incentivization]
 editor: Sergei Tikhomirov <sergei@status.im>
 contributors:
 ---
+
 ## Abstract
 
 This document describes an approach to incentivization of Waku request-response protocols.
@@ -32,18 +32,20 @@ See a [write-up on incentivization](https://github.com/waku-org/research/blob/1e
 
 ## Theory / Semantics
 
-The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”,  “NOT RECOMMENDED”, “MAY”, and “OPTIONAL” in this document are to be interpreted as described in [RFC 2119](https://www.ietf.org/rfc/rfc2119.txt).
+The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “NOT RECOMMENDED”, “MAY”, and “OPTIONAL” in this document are to be interpreted as described in [RFC 2119](https://www.ietf.org/rfc/rfc2119.txt).
 
 Consider a request-response protocol with two roles: a client and a server.
 A server MAY indicate to a client that it expects certain eligibility criteria to be met.
 In that case, a client MUST provide a valid eligibility proof as part of its request.
 
 Forms of eligibility proofs include:
+
 - Proof of payment: for paid non-authenticated requests. A proof of payment, in turn, may also take different forms, such as a transaction hash or a ZK-proof. In order to interpret a proof of payment, the server needs information about its type.
 - Proof of membership: for services for a predefined group of users. An example use case: an application developer pays in bulk for their users' requests. A client then prove that they belong to the user set of that application. A similar concept (RLN) is used in Waku Relay for spam prevention.
 - Service credential: a proof of membership in a set of clients who have prepaid for the service (which may be considered a special case of proof of membership).
 
 Upon a receiving a request:
+
 - the server SHOULD check if the eligibility proof is included and valid;
 - if that proof is absent or invalid, the server SHOULD send back response with a corresponding error code and error description;
 - if the proof is valid, the server SHOULD send back the response that the client has requested.
@@ -85,10 +87,12 @@ A Store server responds with a list of messages that pass the user's filter.
 See [13/WAKU2-STORE](https://rfc.vac.dev/spec/13/) for the definitions of `HistoryQuery` and `HistoryResponse`.
 
 The PoC Store incentivization makes the following simplifying assumptions:
+
 - the client knows the server's on-chain address `A`;
 - the client and the server have agreed on a constant price `r` per hour of message history.
 
 To query messages from a period of length `t`, the client:
+
 1. calculates the total price `p` as `p = r * t`;
 2. pays `p` to the server's address `A` with an on-chain transaction;
 3. waits until the transaction is confirmed with identifier `txid`;
@@ -98,6 +102,7 @@ It is the server's responsibility to keep track of the `txid`s from prior reques
 
 Note that `txid` may not always be practical as proof of payment due to on-chain confirmation latency.
 To address this issue, future versions of the protocol may involve:
+
 - paying for multiple requests in one transaction;
 - using faster (likely L2-based) payment mechanisms.
 
@@ -106,6 +111,7 @@ To address this issue, future versions of the protocol may involve:
 #### Request
 
 We extend `HistoryQuery` to include an eligibility proof:
+
 ```protobuf
 message HistoryQuery {
   // the first field is reserved for future use
@@ -118,6 +124,7 @@ message HistoryQuery {
 ```
 
 An example of usage with `txid` as a proof of payment:
+
 ```protobuf
 HistoryQuery history_query {
   // the first field is reserved for future use
@@ -136,6 +143,7 @@ HistoryQuery history_query {
 #### Response
 
 We extend the `HistoryResponse` to indicate the eligibility status:
+
 ```protobuf
 message HistoryResponse {
   // the first field is reserved for future use
@@ -152,6 +160,7 @@ message HistoryResponse {
 ```
 
 Example of a response if the client is eligible:
+
 ```protobuf
 HistoryResponse response_example {
   messages: [message_1, message_2]
@@ -165,6 +174,7 @@ HistoryResponse response_example {
 ```
 
 Example of a response if the client is not eligible:
+
 ```protobuf
 HistoryResponse response_example {
   messages: [] // no messages sent to non-eligible clients
@@ -191,6 +201,7 @@ Additionally, the feasibility of paying for each query is hindered by on-chain f
 
 We will address these challenges as the specification evolves alongside the corresponding PoC implementation.
 The following ideas will be explored:
+
 - Batch Payment: instead of paying for an individual query, the client would make a consolidated payment for multiple messages.
 - Price Negotiation: rather than receiving prices off-band, the client would engage in negotiation with the server to determine costs.
 - Dynamic Pricing: the price per message would be variable, based on the total size (in bytes) of all received messages.
@@ -203,16 +214,19 @@ Copyright and related rights waived via [CC0](https://creativecommons.org/public
 ## References
 
 ### normative
+
 - A high-level [incentivization outline](https://github.com/waku-org/research/blob/master/incentivization.md)
 - [13/WAKU2-STORE](https://rfc.vac.dev/spec/13/) (for Store-specific sections)
 
 ### informative
 
 RFCs of request-response protocols:
+
 - [12/WAKU2-FILTER](https://rfc.vac.dev/spec/12)
 - [13/WAKU2-STORE](https://rfc.vac.dev/spec/13/)
 - [19/WAKU2-LIGHTPUSH](https://rfc.vac.dev/spec/19/)
 
 RFCs of Relay and RLN-Relay:
+
 - [11/WAKU2-RELAY](https://rfc.vac.dev/spec/11)
 - [17/WAKU2-RLN-RELAY](https://rfc.vac.dev/spec/17)
