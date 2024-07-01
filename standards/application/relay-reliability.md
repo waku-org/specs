@@ -96,7 +96,7 @@ def fetchMissingMessages(queryParams):
     missingMessageHashes = []
 
     # get missing message identifiers first in order to reduce the data transfer
-    response = waku.store.queryMessageHashes(queryParams)
+    response = waku.store.queryMessageHashes(peerID, queryParams)
     for !response.isComplete():
         # process each message in the response
         response.messages().forEach(messageHash -> {
