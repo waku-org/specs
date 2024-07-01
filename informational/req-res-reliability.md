@@ -51,7 +51,7 @@ As a useful metric to define and implement for determining quality of provided s
 
 - While registering Filter subscriptions - it is advised to batch requests for multiple content topics into one in order to reduce amount of queries sent to a node. 
 
-- During creation of a new subscription it can be benefitial to use only new peers to which no subscriptions yet present and not use peers with which Filter already failed.
+- During creation of a new subscription it can be beneficial to use only new peers to which no subscriptions yet present and not use peers with which Filter already failed.
 
 ## Security/Privacy Considerations
 
