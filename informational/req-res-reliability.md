@@ -14,7 +14,7 @@ This RFC describes set of instructions used across different [WAKU2](https://git
 
 ## Motivation
 
-Descriptions of mentioned protocols do not define some of the real world use cases that are often observed in unreliable network environment. Such use cases can be: recovery from offline state, decrease rate of missed messages, increase probability of messages being broadcasted within the network.
+Specifications of the mentioned protocols do not define some of the real world use cases that are often observed in unreliable network environment. Such use cases can be: recovery from offline state, decrease rate of missed messages, increase probability of messages being broadcasted within the network.
 
 ## Suggestions
 
@@ -24,7 +24,7 @@ As a useful metric to define and implement for determining quality of provided s
 - unhealthy - no peer connections are available regardless of protocol;
 - minimally healthy:
   - Relay has less than 4 peers connected;
-  - Filter and LightPush has one per each peer connection available;
+  - Filter and LightPush clients has one per each peer connection available;
 - sufficiently healthy:
   - Relay has minimum 4 peers connected;
   - more than 1 connection in Filter and at least 2 connections available in LightPush;
@@ -41,7 +41,7 @@ As a useful metric to define and implement for determining quality of provided s
 
 - While sending message with Light Push - it is advised to use more than 1 peer in order to increase chances of delivering message.
 
-- If sending message is failed to all of the peers - node should try to re-send message after some interval and continue doing so while OK response is received. 
+- If sending message is failed to all of the peers - node should try to re-send message after some interval and continue doing so until OK response is received. 
 
 ### Filter
 
