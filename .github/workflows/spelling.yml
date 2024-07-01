@@ -19,4 +19,4 @@ jobs:
         name: Spellcheck
         env:
           MATRIX: ${{ toJson(matrix) }}
-          run: pyspelling --matrix "$MATRIX"
+          run: pyspelling -c ./spellcheck.yaml --matrix "$MATRIX"
