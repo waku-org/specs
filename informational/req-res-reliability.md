@@ -31,10 +31,8 @@ Such use cases can be: recovery from offline state, decrease rate of missed mess
 As a useful metric to define and implement for determining quality of provided service by a node:
 - unhealthy - no peer connections are available regardless of protocol;
 - minimally healthy:
-  - Relay has less than 4 peers connected;
   - Filter and LightPush clients has one per each peer connection available;
 - sufficiently healthy:
-  - Relay has minimum 4 peers connected;
   - more than 1 connection in Filter and at least 2 connections available in LightPush;
 
 ### Peers and connection management
