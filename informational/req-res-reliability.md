@@ -10,11 +10,19 @@ contributors:
 ---
 
 ## Abstract
-This RFC describes set of instructions used across different [WAKU2](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/10/waku2.md) implementations for improved reliability in request-response protocols such as [WAKU2-LIGHTPUSH](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/19/lightpush.md) and [WAKU2-FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md).
+This RFC describes set of instructions used across different [WAKU2](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/10/waku2.md) implementations for improved reliability during usage of request-response protocols by a light node.
+Such protocols are:
+- [WAKU2-LIGHTPUSH](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/19/lightpush.md) - is used for sending messages;
+- [WAKU2-FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md) - is used for receiving messages;
+
+### Definitions
+- Service node - provides services to other nodes such as relaying messages send by LightPush to the network or broadcasts messages from the network through Filter, usually serves responses;
+- Light node - connects to and uses one or more service nodes via LightPush and/or Filter protocols, usually sends requests;
 
 ## Motivation
 
-Specifications of the mentioned protocols do not define some of the real world use cases that are often observed in unreliable network environment. Such use cases can be: recovery from offline state, decrease rate of missed messages, increase probability of messages being broadcasted within the network.
+Specifications of the mentioned protocols do not define some of the real world use cases that are often observed in unreliable network environment from the perspective of light nodes that are consumers of LightPush and/or Filter protocols.
+Such use cases can be: recovery from offline state, decrease rate of missed messages, increase probability of messages being broadcasted within the network.
 
 ## Suggestions
 
