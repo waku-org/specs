@@ -20,7 +20,7 @@ Application like Status already uses [MVDS](https://github.com/vacp2p/rfc-index/
 
 In other words, an application defines a payload over Waku and is interested in e2e delivery between application users. Waku provides a pub/sub broadcast transport, which is interested in reliably routing a message to all participants in the pub/sub broadcast group.
 
-Before we have a complete design for e2e reliability, we need to compose existing protocols to increase the reliability of the relay protocol. This document proposes a few options for such composition.
+Before we have a complete design for e2e reliability, we need to compose existing protocols to increase the reliability of the relay protocol. This document proposes a few options for such composition. The approch proposed here can also be applied to scenarios which depend on [Light Push](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/19/lightpush.md) and [Filter](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/12/filter.md) protocol, since they are service wrappers of Relay protocol.
 
 ## Motivation
 
@@ -180,8 +180,10 @@ Copyright and related rights waived via [CC0](https://creativecommons.org/public
 ## References
 
 1. [Relay Protocol](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md)
-2. [MVDS - Minimum Viable Data Synchronization](https://github.com/vacp2p/rfc-index/blob/main/vac/2/mvds.md)
-3. [End-to-end reliability for scalable distributed logs](https://forum.vac.dev/t/end-to-end-reliability-for-scalable-distributed-logs/293)
-4. [Waku Store Query](https://github.com/waku-org/specs/blob/master/standards/core/store.md)
-5. [Waku v2 Discv5 Ambient Peer Discovery](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/33/discv5.md)
-6. [Waku v2 Peer Exchange](https://github.com/waku-org/specs/blob/master/standards/core/peer-exchange.md)
+2. [Light Push Protocl](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/19/lightpush.md)
+3. [Filter Protocl](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/12/filter.md)
+4. [MVDS - Minimum Viable Data Synchronization](https://github.com/vacp2p/rfc-index/blob/main/vac/2/mvds.md)
+5. [End-to-end reliability for scalable distributed logs](https://forum.vac.dev/t/end-to-end-reliability-for-scalable-distributed-logs/293)
+6. [Waku Store Query](https://github.com/waku-org/specs/blob/master/standards/core/store.md)
+7. [Waku v2 Discv5 Ambient Peer Discovery](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/33/discv5.md)
+8. [Waku v2 Peer Exchange](https://github.com/waku-org/specs/blob/master/standards/core/peer-exchange.md)
