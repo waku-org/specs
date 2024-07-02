@@ -46,9 +46,11 @@ To address this we suggest following metrics:
 In case a protocol failed to use any service node more than once -
 connection to it should be dropped and a new service node should be connected and added to the pool instead.
 
-- During discovery of new peers it is better to filter out based on ENR / multiaddress. For example in some cases `circuit-relay` addresses are not needed when we try to find and connect to peers directly.
+- During discovery of new service nodes it is better to filter out based on ENR / multiaddress.
+For example in some cases `circuit-relay` addresses are not needed when we try to find and connect to service nodes directly.
 
-- When peer is discovered second time, we need to be sure to keep connection information up to date in Peer Store.
+- When a service node is discovered second time,
+we need to be sure to keep connection information up to date in Peer Store.
 
 ### Light Push 
 
