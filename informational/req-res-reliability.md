@@ -28,12 +28,14 @@ Such use cases can be: recovery from offline state, decrease rate of missed mess
 
 ### Node health
 
-As a useful metric to define and implement for determining quality of provided service by a node:
-- unhealthy - no peer connections are available regardless of protocol;
+Metric meant to determine how reliable light node is:
+- unhealthy - no connections to service nodes are available regardless of protocol;
 - minimally healthy:
-  - Filter and LightPush clients has one per each peer connection available;
+  - Filter has one service node connection;
+  - LightPush protocol has one service node connection;
 - sufficiently healthy:
-  - more than 1 connection in Filter and at least 2 connections available in LightPush;
+  - Filter has at least 2 connections available to service nodes;
+  - LightPush has at least 2 connections available to service nodes;
 
 ### Peers and connection management
 
