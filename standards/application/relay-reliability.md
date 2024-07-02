@@ -10,13 +10,15 @@ contributors:
 
 ## Abstract
 
-[Relay Protocol](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md) in Waku is efficient for routing messages, but there's no guarantee that a message will reach to its destination. For example, the receiver in a chat application may miss messages when network issue happens at either sender or receiver side. In general, a message in Waku network includes 3 status:
+[Relay Protocol](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md) in Waku is efficient for routing messages, but there's no guarantee that a message will reach to its destination. For example, the receiver in a chat application may miss messages when network issue happens at either sender or receiver side. In general, a message in Waku network includes 3 status from sender's perspective:
 
 - **outgoing**, the message is posted by its creator but no confirmations from other nodes yet
 - **sent**, the message is received by any other node in the network
 - **delivered**, the message is acknowledged by the receiver
 
 Application like Status already uses [MVDS](https://github.com/vacp2p/rfc-index/blob/main/vac/2/mvds.md) for e2e acknowledgement in direct messages and group chat. There is an ongoing [discussion](https://forum.vac.dev/t/end-to-end-reliability-for-scalable-distributed-logs/293) about a more general and bandwidth efficient solution for e2e reliablity.
+
+In other words, an application defines a payload over Waku and is interested in e2e delivery between application users. Waku provides a pub/sub broadcast transport, which is interested in reliably routing a message to all participants in the pub/sub broadcast group.
 
 Before we have a complete design for e2e reliability, we need to compose existing protocols to increase the reliability of the relay protocol. This document proposes a few options for such composition.
 
@@ -30,7 +32,7 @@ For the nodes that may have connection issues to **publish** messages via relay 
 
 **Search criteria with topics and time range**
 
-For the nodes that may have connection issues to **receive** messages via relay network, this search criteria can be used to fetch missing messages from store nodes when network resumes. 
+For the nodes that may have connection issues to **receive** messages via relay network, this search criteria can be used to fetch missing messages from store nodes periodically after network resumes. 
 
 By leveraging the store node to provide such query services, the applications are able to mitigate the reliability issue of relay protocol. But this approach also introduces new challenges like centralization, privacy, and scalability. It should be viewed as a temporary solution and deprecated when e2e reliability solution is ready.
 
@@ -147,6 +149,18 @@ def fetchMissingMessages(peerID, queryParams):
 Function `fetchMissingMessages` is runing periocally, for example 1 minute. It first fetch all the message hashes in the specified time range, check if message exist in local dabatase, if not, fetch the missing messages in batch. The batch size should be bounded to avoid large data transfer or exceed the max supported size by store node. 
 
 When finishing fetching missing messages, the application should update the last fetch time in `FetchRecord`. The last fetch time can be used to calculate the time range for the next fetch and avoid fetching the same messages again.
+
+
+### Unified Query
+
+There are cases that both outgoing and incoming messages are queried in similar situation, for example at similar interval. The application can combine the above two worflows into one to have a unified query with better performance overall.
+
+The workflow can be like this:
+- create outgoing buffer for all "outgoing" messages
+- create incoming buffer for all recently received message hashes
+- query store node based on topics and time range for message hashes periodically
+- check outgoing buffer with returned message hash, if included, mark message as `sent`, resend if needed.
+- check incoming buffer with returned message hash, if not included, fetch the missing message with its hash.
 
 ## Security and Performance Considerations
 
