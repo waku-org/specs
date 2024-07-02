@@ -10,7 +10,7 @@ contributors:
 # Abstract
 This specification explains the `WAKU-SYNC` protocol
 which enables the reconciliation of two sets of message hashes
-in the context of keeping syncronized two Waku Store nodes.
+in the context of keeping multiple nodes syncronized.
 Waku Sync is a wrapper around
 [Negentropy](https://github.com/hoytech/negentropy) a [range-based set reconciliation protocol](https://logperiodic.com/rbsr.html).
 
@@ -29,10 +29,20 @@ Client always refers to the initiator
 and the server the receiver of the first payload.
 
 ## Design Requirements
-Nodes enabling Waku Sync SHOULD have the relay and store protocols enabled and
-keep messages for at least the last hour. TODO do we need to say this, sounds like an impl. detail
+Nodes enabling Waku Sync SHOULD
+manage and keep message hashes
+for the range of time
+during which syncronization is required.
+Nodes SHOULD use the same time range,
+for Waku we chose one hour as the global default.
+Waku Relay or Filter protocol MAY be enabled
+and used in conjuction with Sync
+as a source of new message hashes
+for the time range.
 
-After each sync session, nodes SHOULD use Store queries to acquire missing messages.
+Nodes MAY use the Store protocol
+to request missing messages
+or to provide messages to requesting clients.
 
 ## Payload
 
@@ -50,8 +60,12 @@ message SyncPayload {
 
 ## Session Flow
 A client initiate a session with a server
-by sending a `SyncPayload` with only the `negentropy` field set.
-This field MUST contain the first negentropy payload created by the client for this session.
+by sending a `SyncPayload` with
+only the `negentropy` field set to it.
+This field MUST contain
+the first negentropy payload
+created by the client
+for this session.
 
 The server receives a `SyncPayload`.
 A new negentropy payload is computed from the received one.
@@ -67,21 +81,15 @@ those MUST be stored.
 In the case of an empty payload,
 the client MUST send back a `SyncPayload`
 with all the hashes previoudly found in the `hashes` field and
-an empty `engentropy` field.
-
-### Storage Pruning
-TODO? do we need to talk about that, seams like an implementation detail
-
-### Message transfer
-TODO? do we need to talk about that, seams like an implementation detail
+an empty `nengentropy` field.
 
 # Attack Vectors
 Nodes using `WAKU-SYNC` are fully trusted.
-Message hashes are assumed to be of valid messages received via Waku Relay.
+Message hashes are assumed to be of valid messages received via Waku Relay or Filter.
 
 Further refinements to the protocol are planned
 to reduce the trust level required to operate.
-Notably by verifing message RLN proofs at reception.
+Notably by verifing messages RLN proof at reception.
 
 # Copyright
 
