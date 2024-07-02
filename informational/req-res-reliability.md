@@ -42,7 +42,9 @@ To address this we suggest following metrics:
 
 ### Peers and connection management
 
-- Each protocols should retain a pool of reliable peers. In case a protocol failed to use any peer more than once - connection to it should be dropped and new peer should be added to the pool instead. 
+- Light node should retain a pool of reliable service nodes per each protocol.
+In case a protocol failed to use any service node more than once -
+connection to it should be dropped and a new service node should be connected and added to the pool instead.
 
 - During discovery of new peers it is better to filter out based on ENR / multiaddress. For example in some cases `circuit-relay` addresses are not needed when we try to find and connect to peers directly.
 
