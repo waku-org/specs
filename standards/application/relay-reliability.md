@@ -10,7 +10,9 @@ contributors:
 
 ## Abstract
 
-[Relay Protocol](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md) in Waku is efficient for routing messages, but there's no guarantee that a message will reach to its destination. For example, the receiver in a chat application may miss messages when network issue happens at either sender or receiver side. In general, a message in Waku network includes 3 status from sender's perspective:
+[Relay Protocol](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md) in Waku is efficient for routing messages, but there's no guarantee that a message will reach to its destination. For example, the receiver in a chat application may miss messages when network issue happens at either sender or receiver side. 
+
+In general, a message in Waku network includes 3 status from sender's perspective:
 
 - **outgoing**, the message is posted by its creator but no confirmations from other nodes yet
 - **sent**, the message is received by any other node in the network
@@ -34,7 +36,9 @@ For the nodes that may have connection issues to **publish** messages via relay 
 
 For the nodes that may have connection issues to **receive** messages via relay network, this search criteria can be used to fetch missing messages from store nodes periodically after network resumes. 
 
-By leveraging the store node to provide such query services, the applications are able to mitigate the reliability issue of relay protocol. But this approach also introduces new challenges like centralization, privacy, and scalability. It should be viewed as a temporary solution and deprecated when e2e reliability solution is ready.
+In summary, by leveraging the store node to provide such query services, the applications are able to mitigate the reliability issue of relay protocol. 
+
+But this approach also introduces new challenges like centralization, privacy, and scalability. It should be viewed as a temporary solution and deprecated when e2e reliability solution is ready.
 
 ## Implementation Suggestions 
 
