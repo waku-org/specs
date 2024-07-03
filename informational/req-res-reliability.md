@@ -83,7 +83,7 @@ we need to be sure to keep connection information up to date in Peer Store.
 
 ## Security/Privacy Considerations
 
-None of the mentioned recommendations incur privacy or security tradeoffs and in some cases increase k-anonymity (e.g having unique peers for Filter subscriptions).
+See [WAKU2-ADVERSARIAL-MODELS](https://github.com/waku-org/specs/blob/master/informational/adversarial-models.md).
 
 ## Copyright
 
