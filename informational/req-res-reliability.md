@@ -42,16 +42,30 @@ To address this we suggest following metrics:
 
 ### Peers and connection management
 
-- Light node should maintain a pool of reliable service nodes for each protocol.
+#### Pool of reliable service nodes
+Light node should maintain a pool of reliable service nodes for each protocol.
 In case service node fails to serve protocol request from a light node 3 times - light node should drop connection to it and a new service node should be connected and added to the pool instead.
 
-- During discovery of new service nodes it is better to filter out based on ENR / multiaddress.
-For example in some cases `circuit-relay` addresses are not needed when we try to find and connect to service nodes directly.
+#### Seection of discovered service nodes
+During discovery light node should filter out service nodes based on preferences before establishing connection.
+These preferences might include:
+- [Libp2p multiadresses](https://github.com/libp2p/specs/blob/master/addressing/README.md) of a service node;
+- Waku or libp2p protocols that a service node implements;
+- Wakus shards that a service node is part of;
 
-- When a service node is discovered second time,
+More details about discovery can be found at [WAKU2 Discovery domain](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/10/waku2.md#discovery-domain) or [RELAY-SHARDING Discovery](https://github.com/waku-org/specs/blob/master/standards/core/relay-sharding.md#discovery).
+
+Examples of filtering:
+- When [Circuit V2](https://github.com/libp2p/specs/blob/master/relay/circuit-v2.md) multiaddresses discovered by a light node - it might avoid connecting such service nodes and wait for service nodes that can be connected directly;
+- When light node discovers service nodes that implement needed Waku protocols - it should prioritize those that implement most recent version of protocol;
+- Light node must connect only to those service nodes that participate in needed shard;
+
+#### Continuous discovery
+Light node must keep information about service nodes up to date.
+For example when a service node is discovered second time,
 we need to be sure to keep connection information up to date in Peer Store.
 
-### Light Push 
+### Light Push
 
 - While sending message with Light Push - it is advised to use more than 1 peer in order to increase chances of delivering message.
 
