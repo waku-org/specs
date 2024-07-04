@@ -10,7 +10,7 @@ contributors:
 
 ## Abstract
 
-Waku is efficient for routing messages with its transport layer like [Relay Protocol](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md) and [Lightpush](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/19/lightpush.md)/[Filter](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/12/filter.md), but there's no guarantee that a message going through Waku will reach to its destination. For example, the receiver in a chat application may miss messages when network issue happens at either sender or receiver side. 
+Waku is efficient for routing messages with its transport layer like [Relay protocol](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md) and [Lightpush](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/19/lightpush.md) / [Filter](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/12/filter.md) protocol. But there's no guarantee that a message going through Waku will reach to its destination. For example, the receiver in a chat application may miss messages when network issue happens at either sender or receiver side. 
 
 In general, a message in Waku network includes 3 status from sender's perspective:
 
@@ -36,9 +36,7 @@ For the nodes that may have connection issues to **publish** messages via transp
 
 For the nodes that may have connection issues to **receive** messages via transport layer, this search criteria can be used to fetch missing messages from store nodes periodically after network resumes. 
 
-In summary, by leveraging the store node to provide such query services, the applications are able to mitigate the reliability issue of transport layer. 
-
-But this approach also introduces new challenges like centralization, privacy, and scalability. It should be viewed as a temporary solution and deprecated when e2e reliability solution is ready.
+In summary, by leveraging the store node to provide such query services, the applications are able to mitigate the reliability issue of transport layer. This approach also introduces new challenges like centralization, privacy, and scalability. It should be viewed as a temporary solution and deprecated when e2e reliability solution is ready.
 
 ## Implementation Suggestions 
 
@@ -163,8 +161,8 @@ The workflow can be like this:
 - create outgoing buffer for all "outgoing" messages
 - create incoming buffer for all recently received message hashes
 - query store node based on topics and time range for message hashes periodically
-- check outgoing buffer with returned message hash, if included, mark message as `sent`, resend if needed.
-- check incoming buffer with returned message hash, if not included, fetch the missing message with its hash.
+- check outgoing buffer with returned message hash, if included, mark message as `sent`, resend if needed
+- check incoming buffer with returned message hash, if not included, fetch the missing message with its hash
 - update the last fetch time for the interested topic
 
 ## Security and Performance Considerations
