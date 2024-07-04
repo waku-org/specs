@@ -1,6 +1,6 @@
 ---
-title: RELIABILITY-RELAY
-name: Reliability for Relay Protocol
+title: TRANSPORT-RELIABILITY
+name: Waku Transport Reliability 
 category: Standards Track
 tags: [reliability, application]
 editor: Kaichao Sun <kaichao@status.im>
@@ -10,7 +10,7 @@ contributors:
 
 ## Abstract
 
-[Relay Protocol](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md) in Waku is efficient for routing messages, but there's no guarantee that a message will reach to its destination. For example, the receiver in a chat application may miss messages when network issue happens at either sender or receiver side. 
+Waku is efficient for routing messages with its transport layer like [Relay Protocol](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md) and [Lightpush](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/19/lightpush.md)/[Filter](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/12/filter.md), but there's no guarantee that a message going through Waku will reach to its destination. For example, the receiver in a chat application may miss messages when network issue happens at either sender or receiver side. 
 
 In general, a message in Waku network includes 3 status from sender's perspective:
 
@@ -20,9 +20,9 @@ In general, a message in Waku network includes 3 status from sender's perspectiv
 
 Application like Status already uses [MVDS](https://github.com/vacp2p/rfc-index/blob/main/vac/2/mvds.md) for e2e acknowledgement in direct messages and group chat. There is an ongoing [discussion](https://forum.vac.dev/t/end-to-end-reliability-for-scalable-distributed-logs/293) about a more general and bandwidth efficient solution for e2e reliablity.
 
-In other words, an application defines a payload over Waku and is interested in e2e delivery between application users. Waku provides a pub/sub broadcast transport, which is interested in reliably routing a message to all participants in the pub/sub broadcast group.
+In other words, an application defines a payload over Waku and is interested in e2e delivery between application users. Waku provides a pub/sub broadcast transport, which is interested in reliably routing a message to all participants in the broadcast group.
 
-Before we have a complete design for e2e reliability, we need to compose existing protocols to increase the reliability of the relay protocol. This document proposes a few options for such composition. The approch proposed here can also be applied to scenarios which depend on [Light Push](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/19/lightpush.md) and [Filter](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/12/filter.md) protocol, since they are service wrappers of Relay protocol.
+Before we have a complete design for e2e reliability, we need to compose existing protocols to increase the reliability of the transport protocol. This document proposes a few options for such composition. 
 
 ## Motivation
 
@@ -30,13 +30,13 @@ The [Store protocol](https://github.com/waku-org/specs/blob/master/standards/cor
 
 **Search criteria with message hash**
 
-For the nodes that may have connection issues to **publish** messages via relay network, this search criteria can be used to check whether a message is populated in the network or not. The message exists in store node can be marked from `outgoing` to `sent` by application. If the message is not found in the store node, the application can resend the message.
+For the nodes that may have connection issues to **publish** messages via transport layer, this search criteria can be used to check whether a message is populated in the network or not. The message exists in store node can be marked from `outgoing` to `sent` by application. If the message is not found in the store node, the application can resend the message.
 
 **Search criteria with topics and time range**
 
-For the nodes that may have connection issues to **receive** messages via relay network, this search criteria can be used to fetch missing messages from store nodes periodically after network resumes. 
+For the nodes that may have connection issues to **receive** messages via transport layer, this search criteria can be used to fetch missing messages from store nodes periodically after network resumes. 
 
-In summary, by leveraging the store node to provide such query services, the applications are able to mitigate the reliability issue of relay protocol. 
+In summary, by leveraging the store node to provide such query services, the applications are able to mitigate the reliability issue of transport layer. 
 
 But this approach also introduces new challenges like centralization, privacy, and scalability. It should be viewed as a temporary solution and deprecated when e2e reliability solution is ready.
 
@@ -157,7 +157,7 @@ When finishing fetching missing messages, the application should update the last
 
 ### Unified Query
 
-There are cases that both outgoing and incoming messages are queried in similar situation, for example at similar interval. The application can combine the above two worflows into one to have a unified query with better performance overall.
+There are cases that both outgoing and incoming messages are queried in similar situation, for example at same interval. The application can combine the above two worflows into one to have a unified query with better performance overall.
 
 The workflow can be like this:
 - create outgoing buffer for all "outgoing" messages
@@ -165,6 +165,7 @@ The workflow can be like this:
 - query store node based on topics and time range for message hashes periodically
 - check outgoing buffer with returned message hash, if included, mark message as `sent`, resend if needed.
 - check incoming buffer with returned message hash, if not included, fetch the missing message with its hash.
+- update the last fetch time for the interested topic
 
 ## Security and Performance Considerations
 
