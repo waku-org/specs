@@ -10,7 +10,11 @@ contributors:
 
 ## Abstract
 
-Waku is efficient for routing messages with its transport layer like [Relay protocol](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md) and [Lightpush](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/19/lightpush.md) / [Filter](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/12/filter.md) protocol. But there's no guarantee that a message going through Waku will reach to its destination. For example, the receiver in a chat application may miss messages when network issue happens at either sender or receiver side. 
+Waku provides an efficient transport layer for p2p communications.
+It defines protocols like [Relay](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md) and [Lightpush](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/19/lightpush.md) / [Filter](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/12/filter.md) for routing messages in decentralised networks.
+However, there is no guarantee that a message broadcast in a Waku network will reach its destination.
+For example, the receiver in a chat application using Waku as p2p transport may miss messages
+when a network issue happens at either the sender or the receiver side. 
 
 In general, a message in Waku network includes 3 status from sender's perspective:
 
