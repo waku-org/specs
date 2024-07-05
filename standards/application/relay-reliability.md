@@ -13,16 +13,16 @@ contributors:
 Waku provides an efficient transport layer for p2p communications.
 It defines protocols like [Relay](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md) and [Lightpush](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/19/lightpush.md) / [Filter](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/12/filter.md) for routing messages in decentralised networks.
 However, there is no guarantee that a message broadcast in a Waku network will reach its destination.
-For example, the receiver in a chat application using Waku as p2p transport may miss messages
-when a network issue happens at either the sender or the receiver side. 
+
+For example, the receiver in a chat application using Waku as p2p transport may miss messages when a network issue happens at either the sender or the receiver side. 
 
 In general, a message in a Waku network may be in one of 3 states from the sender's perspective:
 
-- **outgoing**, the message is posted by its creator but no confirmations from other nodes yet
+- **outgoing**, the message is posted by the sender but no confirmations from other nodes yet
 - **sent**, the message is received by any other node in the network
-- **delivered**, the message is acknowledged by the receiver
+- **delivered**, the message is acknowledged on the application layer by the intended recipient
 
-Application like Status already uses [MVDS](https://github.com/vacp2p/rfc-index/blob/main/vac/2/mvds.md) for e2e acknowledgement in direct messages and group chat. There is an ongoing [discussion](https://forum.vac.dev/t/end-to-end-reliability-for-scalable-distributed-logs/293) about a more general and bandwidth efficient solution for e2e reliablity.
+Application like Status already uses [MVDS](https://github.com/vacp2p/rfc-index/blob/main/vac/2/mvds.md) for e2e acknowledgement in direct messages and group chat. Also there is an ongoing [discussion](https://forum.vac.dev/t/end-to-end-reliability-for-scalable-distributed-logs/293) about a more general and bandwidth efficient solution for e2e reliablity.
 
 In other words, an application defines a payload over Waku and is interested in e2e delivery between application users. Waku provides a pub/sub broadcast transport, which is interested in reliably routing a message to all participants in the broadcast group.
 
@@ -52,10 +52,10 @@ For outgoing messages, the processing flow can be like this:
 - create a buffer for all "outgoing" message hashes
 - send message via relay or lightpush protocol
 - add message hash to the buffer
-- save the message to local database with status "outgoing"
+- keep a copy of the message locally with status outgoing
 - check the buffer periodically
-- query the store node with message hash in the buffer, the messages should be posted more than a few seconds ago
-- if the message exists, update the status to "sent" and remove the message hash from the buffer
+- query the store node with message hash in the buffer of which the send attempt was more than a few seconds ago
+- if the message exists, update its status to "sent" in local data store and remove the message hash from the buffer
 - if the message does not exist, resend the message
 - if the message is still missing in the store node for a period of time, trigger the message failed to send workflow and remove the message hash from the buffer
 
@@ -109,7 +109,7 @@ For incoming messages, the processing flow can be like this:
 - query the store node with the interested topics and time range for message hashes periodically
 - check if each received message hash already exists in the local database. if not, add the missing message hash to a buffer.
 - batch fetch the full messages corresponding to the missing message hashes in the buffer from the store node
-- process the messages necessarily
+- process the messages
 - update the last fetch time for the interested topic
 
 The implementation in Python may look like this:
@@ -166,10 +166,9 @@ There are cases that both outgoing and incoming messages are queried in similar 
 The workflow can be like this:
 - create outgoing buffer for all "outgoing" messages
 - create incoming buffer for all recently received message hashes
-- query store node based on topics and time range for message hashes periodically
+- periodically query store node based on interested topics and time range for message hashes
 - check outgoing buffer with returned message hash, if included, mark message as `sent`, resend if needed
 - check incoming buffer with returned message hash, if not included, fetch the missing message with its hash
-- update the last fetch time for the interested topic
 
 ## Security and Performance Considerations
 
