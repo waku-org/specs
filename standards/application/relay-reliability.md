@@ -16,7 +16,7 @@ However, there is no guarantee that a message broadcast in a Waku network will r
 For example, the receiver in a chat application using Waku as p2p transport may miss messages
 when a network issue happens at either the sender or the receiver side. 
 
-In general, a message in Waku network includes 3 status from sender's perspective:
+In general, a message in a Waku network may be in one of 3 states from the sender's perspective:
 
 - **outgoing**, the message is posted by its creator but no confirmations from other nodes yet
 - **sent**, the message is received by any other node in the network
