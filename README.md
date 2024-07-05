@@ -68,7 +68,13 @@ Relevant Waku resources related to the specifications located in this repository
 Contributions are welcome from any party. 
 Contributors can create specifications relating to the Waku domain and
 create a pull request to begin discussion.
-The recommended [template](./template.md) may be used for new proposed specifications.
+
+Please adhere to the following contribution guidelines:
+- use the recommended [template](./template.md) for new proposed specifications
+- use keywords as per the language recommendations in the [template](./template.md) and [Vac COSS](https://github.com/vacp2p/rfc-index/blob/a5b24ac0a27da361312260f9da372a0e6e812212/vac/1/coss.md#language)
+- use [semantic breaks](https://sembr.org/)
+- links to other Waku, Vac or related specifications must be to the corresponding Github repository and not to a webpage.
+For example, Waku specs reside in [waku-org/specs](https://github.com/waku-org/specs) and Vac RFCs in [vacp2p/rfc-index](https://github.com/vacp2p/rfc-index/).
 
 New specifications are considered a proof of concept.
 Once a rough consensus is reached towards stabilization, 
