@@ -32,7 +32,7 @@ Before we have a complete design for e2e reliability, we need to compose existin
 
 The [Store protocol](https://github.com/waku-org/specs/blob/master/standards/core/store.md) provides a way for nodes in the network to query the existence of messages or fetch specific messages based on the search criteria.
 
-**Search criteria with message hash**
+**Query criteria with message hash**
 
 For the nodes that may have connection issues to **publish** messages via transport layer, this search criteria can be used to check whether a message is populated in the network or not. The message exists in store node can be marked from `outgoing` to `sent` by application. If the message is not found in the store node, the application can resend the message.
 
