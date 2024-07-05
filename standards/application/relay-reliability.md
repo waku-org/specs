@@ -49,7 +49,7 @@ It should be viewed as a temporary solution and deprecated when an e2e reliabili
 ### Query with Message Hash
 
 For outgoing messages, the processing flow can be like this:
-- create a buffer for all "outgoing" messages
+- create a buffer for all "outgoing" message hashes
 - send message via relay or lightpush protocol
 - add message hash to the buffer
 - save the message to local database with status "outgoing"
