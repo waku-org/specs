@@ -45,8 +45,8 @@ This repository contains specifications for the Waku suite of protocols.
 |[WAKU2-DEVICE-PAIRING](standards/application/device-pairing.md)| Device Pairing and Secure Transfers with Noise |
 |[WAKU2-NOISE](standards/application/noise.md)| Noise Protocols for Waku Payload Encryption |
 |[TOR-PUSH](standards/application/tor-push.md)| Waku Tor Push |
-|[RLN-KEYSTORE](standards/application/rln-keystore.md)| Waku RLN Keystore JSON schema|
-|[TRANSPORT-RELIABILITY](standards/application/transport-reliability.md)| Waku Transport Reliability|
+|[RLN-KEYSTORE](standards/application/rln-keystore.md)| Waku RLN Keystore JSON schema |
+|[TRANSPORT-RELIABILITY](standards/application/transport-reliability.md)| Waku Transport Reliability |
 
 ### Informational
 
