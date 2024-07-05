@@ -40,7 +40,9 @@ For the nodes that may have connection issues to **publish** messages via transp
 
 For the nodes that may have connection issues to **receive** messages via transport layer, this search criteria can be used to fetch missing messages from store nodes periodically after network resumes. 
 
-In summary, by leveraging the store node to provide such query services, the applications are able to mitigate the reliability issue of transport layer. This approach also introduces new challenges like centralization, privacy, and scalability. It should be viewed as a temporary solution and deprecated when e2e reliability solution is ready.
+In summary, by leveraging the store node to provide such query services, the applications are able to mitigate reliability issues on the Waku transport layer.
+This approach also introduces new limitations like centralized points of failures in Store nodes, diminished privacy, and lower scalability.
+It should be viewed as a temporary solution and deprecated when an e2e reliability solution is ready.
 
 ## Implementation Suggestions 
 
