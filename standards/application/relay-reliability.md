@@ -105,7 +105,7 @@ An application could use different pubsub topics and content topics, for example
 For incoming messages, the processing flow can be like this:
 - subscribe to the interested pubsub and content topics
 - query the store node with the interested topics and time range for message hashes periodically
-- check if the message hash is exist in local database, if not, adding the message hash to a buffer, if yes, skip the message
+- check if each received message hash already exists in the local database. if not, add the missing message hash to a buffer.
 - batch fetch the full messages corresponding to the missing message hashes in the buffer from the store node
 - process the messages necessarily
 - update the last fetch time for the interested topic
