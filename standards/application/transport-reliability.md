@@ -1,6 +1,6 @@
 ---
 title: TRANSPORT-RELIABILITY
-name: Waku Transport Reliability 
+name: Waku Transport Reliability
 category: Standards Track
 tags: [reliability, application]
 editor: Kaichao Sun <kaichao@status.im>
