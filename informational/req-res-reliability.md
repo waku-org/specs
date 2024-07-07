@@ -64,11 +64,23 @@ Light node must keep information about service nodes up to date.
 For example when a service node is discovered second time,
 we need to be sure to keep connection information up to date in Peer Store.
 
-### Light Push
+### LightPush
 
-- While sending message with Light Push - it is advised to use more than 1 peer in order to increase chances of delivering message.
+#### Sending with redundancy
+To improve chances of delivery of messages light node can attempt sending same message via LightPush to 2 or more service nodes at the same time.
+While doing so it is important to note that bandwidth consumption increases.
 
-- If sending message is failed to all of the peers - node should try to re-send message after some interval and continue doing so until OK response is received. 
+#### Retry on failure
+When light node sends a message it must await for LightPush response from service node and check it for [possible error codes](../standards/core/lightpush.md#examples-of-possible-error-codes).
+In case request failed without error code or response contains errors that can be temporary for service node (e.g `TOO_MANY_REQUESTS` or `NO_PEERS_TO_RELAY`) - 
+light node should try to re-send message after some interval and continue doing so until OK response is received or canceled.
+Interval time can be arbitrary but we recommend starting with 1 second and increasing it on each failure during LightPush send.
+Important to note that [per another recommendation](./req-res-reliability.md#pool-of-reliable-service-nodes) - light node should replace failing service node with another within pool of service nodes used by LightPush.
+
+#### Retry missing messages
+Light node can verity that network that is used at the moment has seen messages that were sent via LightPush earlier.
+In order to do that light node should use [Store protocol](../standards/core/store.md).
+By using Store light node can query service node that implements Store and see if the messages that were sent in the past period were seen.
 
 ### Filter
 
