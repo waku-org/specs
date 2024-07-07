@@ -68,7 +68,8 @@ we need to be sure to keep connection information up to date in Peer Store.
 
 #### Sending with redundancy
 To improve chances of delivery of messages light node can attempt sending same message via LightPush to 2 or more service nodes at the same time.
-While doing so it is important to note that bandwidth consumption increases.
+While doing so it is important to note that bandwidth consumption increases proportionally to amount of additional service nodes used.
+Our advice to use 2 service nodes at a time.
 
 #### Retry on failure
 When light node sends a message it must await for LightPush response from service node and check it for [possible error codes](../standards/core/lightpush.md#examples-of-possible-error-codes).
@@ -80,7 +81,9 @@ Important to note that [per another recommendation](./req-res-reliability.md#poo
 #### Retry missing messages
 Light node can verity that network that is used at the moment has seen messages that were sent via LightPush earlier.
 In order to do that light node should use [Store protocol](../standards/core/store.md).
-By using Store light node can query service node that implements Store and see if the messages that were sent in the past period were seen.
+By using Store protocol light node can query any service node that implements Store and see if the messages that were sent in the past period were seen.
+In case some of the messages are absent in Store - they should be re-sent by LightPush. 
+Our advice to do periodic Store queries once per 30 seconds.
 
 ### Filter
 
