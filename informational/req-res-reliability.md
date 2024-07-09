@@ -68,6 +68,10 @@ Light node must keep information about service nodes up to date.
 For example when a service node is discovered second time,
 we need to be sure to keep connection information up to date in Peer Store.
 
+Information that is important to be up to date:
+- [ENR](../standards/core/enr.md) information;
+- [Libp2p multiaddresses](https://github.com/libp2p/specs/blob/master/addressing/README.md);
+
 ### LightPush
 
 #### Sending with redundancy
@@ -84,10 +88,17 @@ Important to note that [per another recommendation](./req-res-reliability.md#poo
 
 #### Retry missing messages
 Light node can verity that network that is used at the moment has seen messages that were sent via LightPush earlier.
-In order to do that light node should use [Store protocol](../standards/core/store.md).
-By using Store protocol light node can query any service node that implements Store and see if the messages that were sent in the past period were seen.
-In case some of the messages are absent in Store - they should be re-sent by LightPush. 
+In order to do that light node should use [Store protocol](../standards/core/store.md) or [Filter protocol](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md) to a different than the one used for LightPush service node.
+
+By using Store protocol light node can query any service node that implements Store protocol and see if the messages that were sent in the past period were seen.
+Due to [Store message eligibility](https://github.com/waku-org/specs/blob/master/standards/core/store.md#waku-message-store-eligibility) only some of the messages will be stored so there is a limit as to which messages can be verified by Store queries.
 Our advice to do periodic Store queries once per 30 seconds.
+
+By using Filter protocol's active [subscription](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md#filter-push) light node can verify that message that was sent through LightPush was seen by another service node in the network.
+Filter protocol does not have such limitation as to type of messages received with subscription 
+but active subscription does not allow to see messages exchanged in the network while light node was offline.
+
+In case some of the messages were not verified by any of the previous methods  - they should be re-sent by LightPush. 
 
 ### Filter
 
@@ -97,13 +108,16 @@ Our advice for light node to send ping requests once per minute.
 In case light node does not receive OK response or it times out 3 times - such service node should be replaced as part of maintenance of [pool of reliable service nodes](./req-res-reliability.md#pool-of-reliable-service-nodes).
 Right after such replace light node must create new subscription to newly connected service node as described in [Filter specification](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md).
 
-- To decrease chances of missing messages a light node can initiate more than one subscription through Filter protocol to the same content topic to different service nodes and filter out duplicates.
-This will increase bandwidth consumption and would depend on the information exchanged under content topic in use.
+#### Redundant subscriptions for message loss mitigation
+To mitigate possibility of messages not being delivered by a service node - we advice to consider using multiple Filter subscriptions. 
+Light node can initiate two subscriptions to the same content topic but to different service nodes. 
+While receiving messages through two subscriptions - duplicates must be dropped by using [deterministic message hashing](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/14/message.md#deterministic-message-hashing).
+Note that such approach increase bandwidth consumption proportionally to amount of extra subscriptions established and should be used with caution. 
 
-- In case a light node goes offline while having an active subscription - it is important to do ping again right after node appears online.
-In case ping fails - re-subscribe request should be fired to a new peer.
-
-- While registering Filter subscriptions - it is advised to batch requests for multiple content topics into one in order to reduce amount of queries sent to a node. 
+#### Offline recoverability
+Network state should be monitored by light node and in case it goes offline - [regular pings](./req-res-reliability.md#regular-pings) must be stopped. 
+When network connection returns light node should initiate [Filter ping](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md#subscriber_ping) to service nodes in use.
+In case those pings fail light node must replace service nodes following advice of [pool of reliable service nodes](./req-res-reliability.md#pool-of-reliable-service-nodes) without waiting for multiple failures.
 
 ## Security/Privacy Considerations
 
