@@ -11,7 +11,7 @@ contributors:
 
 ## Abstract
 This RFC describes set of instructions used across different [WAKU2](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/10/waku2.md) implementations for improved reliability during usage of request-response protocols by a light node:
-- [WAKU2-LIGHTPUSH](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/19/lightpush.md) - is used for sending messages;
+- [WAKU2-LIGHTPUSH](../standards/core/lightpush.md) - is used for sending messages;
 - [WAKU2-FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md) - is used for receiving messages;
 
 ### Definitions
@@ -44,8 +44,11 @@ To address this we suggest following metrics:
 #### Pool of reliable service nodes
 Light node should maintain a pool of reliable service nodes for each protocol.
 In case service node fails to serve protocol request from a light node 3 times - light node should drop connection to it and a new service node should be connected and added to the pool instead.
+Service node failure can mean various things depending on the protocol in use. 
+For LightPush we advice so refer to [error codes](../standards/core/lightpush.md#examples-of-possible-error-codes) and consider request a failure when it is clear that service node cannot serve any future request, for example when service node does not have any peers to relay and returns `NO_PEERS_TO_RELAY`.
+For Filter we consider service node failing when it cannot serve subscribe or ping request with OK status. 
 
-#### Seection of discovered service nodes
+#### Selection of discovered service nodes
 During discovery light node should filter out service nodes based on preferences before establishing connection.
 These preferences might include:
 - [Libp2p multiadresses](https://github.com/libp2p/specs/blob/master/addressing/README.md) of a service node;
@@ -55,7 +58,7 @@ These preferences might include:
 More details about discovery can be found at [WAKU2 Discovery domain](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/10/waku2.md#discovery-domain) or [RELAY-SHARDING Discovery](https://github.com/waku-org/specs/blob/master/standards/core/relay-sharding.md#discovery).
 
 Examples of filtering:
-- When [Circuit V2](https://github.com/libp2p/specs/blob/master/relay/circuit-v2.md) multiaddresses discovered by a light node - it might avoid connecting such service nodes and wait for service nodes that can be connected directly;
+- When [Circuit V2](https://github.com/libp2p/specs/blob/master/relay/circuit-v2.md) multi-addresses discovered by a light node - it might avoid connecting such service nodes and wait for service nodes that can be connected directly;
 - When light node discovers service nodes that implement needed Waku protocols - it should prioritize those that implement most recent version of protocol;
 - Light node must connect only to those service nodes that participate in needed shard;
 
