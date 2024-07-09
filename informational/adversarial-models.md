@@ -13,7 +13,7 @@ This document lists adversarial models and attack-based threats relevant in the 
 
 ## Motivation and Background
 
-Future versions of this document will serve as a comprehensive list of adversarial models and attack based threats relevant for [Waku v2](https://rfc.vac.dev/waku/standards/core/10/waku2).
+Future versions of this document will serve as a comprehensive list of adversarial models and attack based threats relevant for [Waku v2](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/10/waku2.md).
 The main purpose of this document is being a linkable resource for specifications that address protection as well as mitigation mechanisms within the listed models.
 
 Discussing and introducing countermeasures to specific attacks in specific models is out of scope for this document.
@@ -73,7 +73,7 @@ We subdivide anonymity into _receiver anonymity_ and _sender anonymity_.
 #### Receiver Anonymity
 
 We define receiver anonymity as _unlinkability of users' identities and the data they receive and/or related actions_.
-Because each [Waku message](https://rfc.vac.dev/waku/standards/core/14/message) is associated with a content topic, and each receiver is interested in messages with specific content topics,
+Because each [Waku message](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/14/message.md) is associated with a content topic, and each receiver is interested in messages with specific content topics,
 receiver anonymity in the context of Waku corresponds to _subscriber-topic unlinkability_.
 An example for the "action" part of our receiver anonymity definition is subscribing to a specific topic.
 
@@ -175,8 +175,8 @@ An entity with this power would, in practice, also have the power of the interna
 
 ## Attack-based Threats
 
-The following lists various attacks against [Waku v2](https://rfc.vac.dev/waku/standards/core/10/waku2) protocols.
-If not specifically mentioned, the attacks refer to [Waku relay](https://rfc.vac.dev/waku/standards/core/11/relay) and the underlying [libp2p GossipSub](https://github.com/libp2p/specs/blob/master/pubsub/gossipsub/README.md).
+The following lists various attacks against [Waku v2](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/10/waku2.md) protocols.
+If not specifically mentioned, the attacks refer to [Waku relay](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md) and the underlying [libp2p GossipSub](https://github.com/libp2p/specs/blob/master/pubsub/gossipsub/README.md).
 We also list the weakest attacker model in which the attack can be successfully performed against.
 
 An attack is considered more powerful if it can be successfully performed in a weaker attacker model.
@@ -202,11 +202,11 @@ which in turn significantly increases the probability of attacker nodes ending u
 This section lists attacks that aim at deanonymizing a message sender.
 
 We assume that protocol messages are transmitted within a secure channel set up using the [Noise Protocol Framework](https://noiseprotocol.org/).
-For [Waku Relay](https://rfc.vac.dev/waku/standards/core/11/relay) this means we only consider messages with version field `2`,
+For [Waku Relay](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md) this means we only consider messages with version field `2`,
 which indicates that the payload has to be encoded using [Noise](../standards/application/noise.md).
 
 Note: The currently listed attacks are against libp2p in general.
-The [data field of Waku v2 relay](https://rfc.vac.dev/waku/standards/core/11/relay/#message-fields) must be a [Waku v2 message](https://rfc.vac.dev/waku/standards/core/14/message).
+The [data field of Waku v2 relay](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md/#message-fields) must be a [Waku v2 message](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/14/message.md).
 The attacks listed in the following do not leverage that fact.
 
 #### Replay Attack
@@ -217,7 +217,7 @@ Waku relay is inherently safe against replay attack,
 because GossipSub nodes, and by extension Waku relay nodes,
 feature a `seen` cache, and only relay messages they have not seen before.
 
-Further, replay attacks will be punished by [RLN Relay](https://rfc.vac.dev/waku/standards/core/17/rln-relay).
+Further, replay attacks will be punished by [RLN Relay](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/17/rln-relay.md).
 
 #### Observing Messages
 
@@ -287,8 +287,8 @@ which can be learned via _graph learning_ attacks.
 
 In a flooding attack, attackers flood the network with bogus messages.
 
-Waku employs [RLN Relay](https://rfc.vac.dev/waku/standards/core/17/rln-relay) as the main countermeasure to flooding.
-[SWAP](https://rfc.vac.dev/waku/deprecated/18/swap) also helps mitigating DoS attacks.
+Waku employs [RLN Relay](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/17/rln-relay.md) as the main countermeasure to flooding.
+[SWAP](https://github.com/vacp2p/rfc-index/blob/main/waku/deprecated/18/swap.md) also helps mitigating DoS attacks.
 
 #### Black Hole (internal)
 
@@ -317,20 +317,20 @@ Copyright and related rights waived via [CC0](https://creativecommons.org/public
 
 ## References
 
-- [10/WAKU2](https://rfc.vac.dev/waku/standards/core/10/waku2)
-- [11/WAKU2-RELAY](https://rfc.vac.dev/waku/standards/core/11/relay)
+- [10/WAKU2](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/10/waku2.md)
+- [11/WAKU2-RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md)
 - [libp2p GossipSub](https://github.com/libp2p/specs/blob/master/pubsub/gossipsub/README.md)
 - [Security](https://en.wikipedia.org/wiki/Information_security)
 - [Authentication](https://en.wikipedia.org/wiki/Authentication)
 - [Anonymity Trilemma](https://freedom.cs.purdue.edu/projects/trilemma.html)
-- [Waku v2 message](https://rfc.vac.dev/waku/standards/core/14/message)
+- [Waku v2 message](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/14/message.md)
 - [Pluggable Transports](https://www.pluggabletransports.info/about/)
 - [Sybil attack](https://en.wikipedia.org/wiki/Sybil_attack)
 - [Dolev-Yao model](https://en.wikipedia.org/wiki/Dolev%E2%80%93Yao_model)
 - [Noise Protocol Framework](https://noiseprotocol.org/)
 - [Noise](../standards/application/noise.md)
-- [17/WAKU-RLN-RELAY](https://rfc.vac.dev/waku/standards/core/17/rln-relay)
-- [18/WAKU2-SWAP](https://rfc.vac.dev/waku/deprecated/18/swap)
+- [17/WAKU-RLN-RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/17/rln-relay.md)
+- [18/WAKU2-SWAP](https://github.com/vacp2p/rfc-index/blob/main/waku/deprecated/18/swap.md)
 - [Dandelion++](https://arxiv.org/abs/1805.11060)
 - [On the Anonymity of Peer-To-Peer Network Anonymity Schemes Used by Cryptocurrencies](https://arxiv.org/pdf/2201.11860)
 - [Waku Dandelion](../standards/application/dandelion.md))
