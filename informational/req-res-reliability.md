@@ -34,7 +34,7 @@ Such use cases can be: recovery from offline state, decrease rate of missed mess
 Node health is a metric meant to determine the connectivity state of a light node and its present ability to reliably send and receive messages from the network.
 We consider this reliability to be dependant on amount of simultaneous connections to responsive service nodes.
 Unfortunately the more connections light node establishes - the more bandwidth is consumed.
-To address this we suggest following metrics:
+To address this we suggest following states:
 - unhealthy - no connections to service nodes are available regardless of protocol;
 - minimally healthy:
   - Filter has one service node connection;
@@ -46,7 +46,7 @@ To address this we suggest following metrics:
 ### Peers and connection management
 
 #### Pool of reliable service nodes
-Light node should maintain a pool of reliable service nodes for each protocol.
+Light nodes should maintain a pool of reliable service nodes for each protocol.
 In case service node [fails](./req-res-reliability.md#definitions) to serve protocol request from a light node 3 times - light node should drop connection to it and a new service node should be connected and added to the pool instead.
 
 #### Selection of discovered service nodes
@@ -64,7 +64,7 @@ Examples of filtering:
 - Light node must connect only to those service nodes that participate in needed shard;
 
 #### Continuous discovery
-Light node must keep information about service nodes up to date.
+Light nodes must keep information about service nodes up to date.
 For example when a service node is discovered second time,
 we need to be sure to keep connection information up to date in Peer Store.
 
