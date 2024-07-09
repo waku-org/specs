@@ -105,8 +105,6 @@ In case ping fails - re-subscribe request should be fired to a new peer.
 
 - While registering Filter subscriptions - it is advised to batch requests for multiple content topics into one in order to reduce amount of queries sent to a node. 
 
-- During creation of a new subscription it can be beneficial to use only service nodes to which no subscriptions yet present and no failure was observed.
-
 ## Security/Privacy Considerations
 
 See [WAKU2-ADVERSARIAL-MODELS](https://github.com/waku-org/specs/blob/master/informational/adversarial-models.md).
