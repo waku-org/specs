@@ -47,7 +47,17 @@ To address this we suggest following states:
 
 #### Pool of reliable service nodes
 Light nodes should maintain a pool of reliable service nodes for each protocol.
-In case service node [fails](./req-res-reliability.md#definitions) to serve protocol request from a light node 3 times - light node should drop connection to it and a new service node should be connected and added to the pool instead.
+In case service node [fails](./req-res-reliability.md#definitions) to serve protocol request - 
+light node should drop connection to it and a new service node should be connected and added to the pool instead.
+
+We advice to replace service node for LightPush right after first failure in case:
+- connection to it is lost or request timed out;
+- it's response contains [error codes](../standards/core/lightpush.md#examples-of-possible-error-codes): `UNSUPPORTED_PUBSUB_TOPIC`, `INTERNAL_SERVER_ERROR` or `NO_PEERS_TO_RELAY`;
+- request failed but without error message returned;
+
+For Filter we'd recommend replacing service node:
+- [request for subscription](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md#subscribe) so it cannot be initiated;
+- [ping](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md#subscriber_ping) failed 2 times in a row;
 
 #### Selection of discovered service nodes
 During discovery light node should filter out service nodes based on preferences before establishing connection.
@@ -59,9 +69,10 @@ These preferences might include:
 More details about discovery can be found at [WAKU2 Discovery domain](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/10/waku2.md#discovery-domain) or [RELAY-SHARDING Discovery](https://github.com/waku-org/specs/blob/master/standards/core/relay-sharding.md#discovery).
 
 Examples of filtering:
-- When [Circuit V2](https://github.com/libp2p/specs/blob/master/relay/circuit-v2.md) multi-addresses discovered by a light node - it might avoid connecting such service nodes and wait for service nodes that can be connected directly;
 - When light node discovers service nodes that implement needed Waku protocols - it should prioritize those that implement most recent version of protocol;
-- Light node must connect only to those service nodes that participate in needed shard;
+- Light node must connect only to those service nodes that participate in needed shard and cluster;
+- Light node must use only those service nodes that implement needed transport protocols;
+- When [Circuit V2](https://github.com/libp2p/specs/blob/master/relay/circuit-v2.md) multi-addresses discovered by a light node - it should prefer other service nodes that can be connected directly if possible;
 
 #### Continuous discovery
 Light nodes must keep information about service nodes up to date.
@@ -98,14 +109,14 @@ By using Filter protocol's active [subscription](https://github.com/vacp2p/rfc-i
 Filter protocol does not have such limitation as to type of messages received with subscription 
 but active subscription does not allow to see messages exchanged in the network while light node was offline.
 
-In case some of the messages were not verified by any of the previous methods  - they should be re-sent by LightPush. 
+In case some of the messages were not verified by any of the previous methods  - they should be re-sent by LightPush using different service node.
 
 ### Filter
 
 #### Regular pings
 To ensure that subscription is maintained by a service node and not closed - light node should do recurring [pings](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md#subscriber_ping).
 Our advice for light node to send ping requests once per minute.
-In case light node does not receive OK response or it times out 3 times - such service node should be replaced as part of maintenance of [pool of reliable service nodes](./req-res-reliability.md#pool-of-reliable-service-nodes).
+In case light node does not receive OK response or it times out 2 times - such service node should be replaced as part of maintenance of [pool of reliable service nodes](./req-res-reliability.md#pool-of-reliable-service-nodes).
 Right after such replace light node must create new subscription to newly connected service node as described in [Filter specification](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md).
 
 #### Redundant subscriptions for message loss mitigation
