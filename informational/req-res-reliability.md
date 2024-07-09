@@ -17,6 +17,10 @@ This RFC describes set of instructions used across different [WAKU2](https://git
 ### Definitions
 - Service node - provides services to other nodes such as relaying messages send by LightPush to the network or broadcasts messages from the network through Filter, usually serves responses;
 - Light node - connects to and uses one or more service nodes via LightPush and/or Filter protocols, usually sends requests;
+- Service node failure - can mean various things depending on the protocol in use:
+  - generic protocol failure - request is timed out or failed without error codes;
+  - LightPush specific failure - refer to [error codes](../standards/core/lightpush.md#examples-of-possible-error-codes) and consider request a failure when it is clear that service node cannot serve any future request, for example when service node does not have any peers to relay and returns `NO_PEERS_TO_RELAY`;
+  - Filter specific failure - we consider service node failing when it cannot serve [subscribe](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md#subscribe) or [ping](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md#subscriber_ping) request with OK status;
 
 ## Motivation
 
@@ -43,10 +47,7 @@ To address this we suggest following metrics:
 
 #### Pool of reliable service nodes
 Light node should maintain a pool of reliable service nodes for each protocol.
-In case service node fails to serve protocol request from a light node 3 times - light node should drop connection to it and a new service node should be connected and added to the pool instead.
-Service node failure can mean various things depending on the protocol in use. 
-For LightPush we advice so refer to [error codes](../standards/core/lightpush.md#examples-of-possible-error-codes) and consider request a failure when it is clear that service node cannot serve any future request, for example when service node does not have any peers to relay and returns `NO_PEERS_TO_RELAY`.
-For Filter we consider service node failing when it cannot serve subscribe or ping request with OK status. 
+In case service node [fails](./req-res-reliability.md#definitions) to serve protocol request from a light node 3 times - light node should drop connection to it and a new service node should be connected and added to the pool instead.
 
 #### Selection of discovered service nodes
 During discovery light node should filter out service nodes based on preferences before establishing connection.
@@ -76,7 +77,7 @@ Our advice to use 2 service nodes at a time.
 
 #### Retry on failure
 When light node sends a message it must await for LightPush response from service node and check it for [possible error codes](../standards/core/lightpush.md#examples-of-possible-error-codes).
-In case request failed without error code or response contains errors that can be temporary for service node (e.g `TOO_MANY_REQUESTS` or `NO_PEERS_TO_RELAY`) - 
+In case request failed without error code or response contains errors that can be temporary for service node (e.g `TOO_MANY_REQUESTS`) - 
 light node should try to re-send message after some interval and continue doing so until OK response is received or canceled.
 Interval time can be arbitrary but we recommend starting with 1 second and increasing it on each failure during LightPush send.
 Important to note that [per another recommendation](./req-res-reliability.md#pool-of-reliable-service-nodes) - light node should replace failing service node with another within pool of service nodes used by LightPush.
