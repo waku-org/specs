@@ -25,7 +25,7 @@ This RFC describes set of instructions used across different [WAKU2](https://git
 ## Motivation
 
 Specifications of the mentioned protocols do not define some of the real world use cases that are often observed in unreliable network environment from the perspective of light nodes that are consumers of LightPush and/or Filter protocols.
-Such use cases can be: recovery from offline state, decrease rate of missed messages, increase probability of messages being broadcasted within the network.
+Such use cases can be: recovery from offline state, decrease rate of missed messages, increase probability of messages being broadcasted within the network, unreliability of the service node in use.
 
 ## Suggestions
 
