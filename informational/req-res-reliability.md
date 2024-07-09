@@ -31,7 +31,7 @@ Such use cases can be: recovery from offline state, decrease rate of missed mess
 
 ### Node health
 
-Node health is a metric meant to determine how reliable a light node is.
+Node health is a metric meant to determine the connectivity state of a light node and its present ability to reliably send and receive messages from the network.
 We consider this reliability to be dependant on amount of simultaneous connections to responsive service nodes.
 Unfortunately the more connections light node establishes - the more bandwidth is consumed.
 To address this we suggest following metrics:
