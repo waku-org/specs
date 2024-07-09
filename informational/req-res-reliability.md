@@ -90,13 +90,15 @@ Our advice to do periodic Store queries once per 30 seconds.
 
 ### Filter
 
-- To decrease chances of missing messages a node can initiate more than one subscription through Filter protocol to the same content topic and filter out duplicates. This will increase bandwidth consumption and would depend on the information exchanged under content topic in use.
+- To decrease chances of missing messages a light node can initiate more than one subscription through Filter protocol to the same content topic to different service nodes and filter out duplicates.
+This will increase bandwidth consumption and would depend on the information exchanged under content topic in use.
 
-- In case a node goes offline while having an active subscription - it is important to do ping again right after node appears online. In case ping fails - re-subscribe request should be fired to a new peer.
+- In case a light node goes offline while having an active subscription - it is important to do ping again right after node appears online.
+In case ping fails - re-subscribe request should be fired to a new peer.
 
 - While registering Filter subscriptions - it is advised to batch requests for multiple content topics into one in order to reduce amount of queries sent to a node. 
 
-- During creation of a new subscription it can be beneficial to use only new peers to which no subscriptions yet present and not use peers with which Filter already failed.
+- During creation of a new subscription it can be beneficial to use only service nodes to which no subscriptions yet present and no failure was observed.
 
 ## Security/Privacy Considerations
 
