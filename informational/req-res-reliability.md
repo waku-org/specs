@@ -91,6 +91,12 @@ Our advice to do periodic Store queries once per 30 seconds.
 
 ### Filter
 
+#### Regular pings
+To ensure that subscription is maintained by a service node and not closed - light node should do recurring [pings](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md#subscriber_ping).
+Our advice for light node to send ping requests once per minute.
+In case light node does not receive OK response or it times out 3 times - such service node should be replaced as part of maintenance of [pool of reliable service nodes](./req-res-reliability.md#pool-of-reliable-service-nodes).
+Right after such replace light node must create new subscription to newly connected service node as described in [Filter specification](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md).
+
 - To decrease chances of missing messages a light node can initiate more than one subscription through Filter protocol to the same content topic to different service nodes and filter out duplicates.
 This will increase bandwidth consumption and would depend on the information exchanged under content topic in use.
 
