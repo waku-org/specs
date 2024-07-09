@@ -6,11 +6,11 @@ editor: Giuseppe <giuseppe@status.im>
 contributors:
 ---
 
-This specification describes how payloads of [Waku messages](https://rfc.vac.dev/waku/standards/core/14/message) with [version 2](https://rfc.vac.dev/waku/standards/core/14/message/#version2) can be encrypted
+This specification describes how payloads of [Waku messages](https://github.com/vacp2p/rfc-index/tree/main/waku/standards/core/14) with [version 2](https://github.com/vacp2p/rfc-index/tree/main/waku/standards/core/14) can be encrypted
 in order to achieve confidentiality, authenticity, and integrity
 as well as some form of identity-hiding on communicating parties.
 
-This specification extends the functionalities provided by [26/WAKU-PAYLOAD](https://rfc.vac.dev/waku/standards/application/26/payload),
+This specification extends the functionalities provided by [26/WAKU-PAYLOAD](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/application/26/payload.md),
 adding support to modern symmetric encryption primitives
 and asymmetric key-exchange protocols.
 
@@ -58,7 +58,7 @@ We note that all [design requirements](#Design-requirements) on exchanged messag
 corresponding to a total of 1 Round Trip Time communication _(1-RTT)_.
 In particular, identity-hiding properties can be guaranteed only if the recommendation described in [After-handshake](#After-handshake) are implemented.
 
-In the following, we assume that communicating parties reciprocally know an initial [`contentTopic`](https://rfc.vac.dev/waku/standards/core/14/message/#wakumessage)
+In the following, we assume that communicating parties reciprocally know an initial [`contentTopic`](https://github.com/vacp2p/rfc-index/tree/main/waku/standards/core/14/#wakumessage)
 where they can send/receive the first handshake message(s).
 We further assume that messages sent over a certain `contentTopic` can be efficiently identified by their intended recipients
 thanks to an arbitrary 16 bytes long `message-nametag` field embedded in the message payload
@@ -82,7 +82,7 @@ The symmetric primitives supported are:
 
 ## Specification
 
-When [14/WAKU-MESSAGE version](https://rfc.vac.dev/waku/standards/core/14/message/#payload-encryption) is set to 2,
+When [14/WAKU-MESSAGE version](https://github.com/vacp2p/rfc-index/tree/main/waku/standards/core/14/#payload-encryption) is set to 2,
 the corresponding `WakuMessage`'s `payload` will encapsulate the two fields `handshake-message` and `transport-message`.
 
 The `handshake-message` field MAY contain
@@ -218,26 +218,26 @@ by hashing the result of an ephemeral-ephemeral Diffie-Hellman exchange every 1-
 
 ## Backward Support for Symmetric/Asymmetric Encryption
 
-It is possible to have backward compatibility to symmetric/asymmetric encryption primitives from [26/WAKU-PAYLOAD](https://rfc.vac.dev/waku/standards/application/26/payload),
-effectively encapsulating payload encryption [14/WAKU-MESSAGE version 1](https://rfc.vac.dev/waku/standards/core/14/message/#version1) in [version 2](https://rfc.vac.dev/waku/standards/core/14/message/#version2).
+It is possible to have backward compatibility to symmetric/asymmetric encryption primitives from [26/WAKU-PAYLOAD](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/application/26/payload.md),
+effectively encapsulating payload encryption [14/WAKU-MESSAGE version 1](https://github.com/vacp2p/rfc-index/tree/main/waku/standards/core/14/#version1) in [version 2](https://github.com/vacp2p/rfc-index/tree/main/waku/standards/core/14/#version2).
 
 It suffices to extend the list of supported `protocol-id` to:
 
 - `254`: AES-256-GCM symmetric encryption;
 - `255`: ECIES asymmetric encryption.
 
-and set the `transport-message` field to the [26/WAKU-PAYLOAD](https://rfc.vac.dev/waku/standards/application/26/payload) `data` field, whenever these `protocol-id` values are set.
+and set the `transport-message` field to the [26/WAKU-PAYLOAD](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/application/26/payload.md) `data` field, whenever these `protocol-id` values are set.
 
 Namely, if `protocol-id = 254, 255` then:
 
 - `message-nametag`: is empty;
 - `handshake-message-len`: is set to `0`;
 - `handshake-message`: is empty;
-- `transport-message`: contains the [26/WAKU-PAYLOAD](https://rfc.vac.dev/waku/standards/application/26/payload) `data` field (AES-256-GCM or ECIES, depending on `protocol-id`);
+- `transport-message`: contains the [26/WAKU-PAYLOAD](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/application/26/payload.md) `data` field (AES-256-GCM or ECIES, depending on `protocol-id`);
 - `transport-message-len` is set accordingly to `transport-message` length;
 
 When a `transport-message` corresponding to `protocol-id = 254, 255` is retrieved,
-it SHOULD be decoded as the `data` field in [26/WAKU-PAYLOAD](https://rfc.vac.dev/waku/standards/application/26/payload) specification.
+it SHOULD be decoded as the `data` field in [26/WAKU-PAYLOAD](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/application/26/payload.md) specification.
 
 ## Appendix: Supported Handshakes Description
 
@@ -318,9 +318,9 @@ The main difference with `XX` is that Alice's and Bob's static keys, when transm
 ## References
 
 1. [5/SECURE-TRANSPORT](https://specs.status.im/spec/5)
-2. [10/WAKU2](https://rfc.vac.dev/waku/standards/core/10/waku2)
-3. [26/WAKU-PAYLOAD](https://rfc.vac.dev/waku/standards/application/26/payload)
-4. [14/WAKU-MESSAGE](https://rfc.vac.dev/waku/standards/core/14/message/#version1)
+2. [10/WAKU2](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/10/waku2.md)
+3. [26/WAKU-PAYLOAD](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/application/26/payload.md)
+4. [14/WAKU-MESSAGE](https://github.com/vacp2p/rfc-index/tree/main/waku/standards/core/14)
 5. [Noise protocol](http://www.noiseprotocol.org/noise.html)
 6. [Noise handshakes as key-exchange mechanism for Waku2](https://forum.vac.dev/t/noise-handshakes-as-key-exchange-mechanism-for-waku2/130)
 7. [Augmented Backus-Naur form (ABNF)](https://tools.ietf.org/html/rfc5234)
