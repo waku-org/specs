@@ -15,7 +15,7 @@ This RFC describes set of instructions used across different [WAKU2](https://git
 - [WAKU2-FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md) - is used for receiving messages;
 
 ### Definitions
-- Service node - provides services to other nodes such as relaying messages send by LightPush to the network or broadcasts messages from the network through Filter, usually serves responses;
+- Service node - provides services to other nodes such as relaying messages send by LightPush to the network or service messages from the network through Filter, usually serves responses;
 - Light node - connects to and uses one or more service nodes via LightPush and/or Filter protocols, usually sends requests;
 - Service node failure - can mean various things depending on the protocol in use:
   - generic protocol failure - request is timed out or failed without error codes;
