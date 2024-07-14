@@ -1,7 +1,7 @@
 ---
 title: REQ-RES-RELIABILITY
 name: Reliability for request-response protocols
-category: Best Current Practice
+category: Standards Track
 tags: [reliability, application]
 editor: Oleksandr Kozlov <oleksandr@status.im>
 contributors:
