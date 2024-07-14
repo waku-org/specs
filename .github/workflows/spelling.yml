@@ -1,4 +1,3 @@
-# This is workflow for spell checking using PySpelling lib (https://pypi.org/project/pyspelling/)
 name: Spellcheck
 
 on:
@@ -11,12 +10,16 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  spellcheck:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: igsekor/pyspelling-any@v1.0.4
-        name: Spellcheck
-        env:
-          MATRIX: ${{ toJson(matrix) }}
-          run: pyspelling --matrix "$MATRIX"
+
+      - name: Install aspell
+        run: sudo apt-get install -y aspell aspell-en
+
+      - name: Run spellcheck
+        uses: igsekor/pyspelling-any@v1.0.4
+        with:
+          args: "-c ./spellcheck.yaml"
+

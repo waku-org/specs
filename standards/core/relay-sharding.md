@@ -11,7 +11,7 @@ contributors:
 
 ## Abstract
 
-This document describes ways of sharding the [Waku relay](https://rfc.vac.dev/spec/11/) topic,
+This document describes ways of sharding the [Waku relay](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md) topic,
 allowing Waku networks to scale in the number of content topics.
 
 > _Note_: Scaling in the size of a single content topic is out of scope for this document.
@@ -25,7 +25,7 @@ However, they do not scale to large traffic loads.
 A single [libp2p gossipsub mesh](https://github.com/libp2p/specs/blob/master/pubsub/gossipsub/gossipsub-v1.0.md#gossipsub-the-gossiping-mesh-router),
 which carries messages associated with a single pubsub topic, can be seen as a separate unstructured P2P network
 (control messages go beyond these boundaries, but at its core, it is a separate P2P network).
-With this, the number of [Waku relay](https://rfc.vac.dev/spec/11/) content topics that can be carried over a pubsub topic is limited.
+With this, the number of [Waku relay](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md) content topics that can be carried over a pubsub topic is limited.
 This prevents app protocols that aim to span many multicast groups (realized by content topics) from scaling.
 
 This document specifies three pubsub topic sharding methods (with varying degrees of automation),
@@ -35,7 +35,7 @@ This document also covers discovery of topic shards.
 ## Named Sharding
 
 _Named sharding_ offers apps to freely choose pubsub topic names.
-It is RECOMMENDED for App protocols to follow the naming structure detailed in [23/WAKU2-TOPICS](https://rfc.vac.dev/spec/23/).
+It is RECOMMENDED for App protocols to follow the naming structure detailed in [23/WAKU2-TOPICS](https://github.com/vacp2p/rfc-index/blob/main/waku/informational/23/topics.md).
 With named sharding, managing discovery falls into the responsibility of apps.
 
 From an app protocol point of view, a subscription to a content topic `waku2/xxx` on a shard named /mesh/v1.1.1/xxx would look like:
@@ -82,7 +82,7 @@ an example for the 2nd shard in the global shard cluster:
 
 `/waku/2/rs/0/2`.
 
-> _Note_: Because _all_ shards distribute payload defined in [14/WAKU2-MESSAGE](https://rfc.vac.dev/spec/14/) via [protocol buffers](https://developers.google.com/protocol-buffers/),
+> _Note_: Because _all_ shards distribute payload defined in [14/WAKU2-MESSAGE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/14/message.md) via [protocol buffers](https://developers.google.com/protocol-buffers/),
 > the pubsub topic name does not explicitly add `/proto` to indicate protocol buffer encoding.
 > We use `rs` to indicate these are _relay shard_ clusters; further shard types might follow in the future.
 
@@ -102,7 +102,7 @@ so app protocols do not have to implement their own discovery method.
 
 Nodes add information about their shard participation in their [WAKU2-ENR](./enr.md).
 Having a static shard participation indication as part of the ENR allows nodes
-to discover peers that are part of shards via [33/WAKU2-DISCV5](https://rfc.vac.dev/spec/33/) as well as via DNS.
+to discover peers that are part of shards via [33/WAKU2-DISCV5](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/33/discv5.md) as well as via DNS.
 
 > _Note:_ In the current version of this document,
 > sharding information is directly added to the ENR.
@@ -191,7 +191,7 @@ The shard to use is the modulo of the hash by the number of shards in the networ
 
 ### Content Topics Format for Autosharding
 
-Content topics MUST follow the format in [23/WAKU2-TOPICS](https://rfc.vac.dev/spec/23/#content-topic-format).
+Content topics MUST follow the format in [23/WAKU2-TOPICS](https://github.com/vacp2p/rfc-index/blob/main/waku/informational/23/topics.md/#content-topic-format).
 In addition, a generation prefix MAY be added to content topics.
 When omitted default values are used.
 Generation default value is `0`.
@@ -242,7 +242,7 @@ but is planned to preserve the index range allocation.
 Instead of adding the data to the ENR, it will treat each array index as a capability,
 which can be hierarchical, having each shard in the indexed shard cluster as a sub-capability.
 When scaling to a very large number of shards, this will avoid blowing up the ENR size, and allows efficient discovery.
-We currently use [33/WAKU2-DISCV5](https://rfc.vac.dev/spec/33/) for discovery,
+We currently use [33/WAKU2-DISCV5](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/33/discv5.md) for discovery,
 which is based on Ethereum's [discv5](https://github.com/ethereum/devp2p/blob/master/discv5/discv5.md).
 While this allows to sample nodes from a distributed set of nodes efficiently and offers good resilience,
 it does not allow to efficiently discover nodes with specific capabilities within this node set.
@@ -272,12 +272,13 @@ Copyright and related rights waived via [CC0](https://creativecommons.org/public
 
 ## References
 
-- [11/WAKU2-RELAY](https://rfc.vac.dev/spec/11/)
+- [11/WAKU2-RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md)
 - [Unstructured P2P network](https://en.wikipedia.org/wiki/Peer-to-peer#Unstructured_networks)
-- [33/WAKU2-DISCV5](https://rfc.vac.dev/spec/33/)
+- [33/WAKU2-DISCV5](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/33/discv5.md)
 - [WAKU2-ENR](./enr.md)
-- [23/WAKU2-TOPICS](https://rfc.vac.dev/spec/23/)
+- [23/WAKU2-TOPICS](https://github.com/vacp2p/rfc-index/blob/main/waku/informational/23/topics.md)
 - [Ethereum ENR sharding bit vector](https://github.com/ethereum/consensus-specs/blob/dev/specs/altair/p2p-interface.md#metadata)
 - [Ethereum discv5 specification](https://github.com/ethereum/devp2p/blob/master/discv5/discv5-theory.md)
 - [Research log: Waku Discovery](https://vac.dev/wakuv2-apd)
 - [WAKU2-RELAY-STATIC-SHARD-ALLOC](../../informational/relay-static-shard-alloc.md)
+- [14/WAKU2-MESSAGE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/14/message.md)

@@ -9,10 +9,10 @@ contributors:
 
 ## Abstract
 
-This document extends the [11/WAKU2-RELAY](https://rfc.vac.dev/spec/11), specifying Waku Tor Push,
+This document extends the [11/WAKU2-RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md), specifying Waku Tor Push,
 which allows nodes to push messages via Tor into the Waku relay network.
 
-Waku Tor Push builds on [46/GOSSIPSUB-TOR-PUSH](https://rfc.vac.dev/spec/46).
+Waku Tor Push builds on [GOSSIPSUB-TOR-PUSH](https://github.com/vacp2p/rfc-index/blob/main/vac/raw/gossipsub-tor-push.md).
 
 **Protocol identifier**: /vac/waku/relay/2.0.0
 
@@ -22,13 +22,13 @@ This allows Waku relay nodes that are oblivious to Tor Push to process messages 
 
 ## Functional Operation
 
-In its current version, Waku Tor Push corresponds to [46/GOSSIPSUB-TOR-PUSH](https://rfc.vac.dev/spec/46)
-applied to [11/WAKU2-RELAY](https://rfc.vac.dev/spec/11/),
+In its current version, Waku Tor Push corresponds to [GOSSIPSUB-TOR-PUSH](https://github.com/vacp2p/rfc-index/blob/main/vac/raw/gossipsub-tor-push.md)
+applied to [11/WAKU2-RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md),
 instead of [libp2p gossipsub](https://github.com/libp2p/specs/blob/master/pubsub/gossipsub/README.md).
 
 ## Security/Privacy Considerations
 
-see [46/GOSSIPSUB-TOR-PUSH](https://rfc.vac.dev/spec/46)
+see [GOSSIPSUB-TOR-PUSH](https://github.com/vacp2p/rfc-index/blob/main/vac/raw/gossipsub-tor-push.md)
 
 ## Copyright
 
@@ -36,7 +36,7 @@ Copyright and related rights waived via [CC0](https://creativecommons.org/public
 
 ## References
 
-- [11/WAKU2-RELAY](https://rfc.vac.dev/spec/11)
+- [11/WAKU2-RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md)
 - [libp2p gossipsub](https://github.com/libp2p/specs/blob/master/pubsub/gossipsub/README.md)
-- [46/GOSSIPSUB-TOR-PUSH](https://rfc.vac.dev/spec/46)
+- [GOSSIPSUB-TOR-PUSH](https://github.com/vacp2p/rfc-index/blob/main/vac/raw/gossipsub-tor-push.md)
 - [Tor](https://www.torproject.org/)

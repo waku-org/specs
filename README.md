@@ -26,10 +26,10 @@ This repository contains specifications for the Waku suite of protocols.
 |[WAKU2-PEER-EXCHANGE](standards/core/peer-exchange.md)| Waku Peer Exchange |
 |[WAKU2-ENR](standards/core/enr.md)| Waku Usage of ENR |
 |[WAKU2-INCENTIVIZATION](standards/core/incentivization.md)| Waku Incentivization |
-|[WAKU2-METADATA](standards/core/metadata.md)| Waku Metadata |
-|[WAKU2-NETWORK](standards/core/network.md)| Waku Network |
+|[66/WAKU2-METADATA](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/66/metadata.md)| Waku Metadata |
+|[64/WAKU2-NETWORK](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/64/network.md)| Waku Network |
 |[RELAY-SHARDING](standards/core/relay-sharding.md)| Waku Relay Sharding |
-| WAKU2-STOREV3 | Coming Soon |
+|[WAKU2-STORE](standards/core/store.md) | Waku Store Query |
 
 ### Application standards
 
@@ -45,6 +45,8 @@ This repository contains specifications for the Waku suite of protocols.
 |[WAKU2-DEVICE-PAIRING](standards/application/device-pairing.md)| Device Pairing and Secure Transfers with Noise |
 |[WAKU2-NOISE](standards/application/noise.md)| Noise Protocols for Waku Payload Encryption |
 |[TOR-PUSH](standards/application/tor-push.md)| Waku Tor Push |
+|[RLN-KEYSTORE](standards/application/rln-keystore.md)| Waku RLN Keystore JSON schema |
+|[TRANSPORT-RELIABILITY](standards/application/transport-reliability.md)| Waku Transport Reliability |
 
 ### Informational
 
@@ -67,7 +69,13 @@ Relevant Waku resources related to the specifications located in this repository
 Contributions are welcome from any party. 
 Contributors can create specifications relating to the Waku domain and
 create a pull request to begin discussion.
-The recommended [template](./template.md) may be used for new proposed specifications.
+
+Please adhere to the following contribution guidelines:
+- use the recommended [template](./template.md) for new proposed specifications
+- use keywords as per the language recommendations in the [template](./template.md) and [Vac COSS](https://github.com/vacp2p/rfc-index/blob/a5b24ac0a27da361312260f9da372a0e6e812212/vac/1/coss.md#language)
+- use [semantic breaks](https://sembr.org/)
+- links to Waku, Vac or other [IFT](https://free.technology/)-related specifications must be to the corresponding Github repository and not to a webpage.
+For example, Waku specs reside in [waku-org/specs](https://github.com/waku-org/specs) and Vac RFCs in [vacp2p/rfc-index](https://github.com/vacp2p/rfc-index/).
 
 New specifications are considered a proof of concept.
 Once a rough consensus is reached towards stabilization, 
