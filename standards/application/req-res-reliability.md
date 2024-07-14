@@ -2,7 +2,7 @@
 title: REQ-RES-RELIABILITY
 name: Reliability for request-response protocols
 category: Best Current Practice
-tags: [informational]
+tags: [reliability, application]
 editor: Oleksandr Kozlov <oleksandr@status.im>
 contributors:
 - Prem Chaitanya Prathi <prem@status.im>

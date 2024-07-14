@@ -47,6 +47,7 @@ This repository contains specifications for the Waku suite of protocols.
 |[TOR-PUSH](standards/application/tor-push.md)| Waku Tor Push |
 |[RLN-KEYSTORE](standards/application/rln-keystore.md)| Waku RLN Keystore JSON schema |
 |[TRANSPORT-RELIABILITY](standards/application/transport-reliability.md)| Waku Transport Reliability |
+|[REQ-RES-RELIABILITY](standards/application/req-res-reliability.md)| Reliability for request-response protocols |
 
 ### Informational
 
