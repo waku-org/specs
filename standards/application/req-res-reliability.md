@@ -47,7 +47,7 @@ To address this we RECOMMEND following states:
 - sufficiently healthy:
   - Filter has at least 2 connections available to service nodes AND LightPush has at least 2 connections available to service nodes;
 
-If one of the protocols is unhealthy or minimally healthy, while the other is sufficiently healthy - overall node health SHOULD be considered as unhealthy or minimally healthy respectively.
+Overall node health SHOULD be considered as unhealthy or minimally healthy respectively if one of the protocols is unhealthy or minimally healthy, while the other is sufficiently healthy.
 
 ### Peers and connection management
 
