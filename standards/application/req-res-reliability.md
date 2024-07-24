@@ -40,13 +40,14 @@ Node health is a metric meant to determine the connectivity state of a light nod
 We consider this reliability to be dependent on amount of simultaneous connections to responsive service nodes.
 Unfortunately the more connections light node establishes - the more bandwidth is consumed.
 To address this we RECOMMEND following states:
-- unhealthy - no connections to service nodes are available regardless of protocol;
+- unhealthy:
+  - no connections to service nodes are available regardless of protocol;
 - minimally healthy:
-  - Filter has one service node connection;
-  - LightPush protocol has one service node connection;
+  - Filter has one service node connection AND LightPush protocol has one service node connection;
 - sufficiently healthy:
-  - Filter has at least 2 connections available to service nodes;
-  - LightPush has at least 2 connections available to service nodes;
+  - Filter has at least 2 connections available to service nodes AND LightPush has at least 2 connections available to service nodes;
+
+Overall node health SHOULD be considered as unhealthy or minimally healthy respectively if one of the protocols is unhealthy or minimally healthy, while the other is sufficiently healthy.
 
 ### Peers and connection management
 
