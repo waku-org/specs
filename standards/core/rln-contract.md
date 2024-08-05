@@ -35,7 +35,7 @@ which is necessary for proof generation and verification.
 In testnet deployment, the RLN contract does not require any payment apart from gas costs.
 This document aims to make the RLN contract suitable for mainnet deployment.
 In particular, the contract would require users to put down a deposit.
-The aim of the deposit initially is purely to protect the system from abuse.
+The aim of the deposit initially is purely to protect the system from denial-of-service attacks using bandwidth capping.
 It may also be explored as a revenue stream for Waku in later versions.
 
 ## Semantics
@@ -68,7 +68,7 @@ At any point, a user can withdraw their deposit and terminate the membership.
 In more detail, the membership life-cycle is as follows:
 1. A user registers a membership:
     1. If there are expired unclaimed slots in the tree, use the slot with the earliest expiration date past its grace period, otherwise create a new slot;
-    2. if the membership re-uses a previously used slot, refund the previous user’s deposit.
+    2. if the membership re-uses a previously used slot, the previous user can claim their deposit back.
 2. The user sends messages while the membership is active:
     1. If the user exceeds the rate limit, their over-limit messages are not propagated in that epoch; the deposit is not slashed.
 3. After the membership expires, the user can do one of the following:
@@ -89,7 +89,7 @@ The contract governance is as follows:
 
 1. the first deployment of the contract allows the `Owner` to modify certain parameters (TBD) under certain constraints (TBD);
 2. at some point, the `Onwer` would renounce their privileges, and the contract will become immutable;
-3. further upgrades, if necessary, can be done by deploying a new contract and moving the membership set.
+3. further upgrades, if necessary, can be done by deploying a new contract and migrating the membership set.
 
 ## Parameters
 
@@ -101,17 +101,17 @@ We make the following design choices:
 
 For the initial deployment, we suggest the following values.
 
-| Parameter                                                 | Symbol     | Value   | Units                             | Modifiable? | Comment                        |
-| --------------------------------------------------------- | ---------- | ------- | --------------------------------- | ----------- | ------------------------------ |
-| Epoch length                                              | `epoch`    | `10`    | minutes                           | TBD         |                                |
-| Maximum total rate limit of concurrent active memberships | `R_{max}`  | TBD     | messages per `epoch`              | Yes         | Can be replaced with `N_{max}` |
-| Maximum number of concurrent active memberships           | `N_{max}`  | `10000` | units                             | Yes         | Can be replaced with `R_{max}` |
-| Rate limit for low-tier                                   | `R_{low}`  | `20`    | messages per `epoch`              | TBD         |                                |
-| Rate limit for mid-tier                                   | `R_{mid}`  | `200`   | messages per `epoch`              | TBD         |                                |
-| Rate limit for high-tier                                  | `R_{high}` | `600`   | messages per `epoch`              | TBD         |                                |
-| Unit price                                                | `p_u`      | TBD     | `USD` per `1` message per `epoch` | Yes         |                                |
-| Membership expiration term                                | `T`        | `90`    | days                              | Yes         |                                |
-| Grace period                                              | `G`        | `30`    | days                              | Yes         |                                |
+| Parameter                                                 | Symbol     | Value   | Units                                                                                | Modifiable? | Comment                        |
+| --------------------------------------------------------- | ---------- | ------- | ------------------------------------------------------------------------------------ | ----------- | ------------------------------ |
+| Epoch length                                              | `epoch`    | `10`    | minutes                                                                              | Yes         |                                |
+| Maximum total rate limit of concurrent active memberships | `R_{max}`  | TBD     | messages per `epoch`                                                                 | Yes         | Can be replaced with `N_{max}` |
+| Maximum number of concurrent active memberships           | `N_{max}`  | `10000` | units                                                                                | Yes         | Can be replaced with `R_{max}` |
+| Rate limit for low-tier                                   | `R_{low}`  | `20`    | messages per `epoch`                                                                 | TBD         |                                |
+| Rate limit for mid-tier                                   | `R_{mid}`  | `200`   | messages per `epoch`                                                                 | TBD         |                                |
+| Rate limit for high-tier                                  | `R_{high}` | `600`   | messages per `epoch`                                                                 | TBD         |                                |
+| Unit price                                                | `p_u`      | TBD     | `USD` per `1` message per `epoch` for the duration of one membership expiration term | Yes         |                                |
+| Membership expiration term                                | `T`        | `90`    | days                                                                                 | Yes         |                                |
+| Grace period                                              | `G`        | `30`    | days                                                                                 | Yes         |                                |
 
 ### Discussion on some parameter values
 
@@ -130,8 +130,12 @@ allowing us to reason about network utilization on a longer time scale.
 On the other hand, long epochs lead to more memory requirements for nodes due to the growth of the nullifier log.
 Each message contains a nullifier that proves its validity in terms of RLN.
 Within the latest epoch, each relaying node stores all nullifiers to detect users exceeding the rate limit.
+Nullifier log data needs to be stored in memory.
 Each nullifier plus metadata is `128` bytes (per message).
 This means that one user with a `1` message per second rate limit (high-tier) generates up to `600 * 128 / 1024 = 75 KiB` of nullifier log data per 10-min epoch.
+This corresponds to:
+- for 1000 users: approximately `73 MiB`;
+- for 10 thousand users: approximately `732 MiB`.
 
 #### Maximum total message limit / concurrently active memberships
 
