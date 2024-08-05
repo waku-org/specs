@@ -13,12 +13,12 @@ This specification describes the smart contract that governs RLN memberships, in
 
 - the overall smart contract functionality;
 - contract parameters;
-- the values of those parameters for the initial deployment;
+- the values of those parameters for the initial deployment on a mainnet chain;
 - the way in which the parameters can be modified.
 
 ## Background
 
-Rate-Limiting Nullifiers (RLN) is a ZK-based rate-limiting technique used in Waku.
+[Rate-Limiting Nullifiers](https://rate-limiting-nullifier.github.io/rln-docs/) (RLN) is a ZK-based rate-limiting technique used in Waku.
 Before sending messages, users must register in a smart contract.
 They then attach a ZK proof of valid membership to every message.
 Relaying nodes check message validity and drop invalid messages.
@@ -34,19 +34,20 @@ which is necessary for proof generation and verification.
 
 In testnet deployment, the RLN contract does not require any payment apart from gas costs.
 This document aims to make the RLN contract suitable for mainnet deployment.
-In particular, the contract would require uses to put down a deposit.
+In particular, the contract would require users to put down a deposit.
 The aim of the deposit initially is purely to protect the system from abuse.
 It may also be explored as a revenue stream for Waku in later versions.
 
 ## Semantics
 
-The RLN contract provides the following functionality:
+The RLN contract provides the following functionalities:
 - register a membership in a given tier;
 - check if a membership is valid;
 - withdraw the deposit for an expired membership;
-- extend an expired membership.
+- get a merkle proof
+- get the merkle tree (root?)
 
-For the `Owner`, the contract provides the following additional functionality:
+For the _Contract Owner_, the contract provides the following additional functionality:
 - change the modifiable parameters (see parameter table below);
 - (TBD) freeze certain functionality (e.g., in case of an attack, stop new registrations, deposit withdrawals, etc).
 
@@ -57,7 +58,7 @@ In the initial deployment:
 
 ### Membership life-cycle
 
-To register a membership, a user puts locks up a deposit.
+To register a membership, a user locks up a deposit.
 Each membership has an expiration date.
 After a membership expires, it enters a grace period, during which the user can extend it.
 Extending a membership requires no additional deposit.
@@ -71,12 +72,12 @@ In more detail, the membership life-cycle is as follows:
 2. The user sends messages while the membership is active:
     1. If the user exceeds the rate limit, their over-limit messages are not propagated in that epoch; the deposit is not slashed.
 3. After the membership expires, the user can do one of the following:
-    1. Do nothing. The deposit remains in the contract, and the user retains the ability to send messages (respecting the per-epoch rate limit);
+    1. Do nothing. The deposit remains in the contract, and the user retains the ability to send messages (respecting the per-epoch rate limit); until another user takes their slot
     2. Withdraw the deposit. The user receives the full deposit back, and loses the ability to send messages;
     3. Extend the membership. The user sends a transaction to re-enable their membership for another expiration term. The user only covers gas costs and does not have to provide additional funds. The original deposit remains in the contract. The membership is prolonged for another expiration term under the same conditions.
 
 The user can extend the membership both during and after its grace period.
-By not extending the membership within its grace period, the user assumes the risk of the membership being taken over at any moment.
+By not extending the membership before the grace period expires, the user assumes the risk of the membership being taken over at any moment.
 
 A user can hold multiple memberships.
 Memberships are not transferable.
@@ -84,7 +85,7 @@ There is no limitation on the number of membership per user (apart from the glob
 
 ## Contract governance and mutability
 
-The contract governance is follows:
+The contract governance is as follows:
 
 1. the first deployment of the contract allows the `Owner` to modify certain parameters (TBD) under certain constraints (TBD);
 2. at some point, the `Onwer` would renounce their privileges, and the contract will become immutable;
