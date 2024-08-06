@@ -77,6 +77,8 @@ Please adhere to the following contribution guidelines:
 - use [semantic breaks](https://sembr.org/)
 - links to Waku, Vac or other [IFT](https://free.technology/)-related specifications must be to the corresponding Github repository and not to a webpage.
 For example, Waku specs reside in [waku-org/specs](https://github.com/waku-org/specs) and Vac RFCs in [vacp2p/rfc-index](https://github.com/vacp2p/rfc-index/).
+- we no longer use "v2" in the _name_ of new specifications (and existing spec names inconsistent with this rule will eventually be revised). For example, do not call your specification "Waku v2 New Protocol" but simply "Waku New Protocol"
+- the _title_ of new specifications must be prefixed with `WAKU2-` to differentiate it from other projects' specs and previous RFC generations. For example, "Waku New Protocol" could be titled `WAKU2-NEW-PROTOCOL`.
 
 New specifications are considered a proof of concept.
 Once a rough consensus is reached towards stabilization, 
