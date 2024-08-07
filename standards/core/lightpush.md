@@ -36,9 +36,9 @@ message LightPushRequest {
 
 message LightPushResponse {
     string request_id = 1;
-    uint32 status_code = 10; // non zero in case of failure, see appendix
+    uint32 status_code = 10; // has value 200 in case of success, see appendix
     optional string status_desc = 11;
-    optional uint32 relay_peer_count = 12; // number of peers, message is successfully relayed to 
+    optional uint32 relay_peer_count = 12; // number of peers, the message is successfully relayed to 
 }
 ```
 
@@ -47,7 +47,7 @@ message LightPushResponse {
 Nodes that respond to `LightPushRequest` SHOULD
 - either relay the encapsulated message via [11/WAKU2-RELAY](https://rfc.vac.dev/waku/standards/core/11/relay) protocol on the specified `pubsub_topic`<br>
 - or perform another requested service.
-  `Services beyond [11/WAKU2-RELAY](https://rfc.vac.dev/waku/standards/core/11/relay) are as yet underdefined.`
+  `Services beyond [11/WAKU2-RELAY](https://rfc.vac.dev/waku/standards/core/11/relay) are yet to be defined.`
 
 Depending on the network configuration, the lightpush client may not need to provide `pubsub_topic` ([WAKU2-RELAY-SHARDING](https://github.com/waku-org/specs/blob/master/standards/core/relay-sharding.md)).<br>
 
