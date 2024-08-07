@@ -40,19 +40,21 @@ It may also be explored as a revenue stream for Waku in later versions.
 
 ## Semantics
 
+This section is not intended to describe the full contract functionality.
+We only focus on functions required for managing memberships, expiration, deposits, etc.
+The document might later evolve into a full-fledged contract specification.
+
 The RLN contract provides the following functionalities:
 - register a membership in a given tier;
-- check if a membership is valid;
-- withdraw the deposit for an expired membership;
-- get a merkle proof
-- get the merkle tree (root?)
+- extend a membership;
+- withdraw the deposit for an expired membership.
 
 For the _Contract Owner_, the contract provides the following additional functionality:
 - change the modifiable parameters (see parameter table below);
 - (TBD) freeze certain functionality (e.g., in case of an attack, stop new registrations, deposit withdrawals, etc).
 
 In the initial deployment:
-- there is no slashing;
+- there is no slashing - that is, a user's deposit is not taken away in case of misbehavior;
 - membership expiration includes a grace period;
 - a user can extend their membership without putting up any additional deposit.
 
@@ -70,9 +72,9 @@ In more detail, the membership life-cycle is as follows:
     1. If there are expired unclaimed slots in the tree, use the slot with the earliest expiration date past its grace period, otherwise create a new slot;
     2. if the membership re-uses a previously used slot, the previous user can claim their deposit back.
 2. The user sends messages while the membership is active:
-    1. If the user exceeds the rate limit, their over-limit messages are not propagated in that epoch; the deposit is not slashed.
+    1. If the user exceeds the rate limit, their over-limit messages are not propagated; the deposit is not slashed.
 3. After the membership expires, the user can do one of the following:
-    1. Do nothing. The deposit remains in the contract, and the user retains the ability to send messages (respecting the per-epoch rate limit); until another user takes their slot
+    1. Do nothing. The deposit remains in the contract, and the user retains the ability to send messages (respecting the per-epoch rate limit) until another user takes their slot;
     2. Withdraw the deposit. The user receives the full deposit back, and loses the ability to send messages;
     3. Extend the membership. The user sends a transaction to re-enable their membership for another expiration term. The user only covers gas costs and does not have to provide additional funds. The original deposit remains in the contract. The membership is prolonged for another expiration term under the same conditions.
 
@@ -185,18 +187,6 @@ The current version of the contract (RLNv2) is deployed on Sepolia testnet ([sou
 ## Security / Privacy Considerations
 
 Requesting a Merkle proof for one's own membership through a third-party RPC provider may endanger the requester's privacy.
-
-## Future work
-
-In the future version of RLN contract, the following research directions might be pursued:
-- deposit slashing for misbehaving users;
-- extracting revenue by e.g. only allowing partial deposit withdrawal;
-- incentivization for relaying nodes;
-- non-proportional pricing (e.g., high-tier discounts);
-- accepting other tokens;
-- making memberships transferable (e.g., in the form of an NFT);
-- establishing a free relaying market by economically linking demand with supply;
-- countering potential centralization of membership ownership.
 
 ## Copyright
 
