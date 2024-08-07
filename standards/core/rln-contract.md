@@ -89,8 +89,8 @@ There is no limitation on the number of membership per user (apart from the glob
 
 The contract governance is as follows:
 
-1. the first deployment of the contract allows the `Owner` to modify certain parameters (TBD) under certain constraints (TBD);
-2. at some point, the `Onwer` would renounce their privileges, and the contract will become immutable;
+1. the first deployment of the contract allows the _Owner_ to modify certain parameters (TBD) under certain constraints (TBD);
+2. at some point, the _Owner_ SHOULD renounce their privileges, and the contract MUST become immutable;
 3. further upgrades, if necessary, can be done by deploying a new contract and migrating the membership set.
 
 ## Parameters
