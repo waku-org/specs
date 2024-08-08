@@ -41,49 +41,125 @@ It may also be explored as a revenue stream for Waku in later versions.
 ## Semantics
 
 This section is not intended to describe the full contract functionality.
-We only focus on functions required for managing memberships, expiration, deposits, etc.
+We only focus on functions required for managing memberships.
 The document might later evolve into a full-fledged contract specification.
 
 The RLN contract provides the following functionalities:
-- register a membership in a given tier;
+- register a membership;
 - extend a membership;
-- withdraw the deposit for an expired membership.
+- terminate the membership (withdraw the deposit).
 
 For the _Contract Owner_, the contract provides the following additional functionality:
 - change the modifiable parameters (see parameter table below);
 - (TBD) freeze certain functionality (e.g., in case of an attack, stop new registrations, deposit withdrawals, etc).
 
-In the initial deployment:
-- there is no slashing - that is, a user's deposit is not taken away in case of misbehavior;
-- membership expiration includes a grace period;
-- a user can extend their membership without putting up any additional deposit.
+The deposit is not taken away (slashed) for exceeding the rate limit.
 
-### Membership life-cycle
+### Membership lifecycle
 
-To register a membership, a user locks up a deposit.
-Each membership has an expiration date.
-After a membership expires, it enters a grace period, during which the user can extend it.
-Extending a membership requires no additional deposit.
-After the grace period, an expired membership can be taken over by another user.
-At any point, a user can withdraw their deposit and terminate the membership.
+A membership can be in one of the following states:
+- active;
+- grace-period;
+- expired;
+- erased.
 
-In more detail, the membership life-cycle is as follows:
-1. A user registers a membership:
-    1. If there are expired unclaimed slots in the tree, use the slot with the earliest expiration date past its grace period, otherwise create a new slot;
-    2. if the membership re-uses a previously used slot, the previous user can claim their deposit back.
-2. The user sends messages while the membership is active:
-    1. If the user exceeds the rate limit, their over-limit messages are not propagated; the deposit is not slashed.
-3. After the membership expires, the user can do one of the following:
-    1. Do nothing. The deposit remains in the contract, and the user retains the ability to send messages (respecting the per-epoch rate limit) until another user takes their slot;
-    2. Withdraw the deposit. The user receives the full deposit back, and loses the ability to send messages;
-    3. Extend the membership. The user sends a transaction to re-enable their membership for another expiration term. The user only covers gas costs and does not have to provide additional funds. The original deposit remains in the contract. The membership is prolonged for another expiration term under the same conditions.
+A user locks up a deposit to register a membership, which starts its lifecycle in the _active_ state.
+After the expiration term (see parameter table), a membership moves to the _grace period_ state.
+During grace period, the membership owner can either extend the membership or withdraw the deposit.
+Deposit withdrawal makes a _grace-period_ membership _expired_ immediately.
+Extension makes a _grace-period_ membership _active_ immediately.
+A _grace-period_ membership becomes _expired_ automatically after its grace period ends.
+The slot in the RLN tree of an _expired_ membership can be overridden by a new membership.
+An _expired_ membership becomes _erased_ when its tree slot is overridden.
 
-The user can extend the membership both during and after its grace period.
-By not extending the membership before the grace period expires, the user assumes the risk of the membership being taken over at any moment.
+The user can only extend their membership during its grace period.
+Otherwise, the user assumes the risk of the membership being erased at any moment.
 
-A user can hold multiple memberships.
+The user cannot withdraw their deposit from an _active_ membership.
+The rationale for this limitation is to prevent users from abusing the contract by making deposits and withdrawals in short succession.
+
 Memberships are not transferable.
-There is no limitation on the number of membership per user (apart from the global limits, see parameter table).
+One Ethereum address MAY register multiple memberships.
+One Waku node MAY manage multiple memberships,
+although this functionality is not yet implemented.
+
+Availability of user functionalities depending on the membership state is as follows:
+
+|                       | Active | Grace Period | Expired | Erased |
+| --------------------- | ------ | ------------ | ------- | ------ |
+| Send a message        | Yes    | Yes          | Yes     | No     |
+| Extend the membership | No     | Yes          | No      | No     |
+| Withdraw the deposit  | No     | Yes          | Yes     | Yes    |
+
+Note that the user can still send messages when their membership is _expired_.
+This is explained by the fact that Relay nodes cannot verify the state of the membership, only its presence in the RLN tree.
+_Expired_ memberships are not erased from the tree proactively, as this would require someone to send a transaction and pay the gas costs.
+Instead, an _expired_ memberships is only erased when a new memberships overtakes its slot.
+We expect that an honest user would not want to risk their membership being erased at any time, and would either extend or terminate it during its grace period.
+
+We do not allow extending an _active_ membership.
+The rationale here is that if the _Owner_ changes some contract parameters (e.g., for security purposes),
+users with extended memberships will not be affected by the changes for a long time.
+
+### User actions
+
+In more detail, user actions are handled as follows.
+
+#### Register a membership
+
+Registering a membership:
+1. Check whether there are _expired_ memberships.
+	1. If there are _expired_ memberships:
+		1. Select the _expired_ membership with the earliest end of its grace period;
+		2. Move that membership to the _erased_ state;
+		3. Create a new _active_ membership using the erased membership's tree slot.
+	2. If there are no _expired_ memberships, check whether the total limits are respected.
+		1. If the new membership would exceed the maximum total number of _active_, _grace-period_, and _expired_ memberships, fail the registration;
+		2. If the new membership would exceed the maximum total rate limit of _active_, _grace-period_, and _expired_ memberships, fail the registration;
+		3. Otherwise, create a new membership in the _active_ state.
+
+#### Send a message
+
+Note: when sending a message, the user only interacts with a Relay node, not with the smart contract.
+The Relay node, in turn, interacts with the smart contract to check the user-provided RLN proof.
+
+Sending a message:
+1. If the message is committed to a different epoch than the current epoch, drop the message;
+2. If the user has exceed their allowed rate limit for the current epoch, drop the message;
+3. If the RLN proof fails, drop the message;
+4. Otherwise, propagate the message.
+
+#### Extend a membership
+
+(TBD) The contract doesn't check whether the transaction sender is the owner of the membership in question.
+In other words, any user is permitted to extend any _grace-period_ membership.
+
+Note: an attacker can extend other users' _grace-period_ memberships without their consent,
+which has at least two negative consequences:
+1. users who planned to withdraw their deposit later would have to wait for another membership term;
+2. if an attacker extends many memberships, the cap on total active rate limit can be exceeded, preventing the registration of new memberships.
+
+Extending a membership:
+1. Check whether the membership is in its _grace-period_ state:
+	1. If it is not, fail the transaction;
+	2. Otherwise, mark the membership as _active_.
+
+#### Withdraw the deposit
+
+Withdrawing the deposit:
+1. (TBD) Check whether the user is the "owner" of the membership:
+	1. If not, fail the transaction;
+	2. Otherwise, continue.
+2. Check whether the membership is in one of the states that allow withdrawal:
+	1. If not, fail the transaction;
+	2. Otherwise, continue.
+3. Check whether the deposit has not yet been withdrawn:
+	1. If not, fail the transaction;
+	2. Otherwise, withdraw the deposit.
+
+(TBD) If an _expired_ membership becomes _erased_,
+and its deposit has not been withdrawn,
+data is saved in the smart contract that would allow the user to withdraw the deposit later.
 
 ## Contract governance and mutability
 
@@ -111,7 +187,7 @@ For the initial deployment, we suggest the following values.
 | Rate limit for low-tier                                   | `R_{low}`  | `20`    | messages per `epoch`                                                                 | TBD         |                                |
 | Rate limit for mid-tier                                   | `R_{mid}`  | `200`   | messages per `epoch`                                                                 | TBD         |                                |
 | Rate limit for high-tier                                  | `R_{high}` | `600`   | messages per `epoch`                                                                 | TBD         |                                |
-| Unit price                                                | `p_u`      | TBD     | `USD` per `1` message per `epoch` for the duration of one membership expiration term | Yes         |                                |
+| Unit price                                                | `p_u`      | `0.01`  | `USD` per `1` message per `epoch` for the duration of one membership expiration term | Yes         |                                |
 | Membership expiration term                                | `T`        | `90`    | days                                                                                 | Yes         |                                |
 | Grace period                                              | `G`        | `30`    | days                                                                                 | Yes         |                                |
 
@@ -172,13 +248,10 @@ Other tokens may be added in the future.
 
 #### Grace period and membership extension
 
-On the one hand, memberships must expire,
-otherwise a one-time payment would give a user the right to potentially infinite resource usage.
-On the other hand, the “soft” expiration suggested above is likely sufficient
-while balancing abuse prevention and ease of implementation:
-
-- although extending a membership doesn’t require a new deposit, keeping the original deposit locked up plus paying gas fees imposes cost on membership extension;
-- a legitimate user is unlikely to risk their membership being taken over at any moment by not renewing their membership.
+Membership extension does not require a new deposit.
+However, the opportunity cost of locked-up capital plus gas fees for extension transactions make extensions non-free.
+Moreover, a legitimate user is unlikely to risk their membership being taken over at any moment by not renewing their membership.
+We argue that no new deposit requirement for membership extension is sufficient for the initial mainnet deployment.
 
 ## Implementation Suggestions
 
