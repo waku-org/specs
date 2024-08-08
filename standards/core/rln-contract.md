@@ -38,7 +38,7 @@ In particular, the contract would require users to put down a deposit.
 The aim of the deposit initially is purely to protect the system from denial-of-service attacks using bandwidth capping.
 It may also be explored as a revenue stream for Waku in later versions.
 
-## Semantics
+## Membership lifecycle
 
 This section is not intended to describe the full contract functionality.
 We only focus on functions required for managing memberships.
@@ -55,13 +55,24 @@ For the _Contract Owner_, the contract provides the following additional functio
 
 The deposit is not taken away (slashed) for exceeding the rate limit.
 
-### Membership lifecycle
+## Membership state transitions
 
 A membership can be in one of the following states:
 - active;
 - grace-period;
 - expired;
 - erased.
+
+```mermaid
+graph TD;
+    NonExistent --> |"register"| Active;
+    Active --> |"+90 days"| GracePeriod;
+    GracePeriod --> |"extend"| Active;
+    GracePeriod --> |"+30 days"| Expired;
+    GracePeriod --> |"withdraw"| Expired;
+    Expired --> |"reuse_slot"| Erased;
+
+```
 
 A user locks up a deposit to register a membership, which starts its lifecycle in the _active_ state.
 After the expiration term (see parameter table), a membership moves to the _grace period_ state.
@@ -100,6 +111,10 @@ We expect that an honest user would not want to risk their membership being eras
 We do not allow extending an _active_ membership.
 The rationale here is that if the _Owner_ changes some contract parameters (e.g., for security purposes),
 users with extended memberships will not be affected by the changes for a long time.
+
+Membership states are updated lazily in the contract.
+Before handling any membership-specific function, the contract MUST check if the membership's state is outdated and update it as necessary.
+
 
 ### User actions
 
