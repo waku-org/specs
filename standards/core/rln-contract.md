@@ -96,14 +96,18 @@ Further upgrades, if necessary, SHOULD be done by deploying a new contract and m
 Membership registration is subject to the following conditions:
 - if there are _expired_ memberships in the contract, the new membership MUST overwrite an expired membership;
 - the new membership SHOULD overwrite the membership that had been in _expired_ state for the longest time;
-- if the new membership overwrites another membership, the latter MUST transition from _expired_ to _erased_ state;
+- if the new membership overwrites another membership:
+	- the latter MUST transition from _expired_ to _erased_ state;
+	- the current total rate limit MUST be decremented by the rate limit of the newly _erased_ membership;
 - if the deposit from the newly _erased_ membership has not been withdrawn, the contract MUST take all necessary steps to ensure that the owner of that membership can withdraw their deposit later;
 - registration MUST fail if the total rate limit of _active_, _grace-period_, and _expired_ memberships, including the one being created, would exceed the limit;
 - registration MUST fail if the requested rate limit for the new membership is lower than allowed;
 - the user MUST lock-up a deposit to register a membership;
 - the user MUST specify the requested rate limit of the new membership;
 - the size of the deposit MUST be calculated depending on the requested rate limit;
-- in case of successful registration, the new membership MUST be in _active_ state;
+- in case of successful registration:
+	- the new membership MUST be in _active_ state;
+	- the current total rate limit MUST be incremented by the rate limit of the new membership;
 - a newly created membership MUST have an expiration time `T` and a grace period `G` (suggested values listed below).
 
 ### Send a message
