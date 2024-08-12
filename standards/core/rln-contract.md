@@ -114,7 +114,7 @@ Membership registration is subject to the following conditions:
 - if an _Expired_ membership A is overwritten by membership B:
 	- membership B MUST transition to _ErasedAwaitsWithdrawal_;
 	- the current total rate limit MUST be decremented by the rate limit of membership B;
-	- the contract MUST take all necessary steps to ensure that the owner of membership B can withdraw their deposit later;
+	- the contract MUST take all necessary steps to ensure that the holder of membership B can withdraw their deposit later;
 - registration MUST fail if the total rate limit of _Active_, _GracePeriod_, and _Expired_ memberships, including the one being created, would exceed the limit;
 - registration MUST fail if the requested rate limit for the new membership is lower than the minimal allowed rate limit;
 - the user MUST lock-up a deposit to register a membership;
@@ -140,8 +140,8 @@ A Relay node MUST relay a message unless:
 
 Extending a membership is subject to the following condition:
 - extension MUST fail if the membership is in any state other than _GracePeriod_;
-- the membership owner MUST be able to extend the membership;
-- any user except the membership owner MUST NOT be able to extend the membership;
+- the membership holder MUST be able to extend their membership;
+- any user except the membership holder MUST NOT be able to extend a membership;
 - after a successful extension, the membership MUST become _Active_.
 
 Owning a membership means controlling the private key from which the RLN commitment ID (i.e., public key) was derived.
@@ -149,8 +149,8 @@ Owning a membership means controlling the private key from which the RLN commitm
 ### Withdraw the deposit
 
 Deposit withdrawal is subject to the following conditions:
-- the owner of a membership MUST be able to withdraw their deposit;
-- any user except the membership owner MUST NOT be able to withdraw its deposit;
+- the membership holder MUST be able to withdraw their deposit;
+- any user except the membership holder MUST NOT be able to withdraw its deposit;
 - a deposit MUST be withdrawn in full;
 - a withdrawal MUST fail if the membership is not in _GracePeriod_, _Expired_, or _ErasedAwaitsWithdrawal_;
 - any withdrawal MUST move the membership to _Erased_.
