@@ -28,12 +28,42 @@ as well as to get the data necessary for proof generation and verification.
 To relay a message:
 - the sender MUST register a membership in a smart contract;
 - the sender MUST attach a ZK-proof of membership to every message;
-- each relaying node MUST drop the message if:
-	- the proof is invalid; or
-	- the sender has exceeded their rate limit within the current epoch.
+- each relaying node MUST relay a message unless:
+	- the message is committed to a different epoch than the current epoch; or
+	- the user has exceed their allowed rate limit for the current epoch; or
+	- the RLN proof fails to prove that the message sender holds a membership.
+
+Sending messages is handled by Waku Relay nodes, not by the RLN smart contract.
+The full specification of Relay node behavior is out of scope for this document.
 
 RLN is only deployed on Sepolia testnet as of August 2024.
 This document aims to outline the path to its mainnet deployment.
+
+## Contract overview
+
+The contract MUST provide the following functionalities:
+- register a membership;
+- extend a membership;
+- withdraw a deposit.
+
+Availability of membership-specific functionalities MUST be as follows:
+
+|                       | Active | Grace Period | Expired | ErasedAwaitsWithdrawal | Erased |
+| --------------------- | ------ | ------------ | ------- | ---------------------- | ------ |
+| Send a message        | Yes    | Yes          | Yes     | No                     | No     |
+| Extend the membership | No     | Yes          | No      | No                     | No     |
+| Withdraw the deposit  | No     | Yes          | Yes     | Yes                    | No     |
+
+Contract parameters and their RECOMMENDED values are as follows:
+
+| Parameter                                   | Symbol    | Value   | Units                              |
+| ------------------------------------------- | --------- | ------- | ---------------------------------- |
+| Epoch length                                | `epoch`   | `10`    | minutes                            |
+| Maximum total rate limit of all memberships | `R_{max}` | `20000` | messages per `epoch`               |
+| Minimal rate limit of one membership        | `r_{min}` | `20`    | messages per `epoch`               |
+| Price of `1` message per epoch              | `p_u`     | `0.01`  | `USD` per one period of length `T` |
+| Membership expiration term                  | `T`       | `90`    | days                               |
+| Membership grace period                     | `G`       | `30`    | days                               |
 
 ## Membership lifecycle
 
@@ -74,37 +104,14 @@ Memberships MUST be included in the RLN tree according to the following table:
 | ErasedAwaitsWithdrawal | No                   |
 | Erased                 | No                   |
 
-
 Memberships MUST NOT be transferable.
-One Ethereum address MAY register multiple memberships.
-One Waku node MAY manage multiple memberships
-(this functionality is not yet implemented as of August 2024).
+A user MAY use one Ethereum address to manage multiple memberships.
+A user MAY use one Waku node to manage multiple memberships. ^1
+
+[^1]: No Waku implementation supports managing multiple memberships from one node (as of August 2024).
+
 
 ## Contract functionalities
-
-The contract MUST provide the following functionalities:
-- register a membership;
-- extend a membership;
-- withdraw a deposit.
-
-Availability of membership-specific functionalities MUST be as follows:
-
-|                       | Active | Grace Period | Expired | ErasedAwaitsWithdrawal | Erased |
-| --------------------- | ------ | ------------ | ------- | ---------------------- | ------ |
-| Send a message        | Yes    | Yes          | Yes     | No                     | No     |
-| Extend the membership | No     | Yes          | No      | No                     | No     |
-| Withdraw the deposit  | No     | Yes          | Yes     | Yes                    | No     |
-### Governance and upgradability
-
-At initial mainnet deployment, the contract MUST have an _Owner_ with the following additional functionalities:
-- change any of the modifiable parameters, as listed in the Parameter table;
-- disable any of the following contract functionalities:
-	- register a membership;
-	- extend a membership;
-	- (TBD) withdraw a deposit.
-
-At some point, the _Owner_ SHOULD renounce their privileges, and the contract MUST become immutable.
-Further upgrades, if necessary, SHOULD be done by deploying a new contract and migrating the membership set.
 
 ### Register a membership
 
@@ -125,17 +132,6 @@ Membership registration is subject to the following conditions:
 	- the current total rate limit MUST be incremented by the rate limit of the new membership;
 - a newly created membership MUST have an expiration time `T` and a grace period `G` (see RECOMMENDED parameter values below).
 
-### Send a message
-
-Sending messages is handled by Waku Relay nodes, not by the RLN smart contract.
-For completeness, sending messages is mentioned here as the key Waku functionality.
-The full specification of Relay node behavior is out of scope for this document.
-
-A Relay node MUST relay a message unless:
-- the message is committed to a different epoch than the current epoch; or
-- the user has exceed their allowed rate limit for the current epoch; or
-- the RLN proof fails to prove that the message sender owns an existing membership.
-
 ### Extend a membership
 
 Extending a membership is subject to the following condition:
@@ -155,31 +151,38 @@ Deposit withdrawal is subject to the following conditions:
 - a withdrawal MUST fail if the membership is not in _GracePeriod_, _Expired_, or _ErasedAwaitsWithdrawal_;
 - any withdrawal MUST move the membership to _Erased_.
 
+## Governance and upgradability
+
+At initial mainnet deployment, the contract MUST have an _Owner_.
+The _Owner_ MUST be able to change the values of all contract parameters.
+The _Owner_ MUST be able to pause any of the following contract functionalities:
+	- register a membership;
+	- extend a membership;
+	- withdraw a deposit.
+
+At some point, the _Owner_ SHOULD renounce their privileges, and the contract MUST become immutable.
+Further upgrades, if necessary, SHOULD be done by deploying a new contract and migrating the membership set.
+
 ## Implementation Suggestions
 
 The current version of the contract (RLNv2) is deployed on Sepolia testnet ([source code](https://github.com/waku-org/waku-rlnv2-contract/blob/main/src/WakuRlnV2.sol)).
 
-The RECOMMENDED parameter values for the initial mainnet deployment are listed in the following table.
-All parameter values MUST be modifiable by the contract _Owner_.
-
-| Parameter                                   | Symbol    | Value   | Units                              |
-| ------------------------------------------- | --------- | ------- | ---------------------------------- |
-| Epoch length                                | `epoch`   | `10`    | minutes                            |
-| Maximum total rate limit of all memberships | `R_{max}` | `20000` | messages per `epoch`               |
-| Minimal rate limit of one membership        | `r_{min}` | `20`    | messages per `epoch`               |
-| Price of `1` message per epoch              | `p_u`     | `0.01`  | `USD` per one period of length `T` |
-| Membership expiration term                  | `T`       | `90`    | days                               |
-| Membership grace period                     | `G`       | `30`    | days                               |
-| Accepted tokens                             |           | `DAI`   |                                    |
-| Reference currency                          |           | `USD`   |                                    |
-| Pricing function                            |           | linear  |                                    |
-
-Applications MAY suggest the following rate limits to their users:
+User-facing application SHOULD suggest a few rate limits (tiers) to simplify their users' choice.
+The RECOMMENDED rate limits in a three-tier model are as follows:
 - `20` messages per epoch as low-tier;
 - `200` messages per epoch as mid-tier;
 - `600` messages per epoch as high-tier.
+Users SHOULD be able to select a custom rate limit under advanced settings.
 
-The user-facing application SHOULD save the expiration date in its local keystore during membership registration,
+The RECOMMENDED pricing parameters are:
+
+| Parameter          | Value  |
+| ------------------ | ------ |
+| Accepted tokens    | `DAI`  |
+| Reference currency | `USD`  |
+| Pricing function   | linear |
+
+User-facing applications SHOULD save membership expiration dates in a local keystore during registration,
 and notify the user when their membership is about to expire.
 
 ## Q&A
