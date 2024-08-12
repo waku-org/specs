@@ -38,11 +38,11 @@ This document aims to outline the path to its mainnet deployment.
 ## Membership lifecycle
 
 Any existing membership MUST always be in exactly one of the following states:
-- active;
-- grace-period;
-- expired;
-- erased-awaits-withdrawal;
-- erased.
+- _Active_;
+- _GracePeriod_;
+- _Expired_;
+- _ErasedAwaitsWithdrawal_;
+- _Erased_.
 
 ```mermaid
 graph TD;
@@ -52,17 +52,28 @@ graph TD;
     GracePeriod --> |"time `G` passed"| Expired;
     GracePeriod --> |"withdraw"| Erased;
     Expired --> |"withdraw"| Erased;
-    Expired --> |"reuse_slot"| ErasedAwaitsWithdrawal;
+    Expired --> |"another membership reuses slot"| ErasedAwaitsWithdrawal;
     ErasedAwaitsWithdrawal --> |"withdraw"| Erased;
 
 ```
 
-State updates triggered by a transaction MUST be updated immediately.
-State updates defined by time progression MAY be updated lazily.
-Before providing any membership-specific functionality, the contract MUST:
+State updates triggered by a transaction MUST be applied immediately.
+State updates defined by time progression MAY be applied lazily.
+When providing any membership-specific functionality, the contract MUST:
 - check whether the state of the membership involved is up-to-date;
 - if necessary, update the membership state;
 - process the transaction in accordance with the up-to-date membership state.
+
+Memberships MUST be included in the RLN tree according to the following table:
+
+| State                  | Included in the tree |
+| ---------------------- | -------------------- |
+| Active                 | Yes                  |
+| GracePeriod            | Yes                  |
+| Expired                | Yes                  |
+| ErasedAwaitsWithdrawal | No                   |
+| Erased                 | No                   |
+
 
 Memberships MUST NOT be transferable.
 One Ethereum address MAY register multiple memberships.
@@ -98,26 +109,26 @@ Further upgrades, if necessary, SHOULD be done by deploying a new contract and m
 ### Register a membership
 
 Membership registration is subject to the following conditions:
-- if there are _expired_ memberships in the contract, the new membership MUST overwrite an expired membership;
-- the new membership SHOULD overwrite the membership that had been in _expired_ state for the longest time;
-- if the new membership overwrites another membership:
-	- the latter MUST transition from _expired_ to _erased-awaits-withdrawal_ state;
-	- the current total rate limit MUST be decremented by the rate limit of the newly _erased-awaits-withdrawal_ membership;
-- when moving a membership into _erased-awaits-withdrawal_ state, the contract MUST take all necessary steps to ensure that the owner of that membership can withdraw their deposit later;
-- registration MUST fail if the total rate limit of _active_, _grace-period_, and _expired_ memberships, including the one being created, would exceed the limit;
-- registration MUST fail if the requested rate limit for the new membership is lower than allowed;
+- if there are _Expired_ memberships in the contract, the new membership MUST overwrite an expired membership;
+- the new membership SHOULD overwrite the membership that had been _Expired_ for the longest time;
+- if an _Expired_ membership A is overwritten by membership B:
+	- membership B MUST transition to _ErasedAwaitsWithdrawal_;
+	- the current total rate limit MUST be decremented by the rate limit of membership B;
+	- the contract MUST take all necessary steps to ensure that the owner of membership B can withdraw their deposit later;
+- registration MUST fail if the total rate limit of _Active_, _GracePeriod_, and _Expired_ memberships, including the one being created, would exceed the limit;
+- registration MUST fail if the requested rate limit for the new membership is lower than the minimal allowed rate limit;
 - the user MUST lock-up a deposit to register a membership;
-- the user MUST specify the requested rate limit of the new membership;
+- the user MUST specify the rate limit of the new membership;
 - the size of the deposit MUST be calculated depending on the requested rate limit;
 - in case of successful registration:
-	- the new membership MUST be in _active_ state;
+	- the new membership MUST be in the _Active_ state;
 	- the current total rate limit MUST be incremented by the rate limit of the new membership;
-- a newly created membership MUST have an expiration time `T` and a grace period `G` (suggested values listed below).
+- a newly created membership MUST have an expiration time `T` and a grace period `G` (see RECOMMENDED parameter values below).
 
 ### Send a message
 
 Sending messages is handled by Waku Relay nodes, not by the RLN smart contract.
-For completeness, sending messages is mentioned below where relevant as one of broader Waku functionalities.
+For completeness, sending messages is mentioned here as the key Waku functionality.
 The full specification of Relay node behavior is out of scope for this document.
 
 A Relay node MUST relay a message unless:
@@ -128,10 +139,10 @@ A Relay node MUST relay a message unless:
 ### Extend a membership
 
 Extending a membership is subject to the following condition:
-- extension MUST fail if the membership is in any state other than _grace-period_;
+- extension MUST fail if the membership is in any state other than _GracePeriod_;
 - the membership owner MUST be able to extend the membership;
 - any user except the membership owner MUST NOT be able to extend the membership;
-- after a successful extension, the membership MUST become _active_.
+- after a successful extension, the membership MUST become _Active_.
 
 Owning a membership means controlling the private key from which the RLN commitment ID (i.e., public key) was derived.
 
@@ -139,10 +150,10 @@ Owning a membership means controlling the private key from which the RLN commitm
 
 Deposit withdrawal is subject to the following conditions:
 - the owner of a membership MUST be able to withdraw their deposit;
-- a deposit MUST be withdrawn in full;
 - any user except the membership owner MUST NOT be able to withdraw its deposit;
-- a withdrawal MUST fail if the membership is in any state other than _grace-period_, _expired_, or _erased-awaits-withdrawal_;
-- any withdrawal MUST move the membership it into the _erased_ state.
+- a deposit MUST be withdrawn in full;
+- a withdrawal MUST fail if the membership is not in _GracePeriod_, _Expired_, or _ErasedAwaitsWithdrawal_;
+- any withdrawal MUST move the membership to _Erased_.
 
 ## Implementation Suggestions
 
@@ -168,33 +179,38 @@ Applications MAY suggest the following rate limits to their users:
 - `200` messages per epoch as mid-tier;
 - `600` messages per epoch as high-tier.
 
+The user-facing application SHOULD save the expiration date in its local keystore during membership registration,
+and notify the user when their membership is about to expire.
+
 ## Q&A
 
-### Why can't I withdraw a deposit from an _active_ membership?
+### Why can't I withdraw a deposit from an _Active_ membership?
 
 The rationale for this limitation is to prevent an undesirable usage pattern where users make deposits and withdrawals in short succession.
 
-### Why can't I extend an active membership?
+### Why can't I extend an _Active_ membership?
 
-We do not allow extending an _active_ membership.
-The rationale here is that if the _Owner_ changes some contract parameters (e.g., for security purposes),
+Memberships can only be extended during _GracePeriod_.
+We do not allow extending an _Active_ membership.
+The rationale is that if the _Owner_ changes some contract parameters (e.g., for security purposes),
 users with extended memberships will not be affected by the changes for a long time.
 
-### What happens if I don't extend my membership during its grace period?
+### What if I don't extend my membership within its _GracePeriod_?
 
-The user who does not extend their membership during its grace period, assumes the risk of the membership being overwritten at any moment.
-We expect that most honest users would not want to take that risk and would either extend their memberships or withdraw their deposits during the grace period.
+The user who does not extend their _GracePeriod_ membership, assumes the risk of the membership being overwritten at any moment.
+We expect that most users would not want to take that risk and would either extend their memberships or withdraw their deposits.
 
-### Can I send messages after my membership expires?
+### Can I send messages when my membership is _Expired_?
 
-A membership allows sending messages for some time after expiry.
+An _Expired_ membership allows sending messages for some time.
 
 Sending messages is managed by Relay nodes, not by RLN contract.
 The RLN proof that message senders provide to Relay nodes only proves whether the sender owns _some_ membership included in the RLN tree.
 The sender cannot prove the state of that membership.
 
 _Expired_ memberships are not erased from the tree proactively.
-An expired membership is only erased when either a new membership overwrites it, or when its deposit is withdrawn.
+An _Expired_ membership is only erased when either a new membership overwrites it, or when its deposit is withdrawn.
+After a membership is erased, it can no longer be used for sending messages.
 
 ### Will my deposit be slashed if I exceed the rate limit?
 
@@ -275,9 +291,6 @@ Copyright and related rights waived via [CC0](https://creativecommons.org/public
 - [11/WAKU2-RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md)
 - [17/WAKU2-RLN-RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/17/rln-relay.md)
 
-
-
----
 
 
 
