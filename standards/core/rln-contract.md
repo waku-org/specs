@@ -111,6 +111,7 @@ Availability of membership-specific functionalities MUST be as follows:
 | Send a message        | Yes    | Yes         | Yes     | No                     | No     |
 | Extend the membership | No     | Yes         | No      | No                     | No     |
 | Withdraw the deposit  | No     | Yes         | Yes     | Yes                    | No     |
+
 Sending a message is included here for completeness,
 although it is part of the Relay protocol and not the RLN contract.
 
