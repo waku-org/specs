@@ -59,6 +59,7 @@ This repository contains specifications for the Waku suite of protocols.
 |[30/ADAPTIVE-NODES](https://github.com/vacp2p/rfc-index/blob/main/waku/informational/30/adaptive-nodes.md)| Adaptive Nodes |
 |[ADVERSARIAL-MODELS](informational/adversarial-models.md)| Waku Adversarial Models and Attack-based Threat List |
 |[RELAY-STATIC-SHARD-ALLOC](informational/relay-static-shard-alloc.md)| Waku Relay Static Shard Allocation |
+|[MVDS-STATUS](informational/status-mvds.md)| MVDS Usage in Status App |
 
 ## Resources
 Relevant Waku resources related to the specifications located in this repository:
