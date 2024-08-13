@@ -239,7 +239,7 @@ On the one hand, longer epochs allow for better accommodating short-term usage p
 On the other hand, long epochs increases memory requirements for Relay nodes.
 
 Each message contains a nullifier that proves its validity in terms of RLN.
-Each Relay node must keeps in memory a nullifier log for the current epoch.
+Each Relay node must keep in memory a nullifier log for the current epoch.
 Each nullifier plus metadata is `128` bytes (per message).
 With a `10`-minute epoch, one high-tier user with a `1` message per second rate limit generates up to `600 * 128 / 1024 = 75 KiB` of nullifier log data per epoch.
 This corresponds to:
