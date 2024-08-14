@@ -30,6 +30,9 @@ faster than through a single discovery method.
 Please refers to the [libp2p spec](https://github.com/libp2p/specs/blob/master/rendezvous/README.md#rendezvous-protocol).
 
 ## Theory
+The namespaces used to register and request will be in the format 'rs/cluster-id/shard'.
+A registration or request consist of all the shards a nodes supports and their corresponding namespaces.
+
 Every [Waku Relay](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md) node will be initialized also as a rendezvous point.
 Each relay node will register with a random rendezvous point every 10 seconds.
 Each registration will expire after 1 minute.
@@ -42,7 +45,6 @@ minimize the load on rendezvous points.
 It is assumed that other discovery methods are used in conjunction and
 will continue discovering peers for the lifetime of the node.
 
-The namespaces used to register and request will be in the format '/waku/rs/cluster-id/shard'.
-A registration consist of all the shards a nodes supports and their corresponding namespaces.
+## Future Work
 
-Namespaces will not contain capabilities yet but may in the future.
+Namespaces will not contain capabilities yet but may in the future. If the need arise nodes could use rendezvous to discover peers with specific capabilities.
