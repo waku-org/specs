@@ -20,6 +20,10 @@ It might later evolve into a full-fledged contract specification.
 RLN is only deployed on Sepolia testnet ([source code](https://github.com/waku-org/waku-rlnv2-contract/blob/main/src/WakuRlnV2.sol)) as of August 2024.
 This document aims to outline the path to its mainnet deployment.
 
+## Syntax
+
+The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “NOT RECOMMENDED”, “MAY”, and “OPTIONAL” in this document are to be interpreted as described in [RFC 2119](https://www.ietf.org/rfc/rfc2119.txt).
+
 ## Background
 
 Rate-Limiting Nullifier (RLN) is a ZK-based gadget used for privacy-preserving rate limiting in Waku.
@@ -28,14 +32,10 @@ The smart contract stores the RLN tree that contains all currently existing memb
 Users interact with the contract to manage their memberships
 and to get the necessary data for proof generation and verification.
 
-Sending messages is handled by Waku Relay nodes.
-To send a message, the sender MUST attach a ZK-proof to the message.
-A Relay node MUST relay a message unless:
-- the message belongs to any epoch other than the current one; or
-- the user has exceed their allowed rate limit for the current epoch; or
-- the ZK-proof fails to prove that the sender holds a membership.
-
-The full specification of Relay is out of scope for this document.
+Sending messages is handled by Waku RLN Relay nodes.
+To send a message, the sender MUST prove its validity in terms of RLN.
+An RLN Relay node MUST relay a message unless it is invalid.
+See [17/WAKU2-RLN-RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/17/rln-relay.md) for the full specification of RLN Relay.
 
 ## Contract overview
 
@@ -113,7 +113,7 @@ Availability of membership-specific functionalities MUST be as follows:
 | Withdraw the deposit  | No     | Yes         | Yes     | Yes                    | No     |
 
 Sending a message is included here for completeness,
-although it is part of the Relay protocol and not the RLN contract.
+although it is part of the RLN Relay protocol and not the RLN contract.
 
 ### Register a membership
 
@@ -210,8 +210,8 @@ and would either extend their memberships or withdraw their deposits.
 ### Can I send messages when my membership is _Expired_?
 
 An _Expired_ membership allows sending messages for some time.
-Sending messages is managed by Relay nodes.
-The RLN proof that message senders provide to Relay nodes doesn't prove the state of that membership.
+Sending messages is managed by RLN Relay nodes.
+The RLN proof that message senders provide to RLN Relay nodes doesn't prove the state of that membership.
 
 _Expired_ memberships are not erased from the tree proactively.
 An _Expired_ membership is only erased when either a new membership overwrites it,
@@ -236,10 +236,10 @@ There is a trade-off between short and long epochs.
 We chose an epoch length of `10` minutes as a reasonable middle-ground.
 
 On the one hand, longer epochs allow for better accommodating short-term usage peaks.
-On the other hand, long epochs increases memory requirements for Relay nodes.
+On the other hand, long epochs increases memory requirements for RLN Relay nodes.
 
 Each message contains a nullifier that proves its validity in terms of RLN.
-Each Relay node must keep in memory a nullifier log for the current epoch.
+Each RLN Relay node must keep in memory a nullifier log for the current epoch.
 Each nullifier plus metadata is `128` bytes (per message).
 With a `10`-minute epoch, one high-tier user with a `1` message per second rate limit generates up to `600 * 128 / 1024 = 75 KiB` of nullifier log data per epoch.
 This corresponds to:
