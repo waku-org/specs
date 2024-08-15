@@ -52,7 +52,7 @@ Contract parameters and their RECOMMENDED values for the initial mainnet deploym
 | Maximum total rate limit of all memberships | `R_{max}` | `20000` | messages per `epoch`               |
 | Minimal rate limit of one membership        | `r_{min}` | `20`    | messages per `epoch`               |
 | Price of `1` message per epoch              | `p_u`     | `0.01`  | `USD` per one period of length `T` |
-| Membership expiration term                  | `T`       | `90`    | days                               |
+| Membership expiration term                  | `T`       | `180`   | days                               |
 | Membership grace period                     | `G`       | `30`    | days                               |
 
 ## Membership lifecycle
@@ -67,9 +67,9 @@ Any existing membership MUST always be in exactly one of the following states:
 ```mermaid
 graph TD;
     NonExistent --> |"register"| Active;
-    Active --> |"time T passed"| GracePeriod;
+    Active -.-> |"time T passed"| GracePeriod;
     GracePeriod --> |"extend"| Active;
-    GracePeriod --> |"time G passed"| Expired;
+    GracePeriod -.-> |"time G passed"| Expired;
     GracePeriod --> |"withdraw"| Erased;
     Expired --> |"withdraw"| Erased;
     Expired --> |"another membership reuses slot"| ErasedAwaitsWithdrawal;
@@ -204,8 +204,8 @@ users with extended memberships will not be affected by the changes for a long t
 
 The user who does not extend their _GracePeriod_ membership, 
 assume the risk of the membership being overwritten at any moment.
-We expect that most users would not want to take that risk 
-and would either extend their memberships or withdraw their deposits.
+We expect, generally, that a user would not want to take that risk 
+and would either extend their membership or withdraw their deposit.
 
 ### Can I send messages when my membership is _Expired_?
 
