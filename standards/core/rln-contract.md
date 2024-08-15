@@ -192,6 +192,7 @@ and notify the user when their membership is about to expire.
 ### Why can't I withdraw a deposit from an _Active_ membership?
 
 The rationale for this limitation is to prevent an undesirable usage pattern where users make deposits and withdrawals in short succession.
+Such pattern may lead to network instability and should be carefully studied if seen as desirable.
 
 ### Why can't I extend an _Active_ membership?
 
