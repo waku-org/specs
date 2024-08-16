@@ -169,12 +169,10 @@ Further upgrades, if necessary, SHOULD be done by deploying a new contract and m
 
 ## Implementation Suggestions
 
-User-facing application SHOULD suggest a few rate limits (tiers) to simplify their users' choice.
-The RECOMMENDED rate limits in a three-tier model are as follows:
+User-facing application SHOULD suggest one or a few rate limits (tiers) to simplify their users' choice among the following RECOMMENDED rate limits:
 - `20` messages per epoch as low-tier;
 - `200` messages per epoch as mid-tier;
 - `600` messages per epoch as high-tier.
-Users SHOULD be able to select a custom rate limit under advanced settings.
 
 The RECOMMENDED pricing parameters are:
 
