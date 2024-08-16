@@ -51,7 +51,7 @@ Contract parameters and their RECOMMENDED values for the initial mainnet deploym
 | Epoch length                                | `epoch`   | `10`    | minutes              |
 | Maximum total rate limit of all memberships | `R_{max}` | `20000` | messages per `epoch` |
 | Minimal rate limit of one membership        | `r_{min}` | `20`    | messages per `epoch` |
-| Membership price for `1` message per epoch  | `p_u`     | `0.01`  | `USD`                |
+| Membership price for `1` message per epoch  | `p_u`     | `0.05`  | `USD`                |
 | Membership expiration term                  | `T`       | `180`   | days                 |
 | Membership grace period                     | `G`       | `30`    | days                 |
 | Accepted tokens                             |           | `DAI`   |                      |
@@ -197,7 +197,7 @@ users with extended memberships will not be affected by the changes for a long t
 ### What if I don't extend my membership within its _GracePeriod_?
 
 The user who does not extend their _GracePeriod_ membership, 
-assume the risk of the membership being overwritten at any moment.
+assume the risk of their _Expired_ membership being overwritten.
 We expect, generally, that a user would not want to take that risk 
 and would either extend their membership or withdraw their deposit.
 
