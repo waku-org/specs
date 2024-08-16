@@ -54,6 +54,9 @@ Contract parameters and their RECOMMENDED values for the initial mainnet deploym
 | Membership price for `1` message per epoch  | `p_u`     | `0.01`  | `USD`                |
 | Membership expiration term                  | `T`       | `180`   | days                 |
 | Membership grace period                     | `G`       | `30`    | days                 |
+| Accepted tokens                             |           | `DAI`   |                      |
+
+The pricing function SHOULD be linear in the rate limit per epoch.
 
 ## Membership lifecycle
 
@@ -173,14 +176,6 @@ User-facing application SHOULD suggest one or a few rate limits (tiers) to simpl
 - `20` messages per epoch as low-tier;
 - `200` messages per epoch as mid-tier;
 - `600` messages per epoch as high-tier.
-
-The RECOMMENDED pricing parameters are:
-
-| Parameter          | Value  |
-| ------------------ | ------ |
-| Accepted tokens    | `DAI`  |
-| Reference currency | `USD`  |
-| Pricing function   | linear |
 
 User-facing applications SHOULD save membership expiration dates in a local keystore during registration,
 and notify the user when their membership is about to expire.
