@@ -46,15 +46,15 @@ The contract MUST provide the following functionalities:
 
 Contract parameters and their RECOMMENDED values for the initial mainnet deployment are as follows:
 
-| Parameter                                   | Symbol    | Value   | Units                |
-| ------------------------------------------- | --------- | ------- | -------------------- |
-| Epoch length                                | `epoch`   | `10`    | minutes              |
-| Maximum total rate limit of all memberships | `R_{max}` | `20000` | messages per `epoch` |
-| Minimal rate limit of one membership        | `r_{min}` | `20`    | messages per `epoch` |
-| Membership price for `1` message per epoch  | `p_u`     | `0.05`  | `USD`                |
-| Membership expiration term                  | `T`       | `180`   | days                 |
-| Membership grace period                     | `G`       | `30`    | days                 |
-| Accepted tokens                             |           | `DAI`   |                      |
+| Parameter                                   | Symbol    | Value    | Units                |
+| ------------------------------------------- | --------- | -------- | -------------------- |
+| Epoch length                                | `epoch`   | `10`     | minutes              |
+| Maximum total rate limit of all memberships | `R_{max}` | `160000` | messages per `epoch` |
+| Minimal rate limit of one membership        | `r_{min}` | `20`     | messages per `epoch` |
+| Membership price for `1` message per epoch  | `p_u`     | `0.05`   | `USD`                |
+| Membership expiration term                  | `T`       | `180`    | days                 |
+| Membership grace period                     | `G`       | `30`     | days                 |
+| Accepted tokens                             |           | `DAI`    |                      |
 
 The pricing function SHOULD be linear in the rate limit per epoch.
 
