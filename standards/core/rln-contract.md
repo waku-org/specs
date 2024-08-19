@@ -56,6 +56,7 @@ Contract parameters and their RECOMMENDED values for the initial mainnet deploym
 | Epoch length                                | `epoch`   | `10`     | minutes              |
 | Maximum total rate limit of all memberships | `R_{max}` | `160000` | messages per `epoch` |
 | Minimal rate limit of one membership        | `r_{min}` | `20`     | messages per `epoch` |
+| Maximum rate limit of one membership        | `r_{max}` | `600`    | messages per `epoch` |
 | Membership price for `1` message per epoch  | `p_u`     | `0.05`   | `USD`                |
 | Membership expiration term                  | `T`       | `180`    | days                 |
 | Membership grace period                     | `G`       | `30`     | days                 |
@@ -132,8 +133,8 @@ Membership registration is subject to the following conditions:
 	- membership B MUST become _ErasedAwaitsWithdrawal_;
 	- the current total rate limit MUST be decremented by the rate limit of membership B;
 	- the contract MUST take all necessary steps to ensure that the keeper of membership B can withdraw their deposit later;
-- registration MUST fail if the total rate limit of _Active_, _GracePeriod_, and _Expired_ memberships, including the one being created, would exceed the maximum total rate;
-- registration MUST fail if the requested rate limit for a new membership is lower than the minimal allowed rate limit;
+- registration MUST fail if the total rate limit of _Active_, _GracePeriod_, and _Expired_ memberships, including the one being created, would exceed `R_{max}`;
+- registration MUST fail if the requested rate limit for a new membership is lower than `r_{min}` or higher than `r_{max}`;
 - the user MUST lock-up a deposit to register a membership;
 - the user MUST specify the rate limit of the new membership[^2];
 - the size of the deposit MUST depend on the requested rate limit;
