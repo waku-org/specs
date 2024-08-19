@@ -34,7 +34,7 @@ and to get the necessary data for proof generation and verification.
 
 Sending messages is handled by Waku RLN Relay nodes.
 To send a message, the sender MUST prove its validity in terms of RLN.
-An RLN Relay node MUST relay a message unless it is invalid.
+RLN Relay nodes MUST NOT relay invalid messages.
 See [17/WAKU2-RLN-RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/17/rln-relay.md) for the full specification of RLN Relay.
 
 ## Contract overview
