@@ -44,6 +44,11 @@ The contract MUST provide the following functionalities:
 - extend a membership;
 - withdraw a deposit.
 
+A membership _holder_ is the entity that controls the secret of the respective RLN commitment.
+A membership _keeper_ is the entity that controls the Ethereum address that registered that membership.
+The holder and the keeper MAY differ for the same membership.
+The contract SHOULD only distinguish between the keeper and non-keepers when authorizing membership-related requests.
+
 Contract parameters and their RECOMMENDED values for the initial mainnet deployment are as follows:
 
 | Parameter                                   | Symbol    | Value    | Units                |
@@ -126,7 +131,7 @@ Membership registration is subject to the following conditions:
 - if a new membership A overwrites an _Expired_ membership B:
 	- membership B MUST become _ErasedAwaitsWithdrawal_;
 	- the current total rate limit MUST be decremented by the rate limit of membership B;
-	- the contract MUST take all necessary steps to ensure that the holder of membership B can withdraw their deposit later;
+	- the contract MUST take all necessary steps to ensure that the keeper of membership B can withdraw their deposit later;
 - registration MUST fail if the total rate limit of _Active_, _GracePeriod_, and _Expired_ memberships, including the one being created, would exceed the maximum total rate;
 - registration MUST fail if the requested rate limit for a new membership is lower than the minimal allowed rate limit;
 - the user MUST lock-up a deposit to register a membership;
@@ -143,17 +148,17 @@ Membership registration is subject to the following conditions:
 
 Extending a membership is subject to the following conditions:
 - extension MUST fail if the membership is in any state other than _GracePeriod_;
-- the membership holder MUST be able to extend their membership;
-- any user except the membership holder MUST NOT be able to extend a membership;
+- the membership keeper MUST be able to extend their membership;
+- any user except the membership keeper MUST NOT be able to extend a membership;
 - after a successful extension, the membership MUST become _Active_.
 
-Holding a membership means controlling the private key from which the RLN commitment ID (i.e., public key) was derived.
+
 
 ### Withdraw the deposit
 
 Deposit withdrawal is subject to the following conditions:
-- the membership holder MUST be able to withdraw their deposit;
-- any user except the membership holder MUST NOT be able to withdraw its deposit;
+- the membership keeper MUST be able to withdraw their deposit;
+- any user except the membership keeper MUST NOT be able to withdraw its deposit;
 - a deposit MUST be withdrawn in full;
 - a withdrawal MUST fail if the membership is not in _GracePeriod_, _Expired_, or _ErasedAwaitsWithdrawal_;
 - a membership MUST become _Erased_ after withdrawal.
@@ -233,7 +238,7 @@ On the one hand, longer epochs allow for better accommodating short-term usage p
 On the other hand, long epochs increases memory requirements for RLN Relay nodes.
 
 Each message contains a nullifier that proves its validity in terms of RLN.
-Each RLN Relay node must keep in memory a nullifier log for the current epoch.
+Each RLN Relay node must store in memory a nullifier log for the current epoch.
 Each nullifier plus metadata is `128` bytes (per message).
 With a `10`-minute epoch, one high-tier user with a `1` message per second rate limit generates up to `600 * 128 / 1024 = 75 KiB` of nullifier log data per epoch.
 This corresponds to:
