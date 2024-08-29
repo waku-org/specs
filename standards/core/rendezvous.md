@@ -12,7 +12,7 @@ strategy and usage of the libp2p rendezvous protocol by Waku.
 Rendezvous is one of the discovery methods that can be used by Waku,
 it supplements Discovery v5 and Waku peer exchange but fill a specific role.
 
-## Background
+## Background and Rationale
 How do new nodes join the network is the question that discovery answers.
 Discovery must be fast, pertinent and resilient to attacks.
 Rendezvous is both fast and allow the discovery of relevant peers,
@@ -26,23 +26,26 @@ By using rendezvous in combination with
 Waku nodes will reach a good number of meaningful peers
 faster than through a single discovery method.
 
-## Terminology
-Please refers to the [libp2p spec](https://github.com/libp2p/specs/blob/master/rendezvous/README.md#rendezvous-protocol).
+## Semantics
+Waku rendezvous fully inherit the [libp2p rendezvous semantics](https://github.com/libp2p/specs/blob/master/rendezvous/README.md#rendezvous-protocol).
 
-## Theory
-The namespaces used to register and request will be in the format 'rs/cluster-id/shard'.
-A registration or request consist of all the shards a nodes supports and their corresponding namespaces.
+## Specifications
+The namespaces used to register and request will be in the format `rs/cluster-id/shard`.
 
-Every [Waku Relay](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md) node will be initialized also as a rendezvous point.
-Each relay node will register with a random rendezvous point every 10 seconds.
-Each registration will expire after 1 minute.
-Each node will roughly have 6 records of itself in the network at any given time.
+Every [Waku Relay](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md) node will also be initialized as a rendezvous point.
 
-At startup, every nodes will discover peers by sending a request to a random rendezvous node.
-A maximum of 12 peers will be requested.
+Each relay node will register with random rendezvous points every 10 seconds,
+once for each shard it supports and register only the namespace corresponding to that shard.
+Each registrations will expire after 1 minute.
+
+At startup, every Waku nodes will discover peers by sending requests to random rendezvous points,
+once for each shard it supports.
+A maximum of 12 peers will be requested each time.
+
 This number is enough for good GossipSub connectivity and
 minimize the load on rendezvous points.
-It is assumed that other discovery methods are used in conjunction and
+It is assumed that the bootstrap node used is a rendezvous point and
+that other discovery methods are used in conjunction and
 will continue discovering peers for the lifetime of the node.
 
 ## Future Work
