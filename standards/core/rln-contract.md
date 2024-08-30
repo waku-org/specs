@@ -137,22 +137,32 @@ Availability of membership-specific functionalities[^2] MUST be as follows:
 
 ### Register a membership
 
-Membership registration is subject to the following conditions:
-- If there are _Expired_ memberships in the RLN tree, the new membership MUST overwrite an _Expired_ membership.
-- The new membership SHOULD overwrite the membership that has been _Expired_ for the longest time.
+Let us define the following aggregate rate limits:
+- `R_{active}` is the total rate limit of all _Active_ memberships;
+- `R_{grace_period}` is the total rate limit of all _GracePeriod_ memberships;
+- `R_{expired}` is the total rate limit of all _Expired_ memberships;
+- `r` is the requested rate limit of a new membership.
+
+Let `R_{free} = R_{max} - R_{active} - R_{grace_period} - R_{expired}` be the free rate limit that is available without overwriting _Expired_ slots.
+
+Membership registration is subject to the following requirements:
+- If `r <= R_{free}`, the new membership MUST be registered (assuming all other necessary conditions hold). The new membership MAY overwrite one or multiple _Expired_ memberships.
+- If `r > R_{free}`:
+	- if `r > R_{free} + R_{expired}`, registration MUST fail;
+	- if `r <= R_{free} + R_{expired}`, the new membership MUST be registered by overwriting some _Expired_ memberships.
+- The sender of the registration transaction MAY specify a list of _Expired_ memberships whose slots will be overwritten. If the list is not provided, the contract MAY use any criteria to select _Expired_ memberships to overwrite (see Implementation Suggestions).
 - If a new membership A overwrites an _Expired_ membership B:
 	- membership B MUST become _ErasedAwaitsWithdrawal_;
 	- the current total rate limit MUST be decremented by the rate limit of membership B;
 	- the contract MUST take all necessary steps to ensure that the keeper of membership B can withdraw their deposit later.
-- Registration MUST fail if the total rate limit of _Active_, _GracePeriod_, and _Expired_ memberships, including the one being created, would exceed `R_{max}`.
 - Registration MUST fail if the requested rate limit for a new membership is lower than `r_{min}` or higher than `r_{max}`.
 - The keeper MUST lock up a deposit to register a membership.
 - The keeper MUST specify the rate limit[^3] of a membership at registration time.
 - The size of the deposit MUST depend on the specified rate limit.
 - In case of a successful registration:
 	- the new membership MUST become _Active_;
+	- the new membership MUST have an expiration time `T` and a grace period `G`;
 	- the current total rate limit MUST be incremented by the rate limit of the new membership.
-- A membership MUST have an expiration time `T` and a grace period `G`.
 
 [^3]: A user-facing application SHOULD suggest default rate limits to the keeper (see Implementation Suggestions).
 
@@ -186,8 +196,6 @@ The _Owner_ MUST be able to pause any of the following contract functionalities:
 - extend a membership;
 - withdraw a deposit.
 
-The 
-
 At some point, the _Owner_ SHOULD renounce their privileges,
 and the contract MUST become immutable.
 If further upgrades are necessary,
@@ -195,6 +203,17 @@ a new contract SHOULD be deployed,
 and the membership set SHOULD be migrated.
 
 ## Implementation Suggestions
+
+### Choosing Which _Expired_ Memberships to Overwrite
+
+When registering a new membership, the smart contract may need to decide which _Expired_ memberships to overwrite.
+The criteria for this selection can vary depending on the implementation.
+
+Key considerations include:
+- To minimize gas costs, it's better to overwrite a single high-rate membership rather than multiple low-rate ones.
+- To encourage timely withdrawals, it's better to overwrite memberships that have been _Expired_ for a long time.
+
+### Considerations for User-facing Applications
 
 User-facing applications SHOULD suggest one or more rate limits (tiers) to simplify user selection among the following RECOMMENDED options:
 - `20` messages per epoch as low-tier;
