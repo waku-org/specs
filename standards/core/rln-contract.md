@@ -47,7 +47,9 @@ The contract MUST provide the following functionalities:
 A membership _holder_ is the entity that controls the secret associated with the respective RLN commitment.
 A membership _keeper_ is the sender of the transaction that registered that membership.
 Transaction sender in this context is defined as `msg.sender` in Solidity semantics.
-The contract MUST support transactions sent from externally-owned accounts (EOA).
+The contract MUST support transactions sent directly from externally-owned accounts (EOA).
+The contract MAY support transactions sent from an EOA via a chain of contract calls,
+in which case the last contract in the call chain MAY be designated as the membership keeper.
 The contract MAY also support meta-transactions sent via paymasters or relayers,
 which MAY require additional authentication-related logic.
 
