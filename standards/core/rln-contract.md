@@ -53,18 +53,21 @@ and MAY also use additional criteria.
 
 Contract parameters and their RECOMMENDED values for the initial mainnet deployment are as follows:
 
-| Parameter                                               | Symbol    | Value    | Units                |
-| ------------------------------------------------------- | --------- | -------- | -------------------- |
-| Epoch length                                            | `epoch`   | `10`     | minutes              |
-| Maximum total rate limit of all memberships in the tree | `R_{max}` | `160000` | messages per `epoch` |
-| Minimum rate limit of one membership                    | `r_{min}` | `20`     | messages per `epoch` |
-| Maximum rate limit of one membership                    | `r_{max}` | `600`    | messages per `epoch` |
-| Membership price for `1` message per epoch              | `p_u`     | `0.05`   | `USD`                |
-| Membership expiration term                              | `T`       | `180`    | days                 |
-| Membership grace period                                 | `G`       | `30`     | days                 |
-| Accepted tokens                                         |           | `DAI`    |                      |
+| Parameter                                               | Symbol    | Value    | Units              |
+| ------------------------------------------------------- | --------- | -------- | ------------------ |
+| Epoch length                                            | `t_{ep}`  | `600`    | seconds            |
+| Maximum total rate limit of all memberships in the tree | `R_{max}` | `160000` | messages per epoch |
+| Minimum rate limit of one membership                    | `r_{min}` | `20`     | messages per epoch |
+| Maximum rate limit of one membership                    | `r_{max}` | `600`    | messages per epoch |
+| Membership price for `1` message per epoch              | `p_u`     | `0.05`   | `USD`              |
+| Membership expiration term                              | `T`       | `180`    | days               |
+| Membership grace period                                 | `G`       | `30`     | days               |
+| Accepted tokens                                         |           | `DAI`    |                    |
 
 The pricing function SHOULD be linear in the rate limit per epoch.
+
+Note: epoch length means the same as `period` as defined in [17/WAKU2-RLN-RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/17/rln-relay.md).
+This specification uses the term "epoch length" instead of "period" to avoid confusion with "grace period".
 
 ## Membership lifecycle
 
