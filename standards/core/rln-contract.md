@@ -170,10 +170,16 @@ Deposit withdrawal is subject to the following conditions:
 
 At initial mainnet deployment, the contract MUST have an _Owner_.
 The _Owner_ MUST be able to change the values of all contract parameters.
+The updated parameter values MUST apply to all new memberships.
+The parameters of existing memberships MUST NOT change if the _Owner_ updates global parameters.
+The contract MAY restrict extensions for memberships created before the latest parameter update.
+
 The _Owner_ MUST be able to pause any of the following contract functionalities:
 - register a membership;
 - extend a membership;
 - withdraw a deposit.
+
+The 
 
 At some point, the _Owner_ SHOULD renounce their privileges,
 and the contract MUST become immutable.
