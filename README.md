@@ -30,6 +30,7 @@ This repository contains specifications for the Waku suite of protocols.
 |[64/WAKU2-NETWORK](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/64/network.md)| Waku Network |
 |[RELAY-SHARDING](standards/core/relay-sharding.md)| Waku Relay Sharding |
 |[WAKU2-STORE](standards/core/store.md) | Waku Store Query |
+|[WAKU2-RLN-CONTRACT](standards/core/rln-contract.md) | Waku RLN Contract Specification |
 
 ### Application standards
 
