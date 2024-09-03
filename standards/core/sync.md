@@ -91,6 +91,30 @@ Further refinements to the protocol are planned
 to reduce the trust level required to operate.
 Notably by verifing messages RLN proof at reception.
 
+# Implementation
+The following is not part of the specifications but good to know implementation details.
+
+### Interval
+Ad-hoc syncing can be useful in some cases but continueous periodic sync
+minimise the differences in messages stored across the network.
+Syncing early and often is the best strategy.
+The default used in nwaku is 5 minutes interval between sync with a range of 1 hour.
+
+### Range
+We also offset the sync range by 20 seconds in the past.
+The actual start of the sync range is T-01:00:20 and the end T-00:00:20
+This is to handle the inherent jitter of GossipSub.
+In other words, it is the amount of time needed to confirm if a message is missing or not.
+
+### Storage
+The storage implementation should reflect the Waku context.
+Most messages that will be added will be recent and
+all removed messages will be older ones.
+When differences are found some messages will have to be inserted randomly.
+It is expected to be a less likely case than time based insertion and removal.
+Last but not least it must be optimized for sequential read
+as it is the most often used operation.
+
 # Copyright
 
 Copyright and related rights waived via
