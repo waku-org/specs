@@ -51,3 +51,14 @@ will continue discovering peers for the lifetime of the node.
 ## Future Work
 
 Namespaces will not contain capabilities yet but may in the future. If the need arise nodes could use rendezvous to discover peers with specific capabilities.
+
+# Copyright
+
+Copyright and related rights waived via
+[CC0](https://creativecommons.org/publicdomain/zero/1.0/).
+
+# References
+ - [Discv5](https://github.com/ethereum/devp2p/blob/master/discv5/discv5.md#node-discovery-protocol-v5)
+ - [Peer Exchange](https://github.com/waku-org/specs/blob/master/standards/core/peer-exchange.md#abstract)
+ - [Libp2p Rendezvous](https://github.com/libp2p/specs/blob/master/rendezvous/README.md#rendezvous-protocol)
+ - [Relay](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md)
