@@ -10,7 +10,7 @@ contributors:
 # Abstract
 This specification explains the `WAKU-SYNC` protocol
 which enables the reconciliation of two sets of message hashes
-in the context of keeping multiple nodes syncronized.
+in the context of keeping multiple Store nodes syncronized.
 Waku Sync is a wrapper around
 [Negentropy](https://github.com/hoytech/negentropy) a [range-based set reconciliation protocol](https://logperiodic.com/rbsr.html).
 
@@ -30,18 +30,18 @@ and the server the receiver of the first payload.
 
 ## Design Requirements
 Nodes enabling Waku Sync SHOULD
-manage and keep message hashes
+manage and keep message hashes in a local cache
 for the range of time
 during which syncronization is required.
 Nodes SHOULD use the same time range,
 for Waku we chose one hour as the global default.
-Waku Relay or Filter protocol MAY be enabled
+Waku Relay or Light Push protocol MAY be enabled
 and used in conjuction with Sync
 as a source of new message hashes
-for the time range.
+for the cache.
 
 Nodes MAY use the Store protocol
-to request missing messages
+to request missing messages once reconciliation is complete
 or to provide messages to requesting clients.
 
 ## Payload
@@ -85,7 +85,7 @@ an empty `nengentropy` field.
 
 # Attack Vectors
 Nodes using `WAKU-SYNC` are fully trusted.
-Message hashes are assumed to be of valid messages received via Waku Relay or Filter.
+Message hashes are assumed to be of valid messages received via Waku Relay or Light push.
 
 Further refinements to the protocol are planned
 to reduce the trust level required to operate.
