@@ -7,18 +7,18 @@ contributors:
  - Hanno Cornelius <hanno@status.im>
 ---
 
-# Abstract
+## Abstract
 This specification explains the `WAKU-SYNC` protocol
 which enables the reconciliation of two sets of message hashes
-in the context of keeping multiple Store nodes syncronized.
+in the context of keeping multiple Store nodes synchronized.
 Waku Sync is a wrapper around
 [Negentropy](https://github.com/hoytech/negentropy) a [range-based set reconciliation protocol](https://logperiodic.com/rbsr.html).
 
-# Specification
+## Specification
 
 **Protocol identifier**: `/vac/waku/sync/1.0.0`
 
-## Terminology
+### Terminology
 The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, 
 “RECOMMENDED”, “MAY”, and “OPTIONAL” in this document are to be interpreted as described in [RFC2119](https://www.ietf.org/rfc/rfc2119.txt).
 
@@ -28,15 +28,15 @@ the messages created by the Negentropy protocol.
 Client always refers to the initiator
 and the server the receiver of the first payload.
 
-## Design Requirements
+### Design Requirements
 Nodes enabling Waku Sync SHOULD
 manage and keep message hashes in a local cache
 for the range of time
-during which syncronization is required.
+during which synchronization is required.
 Nodes SHOULD use the same time range,
 for Waku we chose one hour as the global default.
 Waku Relay or Light Push protocol MAY be enabled
-and used in conjuction with Sync
+and used in conjunction with Sync
 as a source of new message hashes
 for the cache.
 
@@ -44,7 +44,7 @@ Nodes MAY use the Store protocol
 to request missing messages once reconciliation is complete
 or to provide messages to requesting clients.
 
-## Payload
+### Payload
 
 ```protobuf
 syntax = "proto3";
@@ -58,7 +58,7 @@ message SyncPayload {
 }
 ```
 
-## Session Flow
+### Session Flow
 A client initiate a session with a server
 by sending a `SyncPayload` with
 only the `negentropy` field set to it.
@@ -80,30 +80,30 @@ This client computation also outputs any hash differences found,
 those MUST be stored.
 In the case of an empty payload,
 the client MUST send back a `SyncPayload`
-with all the hashes previoudly found in the `hashes` field and
+with all the hashes previously found in the `hashes` field and
 an empty `nengentropy` field.
 
-# Attack Vectors
+## Attack Vectors
 Nodes using `WAKU-SYNC` are fully trusted.
 Message hashes are assumed to be of valid messages received via Waku Relay or Light push.
 
 Further refinements to the protocol are planned
 to reduce the trust level required to operate.
-Notably by verifing messages RLN proof at reception.
+Notably by verifying messages RLN proof at reception.
 
-# Implementation
+## Implementation
 The following is not part of the specifications but good to know implementation details.
 
 ### Interval
-Ad-hoc syncing can be useful in some cases but continueous periodic sync
-minimise the differences in messages stored across the network.
+Ad-hoc syncing can be useful in some cases but continuous periodic sync
+minimize the differences in messages stored across the network.
 Syncing early and often is the best strategy.
 The default used in nwaku is 5 minutes interval between sync with a range of 1 hour.
 
 ### Range
 We also offset the sync range by 20 seconds in the past.
 The actual start of the sync range is T-01:00:20 and the end T-00:00:20
-This is to handle the inherent jitter of GossipSub.
+This is to handle the inherent jitters of GossipSub.
 In other words, it is the amount of time needed to confirm if a message is missing or not.
 
 ### Storage
@@ -115,11 +115,11 @@ It is expected to be a less likely case than time based insertion and removal.
 Last but not least it must be optimized for sequential read
 as it is the most often used operation.
 
-# Copyright
+## Copyright
 
 Copyright and related rights waived via
 [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
 
-# References
+## References
  - https://logperiodic.com/rbsr.html
  - https://github.com/hoytech/negentropy
