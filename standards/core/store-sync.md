@@ -30,16 +30,17 @@ Various protocols and features that help with message consistency are described 
 This feature allow a node to fill the gap in messages for the period it was last offline.
 At startup, a node use the Store protocol to query a random node for
 the time interval since it was last online.
+Messages returned my the query are then added to the node local archive storage.
 It is RECOMMENDED” to limit the time interval to a maximum of 6 hours.
 
 ### Waku Sync
 
 Nodes that stay online can still miss messages.
-Waku Sync is used to find those messages by periodically syncing with random nodes.
-It is RECOMMENDED to trigger a sync every 5 minutes for the time range of the last hour.
-After both hash set are reconciled, the Store protocol is used to reciprocally query the other node with the hash differences found.
-
-TODO link to spec
+[Waku Sync](TODO link to spec) is the protocol used to find those messages by periodically syncing with random nodes.
+It is RECOMMENDED to trigger a sync every 5 minutes for a time range of the last hour.
+After both message hash sets are reconciled,
+the Store protocol is used to reciprocally query the other node with the message hash differences found.
+Messages returned my the query are then added to the node local Waku sync and archive storage.
 
 ## Copyright
 
@@ -48,4 +49,4 @@ Copyright and related rights waived via [CC0](https://creativecommons.org/public
 
 ## References
 
-TODO
+- [Waku Sync](TODO link to spec)
