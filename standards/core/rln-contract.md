@@ -60,16 +60,16 @@ and MAY also use additional criteria.
 
 Contract parameters and their RECOMMENDED values for the initial mainnet deployment are as follows:
 
-| Parameter                                               | Symbol    | Value    | Units              |
-| ------------------------------------------------------- | --------- | -------- | ------------------ |
-| Epoch length                                            | `t_{ep}`  | `600`    | seconds            |
-| Maximum total rate limit of all memberships in the tree | `R_{max}` | `160000` | messages per epoch |
-| Minimum rate limit of one membership                    | `r_{min}` | `20`     | messages per epoch |
-| Maximum rate limit of one membership                    | `r_{max}` | `600`    | messages per epoch |
-| Membership price for `1` message per epoch              | `p_u`     | `0.05`   | `USD`              |
-| Membership expiration term                              | `T`       | `180`    | days               |
-| Membership grace period                                 | `G`       | `30`     | days               |
-| Accepted tokens                                         |           | `DAI`    |                    |
+| Parameter                                                 | Symbol    | Value    | Units              |
+| --------------------------------------------------------- | --------- | -------- | ------------------ |
+| Epoch length                                              | `t_{ep}`  | `600`    | seconds            |
+| Maximum total rate limit of all memberships in the tree   | `R_{max}` | `160000` | messages per epoch |
+| Minimum rate limit of one membership                      | `r_{min}` | `20`     | messages per epoch |
+| Maximum rate limit of one membership                      | `r_{max}` | `600`    | messages per epoch |
+| Membership expiration term                                | `T`       | `180`    | days               |
+| Membership grace period                                   | `G`       | `30`     | days               |
+| Membership price for `1` message per epoch for period `T` | `p_u`     | `0.05`   | `USD`              |
+| Accepted tokens                                           |           | `DAI`    |                    |
 
 The pricing function SHOULD be linear in the rate limit per epoch.
 
