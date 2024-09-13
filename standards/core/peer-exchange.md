@@ -82,7 +82,7 @@ message PeerExchangeResponseStatus {
 message PeerExchangeRPC {
   optional PeerExchangeRequest request = 1;
   optional PeerExchangeResponse response = 2;
-  optional PeerExchangeResponseStatus status = 10;
+  optional PeerExchangeResponseStatus response_status = 10;
 }
 
 ```
@@ -93,7 +93,7 @@ Requesters send a `PeerExchangeRequest` to a peer.
 Responders SHOULD not fill `request` field.
 Responders SHOULD include a maximum of `num_peers` `PeerInfo` instances into a response.
 Responders send a `PeerExchangeResponse` to requesters containing a list of `PeerInfo` instances, which in turn hold an ENR.
-Responders, MUST include a `PeerExchangeResponseStatus` in the response in any case. If the request was not successful `PeerExchangeResponse` can be omitted.
+Responders, MUST include a `PeerExchangeResponseStatus` in the response in any case. If the request was not successful `response` field can be omitted.
 
 ### Possible status codes
 
@@ -101,7 +101,7 @@ Responders, MUST include a `PeerExchangeResponseStatus` in the response in any c
 |--------|------|------|
 | SUCCESS  | 200 | Successfull request-respond. In response the answer must contain `PeerExchangeResponse`  |
 | BAD_REQUEST | 400   | Wrong request payload. It must only contain `reques` field.  |
-| BAD_RESPOND | 401   | Wrong respond payload. If success it must contain `respond` and `responseStatus` fields. If failure, only `responseStatus` is set.  |
+| BAD_RESPOND | 401   | Wrong respond payload. If success it must contain `respond` and `response_status` fields. If failure, only `response_status` is set.  |
 | TOO_MANY_REQUESTS | 429 | DOS protection prevented this request as the current request exceeds the configured request rate. |
 | SERVICE_UNAVAILABLE  | 503 | Request cannot be served, either issue on Responder side or having no suitable peer to issue request.  |
 | DIAL_FAILRE | 599 | Requester side problem calling PeerExchange peer. |
