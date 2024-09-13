@@ -66,7 +66,7 @@ message PeerInfo {
   bytes enr = 1;
 }
 
-message PeerExchangeQuery {
+message PeerExchangeRequest {
   uint64 num_peers = 1;
 }
 
@@ -74,18 +74,37 @@ message PeerExchangeResponse {
   repeated PeerInfo peer_infos = 1;
 }
 
+message PeerExchangeResponseStatus {
+  uint32 status = 1;
+  optional string desc = 2;
+}
+
 message PeerExchangeRPC {
-  PeerExchangeQuery query = 1;
-  PeerExchangeResponse response = 2;
+  optional PeerExchangeRequest request = 1;
+  optional PeerExchangeResponse response = 2;
+  optional PeerExchangeResponseStatus status = 10;
 }
 
 ```
 
 The `enr` field contains a Waku ENR as specified in [WAKU2-ENR](./enr.md).
 
-Requesters send a `PeerExchangeQuery` to a peer.
+Requesters send a `PeerExchangeRequest` to a peer.
+Responders SHOULD not fill `request` field.
 Responders SHOULD include a maximum of `num_peers` `PeerInfo` instances into a response.
 Responders send a `PeerExchangeResponse` to requesters containing a list of `PeerInfo` instances, which in turn hold an ENR.
+Responders, MUST include a `PeerExchangeResponseStatus` in the response in any case. If the request was not successful `PeerExchangeResponse` can be omitted.
+
+### Possible status codes
+
+| Result | Code | Note |
+|--------|------|------|
+| SUCCESS  | 200 | Successfull request-respond. In response the answer must contain `PeerExchangeResponse`  |
+| BAD_REQUEST | 400   | Wrong request payload. It must only contain `reques` field.  |
+| BAD_RESPOND | 401   | Wrong respond payload. If success it must contain `respond` and `responseStatus` fields. If failure, only `responseStatus` is set.  |
+| TOO_MANY_REQUESTS | 429 | DOS protection prevented this request as the current request exceeds the configured request rate. |
+| SERVICE_UNAVAILABLE  | 503 | Request cannot be served, either issue on Responder side or having no suitable peer to issue request.  |
+| DIAL_FAILRE | 599 | Requester side problem calling PeerExchange peer. |
 
 ## Implementation Suggestions
 
@@ -143,6 +162,7 @@ Requesters send a simple message request which causes responders to engage in am
 As a mitigation, responders MAY feature a `seen cache` for requests and only answer once per time interval.
 The exchange-peer cache discussed in [Theory and Protocol Semantics Section](#theory-and-protocol-semantics) also provides mitigation.
 Still, frequent queries can tigger the refresh cycle more often. The `seen cache` MAY be used in conjunction to provide additional mitigation.
+Responders MAY apply request limits and thus can reject answering requests within a certain time window. Requestes must be prepared to handle this case.
 
 ### Further Considerations
 
