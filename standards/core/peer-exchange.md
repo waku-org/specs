@@ -72,17 +72,13 @@ message PeerExchangeRequest {
 
 message PeerExchangeResponse {
   repeated PeerInfo peer_infos = 1;
-}
-
-message PeerExchangeResponseStatus {
-  uint32 status = 1;
-  optional string desc = 2;
+  uint32 status = 10;
+  optional string desc = 11;
 }
 
 message PeerExchangeRPC {
-  optional PeerExchangeRequest request = 1;
-  optional PeerExchangeResponse response = 2;
-  optional PeerExchangeResponseStatus response_status = 10;
+  PeerExchangeRequest request = 1;
+  PeerExchangeResponse response = 2;
 }
 
 ```
@@ -90,10 +86,9 @@ message PeerExchangeRPC {
 The `enr` field contains a Waku ENR as specified in [WAKU2-ENR](./enr.md).
 
 Requesters send a `PeerExchangeRequest` to a peer.
-Responders SHOULD not fill `request` field.
 Responders SHOULD include a maximum of `num_peers` `PeerInfo` instances into a response.
 Responders send a `PeerExchangeResponse` to requesters containing a list of `PeerInfo` instances, which in turn hold an ENR.
-Responders, MUST include a `PeerExchangeResponseStatus` in the response in any case. If the request was not successful `response` field can be omitted.
+Responders, MUST include a `status` in the response in any case and possible descriptive form of the problem if any.
 
 ### Possible status codes
 
