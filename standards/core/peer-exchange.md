@@ -94,12 +94,12 @@ Responders, MUST include a `status` in the response in any case and possible des
 
 | Result | Code | Note |
 |--------|------|------|
-| SUCCESS  | 200 | Successfull request-respond. In response the answer must contain `PeerExchangeResponse`  |
-| BAD_REQUEST | 400   | Wrong request payload. It must only contain `reques` field.  |
-| BAD_RESPOND | 401   | Wrong respond payload. If success it must contain `respond` and `response_status` fields. If failure, only `response_status` is set.  |
+| SUCCESS  | 200 | Successfull request-respond.  |
+| BAD_REQUEST | 400   | Wrong request payload. It must only contain `request` field.  |
+| BAD_RESPONSE | 401   | Wrong response payload. If success it must contain `response` and `status` fields. If failure, only `status` is set.  |
 | TOO_MANY_REQUESTS | 429 | DOS protection prevented this request as the current request exceeds the configured request rate. |
 | SERVICE_UNAVAILABLE  | 503 | Request cannot be served, either issue on Responder side or having no suitable peer to issue request.  |
-| DIAL_FAILRE | 599 | Requester side problem calling PeerExchange peer. |
+| DIAL_FAILURE | 599 | Requester side problem calling PeerExchange peer. |
 
 ## Implementation Suggestions
 
