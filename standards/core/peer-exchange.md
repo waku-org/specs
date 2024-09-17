@@ -72,8 +72,8 @@ message PeerExchangeRequest {
 
 message PeerExchangeResponse {
   repeated PeerInfo peer_infos = 1;
-  uint32 status = 10;
-  optional string desc = 11;
+  uint32 status_code = 10;
+  optional string status_desc = 11;
 }
 
 message PeerExchangeRPC {
@@ -88,7 +88,7 @@ The `enr` field contains a Waku ENR as specified in [WAKU2-ENR](./enr.md).
 Requesters send a `PeerExchangeRequest` to a peer.
 Responders SHOULD include a maximum of `num_peers` `PeerInfo` instances into a response.
 Responders send a `PeerExchangeResponse` to requesters containing a list of `PeerInfo` instances, which in turn hold an ENR.
-Responders, MUST include a `status` in the response in any case and possible descriptive form of the problem if any.
+Responders, MUST include a `status_code` in the response in any case and possible descriptive form of the problem if any.
 
 ### Possible status codes
 
@@ -96,7 +96,7 @@ Responders, MUST include a `status` in the response in any case and possible des
 |--------|------|------|
 | SUCCESS  | 200 | Successfull request-respond.  |
 | BAD_REQUEST | 400   | Wrong request payload. It must only contain `request` field.  |
-| BAD_RESPONSE | 401   | Wrong response payload. If success it must contain `response` and `status` fields. If failure, only `status` is set.  |
+| BAD_RESPONSE | 401   | Wrong response payload. If success it must contain `response` and `status_code` fields. If failure, only `status_code` is set.  |
 | TOO_MANY_REQUESTS | 429 | DOS protection prevented this request as the current request exceeds the configured request rate. |
 | SERVICE_UNAVAILABLE  | 503 | Request cannot be served, either issue on Responder side or having no suitable peer to issue request.  |
 | DIAL_FAILURE | 599 | Requester side problem calling PeerExchange peer. |
