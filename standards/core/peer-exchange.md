@@ -97,10 +97,10 @@ They MAY include a descriptive status in the `status_desc` field if available.
 |--------|------|------|
 | SUCCESS  | 200 | Successful request-response.  |
 | BAD_REQUEST | 400   | Wrong request payload. It must only contain `request` field.  |
-| BAD_RESPONSE | 401   | Wrong response payload. If success it must contain `response` and `status_code` fields. If failure, only `status_code` is set.  |
+| BAD_RESPONSE | 401   | Malformed or illegal response payload returned. If success it must contain `response` and `status_code` fields. If failure, only `status_code` is set.  |
 | TOO_MANY_REQUESTS | 429 | DOS protection prevented this request as the current request exceeds the configured request rate. |
-| SERVICE_UNAVAILABLE  | 503 | Request cannot be served, either issue on Responder side or having no suitable peer to issue request.  |
-| DIAL_FAILURE | 599 | Requester side problem calling PeerExchange peer. |
+| SERVICE_UNAVAILABLE  | 503 | Request cannot be performed on requester (client) side, either issue on Responder side or having no suitable peer to issue request.  |
+| DIAL_FAILURE | 599 | Requester (client) side problem calling PeerExchange peer. |
 
 ## Implementation Suggestions
 
