@@ -88,13 +88,14 @@ The `enr` field contains a Waku ENR as specified in [WAKU2-ENR](./enr.md).
 Requesters send a `PeerExchangeRequest` to a peer.
 Responders SHOULD include a maximum of `num_peers` `PeerInfo` instances into a response.
 Responders send a `PeerExchangeResponse` to requesters containing a list of `PeerInfo` instances, which in turn hold an ENR.
-Responders, MUST include a `status_code` in the response in any case and possible descriptive form of the problem if any.
+Responders, MUST include a `status_code` in the response.
+They MAY include a descriptive status in the `status_desc` field if available.
 
 ### Possible status codes
 
 | Result | Code | Note |
 |--------|------|------|
-| SUCCESS  | 200 | Successfull request-respond.  |
+| SUCCESS  | 200 | Successful request-response.  |
 | BAD_REQUEST | 400   | Wrong request payload. It must only contain `request` field.  |
 | BAD_RESPONSE | 401   | Wrong response payload. If success it must contain `response` and `status_code` fields. If failure, only `status_code` is set.  |
 | TOO_MANY_REQUESTS | 429 | DOS protection prevented this request as the current request exceeds the configured request rate. |
@@ -157,7 +158,8 @@ Requesters send a simple message request which causes responders to engage in am
 As a mitigation, responders MAY feature a `seen cache` for requests and only answer once per time interval.
 The exchange-peer cache discussed in [Theory and Protocol Semantics Section](#theory-and-protocol-semantics) also provides mitigation.
 Still, frequent queries can tigger the refresh cycle more often. The `seen cache` MAY be used in conjunction to provide additional mitigation.
-Responders MAY apply request limits and thus can reject answering requests within a certain time window. Requestes must be prepared to handle this case.
+Responders MAY apply request limits and thus can reject answering requests within a certain time window.
+Requesters must be prepared to handle this case.
 
 ### Further Considerations
 
