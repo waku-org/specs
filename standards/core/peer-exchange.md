@@ -66,16 +66,18 @@ message PeerInfo {
   bytes enr = 1;
 }
 
-message PeerExchangeQuery {
+message PeerExchangeRequest {
   uint64 num_peers = 1;
 }
 
 message PeerExchangeResponse {
   repeated PeerInfo peer_infos = 1;
+  uint32 status_code = 10;
+  optional string status_desc = 11;
 }
 
 message PeerExchangeRPC {
-  PeerExchangeQuery query = 1;
+  PeerExchangeRequest request = 1;
   PeerExchangeResponse response = 2;
 }
 
@@ -83,9 +85,22 @@ message PeerExchangeRPC {
 
 The `enr` field contains a Waku ENR as specified in [WAKU2-ENR](./enr.md).
 
-Requesters send a `PeerExchangeQuery` to a peer.
+Requesters send a `PeerExchangeRequest` to a peer.
 Responders SHOULD include a maximum of `num_peers` `PeerInfo` instances into a response.
 Responders send a `PeerExchangeResponse` to requesters containing a list of `PeerInfo` instances, which in turn hold an ENR.
+Responders, MUST include a `status_code` in the response.
+They MAY include a descriptive status in the `status_desc` field if available.
+
+### Possible status codes
+
+| Result | Code | Note |
+|--------|------|------|
+| SUCCESS  | 200 | Successful request-response.  |
+| BAD_REQUEST | 400   | Wrong request payload. It must only contain `request` field.  |
+| BAD_RESPONSE | 401   | Malformed or illegal response payload returned. If success it must contain `response` and `status_code` fields. If failure, only `status_code` is set.  |
+| TOO_MANY_REQUESTS | 429 | DOS protection prevented this request as the current request exceeds the configured request rate. |
+| SERVICE_UNAVAILABLE  | 503 | Request cannot be performed on requester (client) side, either issue on Responder side or having no suitable peer to issue request.  |
+| DIAL_FAILURE | 599 | Requester (client) side problem calling PeerExchange peer. |
 
 ## Implementation Suggestions
 
@@ -143,6 +158,8 @@ Requesters send a simple message request which causes responders to engage in am
 As a mitigation, responders MAY feature a `seen cache` for requests and only answer once per time interval.
 The exchange-peer cache discussed in [Theory and Protocol Semantics Section](#theory-and-protocol-semantics) also provides mitigation.
 Still, frequent queries can tigger the refresh cycle more often. The `seen cache` MAY be used in conjunction to provide additional mitigation.
+Responders MAY apply request limits and thus can reject answering requests within a certain time window.
+Requesters must be prepared to handle this case.
 
 ### Further Considerations
 
