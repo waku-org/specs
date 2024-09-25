@@ -91,17 +91,24 @@ Any existing membership MUST always be in exactly one of the following states:
 graph TD;
     NonExistent --> |"register"| Active;
     Active -.-> |"time T passed"| GracePeriod;
-    GracePeriod --> |"extend"| Active;
+    GracePeriod ==> |"extend"| Active;
     GracePeriod -.-> |"time G passed"| Expired;
-    GracePeriod --> |"erase"| ErasedAwaitsWithdrawal;
+    GracePeriod ==> |"erase"| ErasedAwaitsWithdrawal;
     Expired --> |"erase"| ErasedAwaitsWithdrawal;
     Expired --> |"overwritten by a new membership"| ErasedAwaitsWithdrawal;
-    ErasedAwaitsWithdrawal --> |"withdraw"| Erased;
+    ErasedAwaitsWithdrawal ==> |"withdraw"| Erased;
 
 ```
 
-State updates triggered by a transaction (e.g., from _GracePeriod_ to _Active_ as a result of `extend`) MUST be applied immediately.
-State updates defined by time progression (e.g., from _GracePeriod_ to _Expired_ after time `G`) MAY be applied lazily.
+Different line types denote the types of state transitions:
+
+| Line type      | Triggered by     | Requirements                                                                         |
+| -------------- | ---------------- | ------------------------------------------------------------------------------------ |
+| Thick (`==`)   | Transaction      | MUST be initiable by the membership keeper and MUST NOT be initiable by other users. |
+| Thin (`--`)    | Transaction      | MAY be initiable by any user.                                                        |
+| Dotted (`-.-`) | Time progression | MAY be applied lazily.                                                               |
+
+Transaction-triggered state transitions MUST be applied immediately.
 
 When handling a membership-specific transaction, the contract MUST:
 - check whether the state of the involved membership is up-to-date;
