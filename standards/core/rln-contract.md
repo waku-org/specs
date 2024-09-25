@@ -28,7 +28,7 @@ The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL 
 
 Rate-Limiting Nullifier (RLN) is a Zero-Knowledge (ZK) based gadget used for privacy-preserving rate limiting in Waku.
 The RLN smart contract (referred to as "the contract" hereinafter) is the central component of the RLN architecture.
-The contract stores the RLN tree, which contains all current memberships.
+The contract stores the membership set, which contains all current memberships.
 Users interact with the contract to manage their memberships
 and obtain the necessary data for proof generation and verification.
 
@@ -60,16 +60,16 @@ and MAY also use additional criteria.
 
 Contract parameters and their RECOMMENDED values for the initial mainnet deployment are as follows:
 
-| Parameter                                                 | Symbol    | Value    | Units              |
-| --------------------------------------------------------- | --------- | -------- | ------------------ |
-| Epoch length                                              | `t_{ep}`  | `600`    | seconds            |
-| Maximum total rate limit of all memberships in the tree   | `R_{max}` | `160000` | messages per epoch |
-| Minimum rate limit of one membership                      | `r_{min}` | `20`     | messages per epoch |
-| Maximum rate limit of one membership                      | `r_{max}` | `600`    | messages per epoch |
-| Membership expiration term                                | `T`       | `180`    | days               |
-| Membership grace period                                   | `G`       | `30`     | days               |
-| Membership price for `1` message per epoch for period `T` | `p_u`     | `0.05`   | `USD`              |
-| Accepted tokens                                           |           | `DAI`    |                    |
+| Parameter                                                         | Symbol    | Value    | Units              |
+| ----------------------------------------------------------------- | --------- | -------- | ------------------ |
+| Epoch length                                                      | `t_{ep}`  | `600`    | seconds            |
+| Maximum total rate limit of all memberships in the membership set | `R_{max}` | `160000` | messages per epoch |
+| Minimum rate limit of one membership                              | `r_{min}` | `20`     | messages per epoch |
+| Maximum rate limit of one membership                              | `r_{max}` | `600`    | messages per epoch |
+| Membership expiration term                                        | `T`       | `180`    | days               |
+| Membership grace period                                           | `G`       | `30`     | days               |
+| Membership price for `1` message per epoch for period `T`         | `p_u`     | `0.05`   | `USD`              |
+| Accepted tokens                                                   |           | `DAI`    |                    |
 
 The pricing function SHOULD be linear in the rate limit per epoch.
 
@@ -106,9 +106,9 @@ When handling a membership-specific transaction, the contract MUST:
 - if necessary, update the membership state;
 - process the transaction in accordance with the updated membership state.
 
-Memberships MUST be included in the RLN tree according to the following table:
+Memberships MUST be included in the membership set according to the following table:
 
-| State                    | Included in the RLN tree |
+| State                    | Included in the membership set |
 | ------------------------ | ------------------------ |
 | _Active_                 | Yes                      |
 | _GracePeriod_            | Yes                      |
@@ -204,6 +204,10 @@ and the membership set SHOULD be migrated.
 
 ## Implementation Suggestions
 
+### Membership Set Implementation
+
+The membership set MAY be implemented as a Merkle tree, such as an [Incremental Merkle Tree](https://zkkit.pse.dev/modules/_zk_kit_imt.html) (IMT).
+
 ### Choosing Which _Expired_ Memberships to Overwrite
 
 When registering a new membership, the smart contract may need to decide which _Expired_ memberships to overwrite.
@@ -246,9 +250,9 @@ Generally, users are expected to either extend their membership or withdraw thei
 
 An _Expired_ membership allows sending messages for a certain period.
 The RLN proof that message senders provide to RLN Relay nodes does not prove the state of the membership,
-only its inclusion in the tree.
+only its inclusion in the membership set.
 
-_Expired_ memberships are not proactively erased from the tree.  
+_Expired_ memberships are not proactively erased from the membership set.  
 An _Expired_ membership is erased only when a new membership overwrites it or when its deposit is withdrawn.  
 Once erased (i.e., _Erased_ or _ErasedAwaitsWithdrawal_), the membership can no longer be used to send messages.
 
@@ -289,7 +293,7 @@ we define a cap `R_{max}` on the total rate limit.
 
 ### Why is there a minimum rate limit?
 
-The minimum rate limit `r_{min}` prevents an attack where a large number of tiny memberships cause RLN tree bloat.
+The minimum rate limit `r_{min}` prevents an attack where a large number of tiny memberships cause membership set bloat.
 
 ### Why is there a maximum rate limit?
 
@@ -324,7 +328,7 @@ publicly associates a membership with an Ethereum address.
 However, this association does not compromise the privacy of the relayed messages,
 as the protocol does not require the sender to disclose their specific membership to RLN Relay nodes.
 
-To generate an RLN proof, a message sender must obtain a Merkle proof confirming that their membership belongs to the RLN tree.
+To generate an RLN proof, a message sender must obtain a proof that their membership belongs to the membership set.
 This proof can be requested directly from the contract.
 Requesting the proof through a third-party RPC provider could compromise the sender's privacy,
 as the provider might link the requester's Ethereum address, their RLN membership, and the corresponding API key.
