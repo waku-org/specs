@@ -60,9 +60,29 @@ _Concerns:_
 
 ### Message Retransmission in MVDS
 
-Messages are resent when the recipient is offline, leading to additional network load.
+Direct messages, group messages and some community join request messages are sent via MVDS. When the recipient is offline, these messages are repeatedly resent until a predefined limit is reached, which leads to more bandwidth usage.
 
-Replace MVDS with a more reliable and bandwidth-efficient end-to-end (E2E) reliability protocol to reduce redundant message retransmissions.
+**Option 1**
+
+Replace MVDS with a more reliable and bandwidth-efficient end-to-end (E2E) [reliability protocol](https://forum.vac.dev/t/end-to-end-reliability-for-scalable-distributed-logs/293) to reduce message retransmissions.
+
+_Concerns:_
+- fully adopting e2e reliability protocol requires significant time and resources for implementation.
+
+**Option 2**
+
+Disable MVDS retransmission for recipients that are not online/active.
+
+_Concerns:_
+- user may set their status to offline but still want to receive messages. (TODO needs input from Status team)
+
+**Option 3**
+
+Increase the time interval between message retransmissions to reduce bandwidth usage.
+
+_Concerns:_
+- it may increase the latency of message delivery.
+
 
 ### Updates for Descriptive Messages
 
