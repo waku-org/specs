@@ -68,9 +68,9 @@ Contract parameters and their RECOMMENDED values for the initial mainnet deploym
 | Maximum total rate limit of all memberships in the membership set | `R_{max}` | `160000` | messages per epoch |
 | Minimum rate limit of one membership                              | `r_{min}` | `20`     | messages per epoch |
 | Maximum rate limit of one membership                              | `r_{max}` | `600`    | messages per epoch |
-| Membership expiration term                                        | `T`       | `180`    | days               |
-| Membership grace period duration                                           | `G`       | `30`     | days               |
-| Membership price for `1` message per epoch for period `T`         | `p_u`     | `0.05`   | `USD`              |
+| Membership active state duration                                  | `A`       | `180`    | days               |
+| Membership grace period duration                                  | `G`       | `30`     | days               |
+| Membership price for `1` message per epoch for period `A`         | `p_u`     | `0.05`   | `USD`              |
 | Accepted tokens                                                   |           | `DAI`    |                    |
 
 The pricing function SHOULD be linear in the rate limit per epoch.
@@ -153,7 +153,7 @@ Membership registration is subject to the following requirements:
 - The size of the deposit MUST depend on the specified rate limit.
 - In case of a successful registration:
 	- the new membership MUST become _Active_;
-	- the new membership MUST have an expiration term `T` and a grace period duration `G`;
+	- the new membership MUST have an active state duration `A` and a grace period duration `G`;
 	- the current total rate limit MUST be incremented by the rate limit of the new membership.
 #### Overwriting other memberships
 
@@ -236,7 +236,7 @@ User-facing applications SHOULD suggest one or more rate limits (tiers) to simpl
 - `200` messages per epoch as mid-tier;
 - `600` messages per epoch as high-tier.
 
-User-facing applications SHOULD save membership expiration dates in a local keystore during registration,
+User-facing applications SHOULD save membership expiration timestamps in a local keystore during registration,
 and notify the user when their membership is about to expire.
 
 ## Q&A
