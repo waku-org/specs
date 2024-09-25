@@ -42,21 +42,21 @@ For the full specification of RLN Relay, see See [17/WAKU2-RLN-RELAY](https://gi
 The contract MUST provide the following functionalities:
 - register a membership;
 - extend a membership;
+- erase a membership;
 - withdraw a deposit.
 
 A membership _holder_ is the entity that controls the secret associated with the respective RLN commitment.
-A membership _keeper_ is the sender of the transaction that registered that membership.
-Transaction sender in this context is defined as `msg.sender` in Solidity semantics.
-The contract MUST support transactions sent directly from externally-owned accounts (EOA).
-The contract MAY support transactions sent from an EOA via a chain of contract calls,
-in which case the last contract in the call chain MAY be designated as the membership keeper.
-The contract MAY also support meta-transactions sent via paymasters or relayers,
-which MAY require additional authentication-related logic.
-
+A membership _keeper_ is the sender (`msg.sender` in Solidity semantics) of the transaction that registered that membership.
 The holder and the keeper MAY be different entities for the same membership.
 When authorizing membership-related requests,
 the contract SHOULD distinguish between the keeper and non-keepers,
 and MAY also use additional criteria.
+
+The contract MUST support transactions sent directly from externally-owned accounts (EOA).
+The contract MAY support transactions sent via a chain of contract calls,
+in which case the last contract in the call chain MAY be designated as the membership keeper.
+The contract MAY also support meta-transactions sent via paymasters or relayers,
+which MAY require additional authentication-related logic.
 
 Contract parameters and their RECOMMENDED values for the initial mainnet deployment are as follows:
 
@@ -67,7 +67,7 @@ Contract parameters and their RECOMMENDED values for the initial mainnet deploym
 | Minimum rate limit of one membership                              | `r_{min}` | `20`     | messages per epoch |
 | Maximum rate limit of one membership                              | `r_{max}` | `600`    | messages per epoch |
 | Membership expiration term                                        | `T`       | `180`    | days               |
-| Membership grace period                                           | `G`       | `30`     | days               |
+| Membership grace period duration                                           | `G`       | `30`     | days               |
 | Membership price for `1` message per epoch for period `T`         | `p_u`     | `0.05`   | `USD`              |
 | Accepted tokens                                                   |           | `DAI`    |                    |
 
@@ -127,13 +127,13 @@ A user MAY use one Waku node[^1] to manage multiple memberships.
 
 Availability of membership-specific functionalities[^2] MUST be as follows:
 
-|                       | Active | GracePeriod | Expired | ErasedAwaitsWithdrawal | Erased |
-| --------------------- | ------ | ----------- | ------- | ---------------------- | ------ |
-| Send a message        | Yes    | Yes         | Yes     | No                     | No     |
-| Extend the membership | No     | Yes         | No      | No                     | No     |
-| Withdraw the deposit  | No     | No          | No      | Yes                    | No     |
+|                       | Active | GracePeriod       | Expired | ErasedAwaitsWithdrawal | Erased |
+| --------------------- | ------ | ----------------- | ------- | ---------------------- | ------ |
+| Extend the membership | No     | Yes (keeper only) | No      | No                     | No     |
+| Erase the membership  | No     | Yes (keeper only) | Yes     | No                     | No     |
+| Withdraw the deposit  | No     | No                | No      | Yes (keeper only)      | No     |
 
-[^2]: Sending a message is included here for completeness, although it is part of the RLN Relay protocol and not the contract.
+[^2]: Sending a message is not present in this table because it is part of the RLN Relay protocol and not the contract. For completeness, we note that the membership holder MUST be able to send a message if their membership is _Active_, in _GracePeriod_, or _Expired_. Sending messages with _Expired_ memberships is allowed, because the inclusion (Merkle) proof that the holder provides to RLN Relay only proves that the membership belongs to the membership set, and not that membership's state.
 
 ### Register a membership
 
@@ -161,7 +161,7 @@ Membership registration is subject to the following requirements:
 - The size of the deposit MUST depend on the specified rate limit.
 - In case of a successful registration:
 	- the new membership MUST become _Active_;
-	- the new membership MUST have an expiration time `T` and a grace period `G`;
+	- the new membership MUST have an expiration term `T` and a grace period duration `G`;
 	- the current total rate limit MUST be incremented by the rate limit of the new membership.
 
 [^3]: A user-facing application SHOULD suggest default rate limits to the keeper (see Implementation Suggestions).
