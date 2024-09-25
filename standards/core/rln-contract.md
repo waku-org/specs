@@ -39,11 +39,13 @@ For the full specification of RLN Relay, see See [17/WAKU2-RLN-RELAY](https://gi
 
 ## Contract overview
 
-The contract MUST provide the following functionalities:
+Let us define membership-related functionalities (hereinafter, functionalities) as follows:
 - register a membership;
 - extend a membership;
 - erase a membership;
 - withdraw a deposit.
+
+The contract MUST provide the functionalities.
 
 A membership _holder_ is the entity that controls the secret associated with the respective RLN commitment.
 A membership _keeper_ is the sender (`msg.sender` in Solidity semantics) of the transaction that registered that membership.
@@ -125,7 +127,7 @@ A user MAY use one Waku node[^1] to manage multiple memberships.
 
 ## Contract functionalities
 
-Availability of membership-specific functionalities[^2] MUST be as follows:
+Availability of functionalities[^2] MUST be as follows:
 
 |                       | Active | GracePeriod       | Expired | ErasedAwaitsWithdrawal | Erased |
 | --------------------- | ------ | ----------------- | ------- | ---------------------- | ------ |
@@ -197,10 +199,7 @@ The updated parameter values MUST apply to all new memberships.
 The parameters of existing memberships MUST NOT change if the _Owner_ updates global parameters.
 The contract MAY restrict extensions for memberships created before the latest parameter update.
 
-The _Owner_ MUST be able to pause any of the following contract functionalities:
-- register a membership;
-- extend a membership;
-- withdraw a deposit.
+The _Owner_ MUST be able to pause any of the functionalities (see definition above).
 
 At some point, the _Owner_ SHOULD renounce their privileges,
 and the contract MUST become immutable.
@@ -221,7 +220,7 @@ The criteria for this selection can vary depending on the implementation.
 
 Key considerations include:
 - To minimize gas costs, it's better to overwrite a single high-rate membership rather than multiple low-rate ones.
-- To encourage timely withdrawals, it's better to overwrite memberships that have been _Expired_ for a long time.
+- To encourage timely deposit withdrawals, it's better to overwrite memberships that have been _Expired_ for a long time.
 
 ### Considerations for User-facing Applications
 
@@ -248,9 +247,10 @@ The rationale is to make possible parameter changes that the contract _Owner_ mi
 
 ### What if I don't extend my membership within its _GracePeriod_?
 
-If a user does not extend their membership during the _GracePeriod_,
-they risk having their _Expired_ membership overwritten.  
-Generally, users are expected to either extend their membership or withdraw their deposit to avoid this risk.
+If the membership is not extended during its _GracePeriod_,
+it becomes _Expired_ and can be overwritten.  
+Users are expected to either extend their membership on time to avoid this risk,
+or erase them and withdraw their deposit.
 
 ### Can I send messages when my membership is _Expired_?
 
@@ -260,7 +260,7 @@ only its inclusion in the membership set.
 
 _Expired_ memberships are not proactively erased from the membership set.  
 An _Expired_ membership is erased only when a new membership overwrites it or when its deposit is withdrawn.  
-Once erased (i.e., _Erased_ or _ErasedAwaitsWithdrawal_), the membership can no longer be used to send messages.
+Once in _Erased_ or _ErasedAwaitsWithdrawal_ state, the membership can no longer be used to send messages.
 
 ### Will my deposit be slashed if I exceed the rate limit?
 
