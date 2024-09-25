@@ -91,8 +91,8 @@ graph TD;
     Active -.-> |"time T passed"| GracePeriod;
     GracePeriod --> |"extend"| Active;
     GracePeriod -.-> |"time G passed"| Expired;
-    GracePeriod --> |"withdraw"| Erased;
-    Expired --> |"withdraw"| Erased;
+    GracePeriod --> |"erase"| ErasedAwaitsWithdrawal;
+    Expired --> |"erase"| ErasedAwaitsWithdrawal;
     Expired --> |"another membership reuses slot"| ErasedAwaitsWithdrawal;
     ErasedAwaitsWithdrawal --> |"withdraw"| Erased;
 
@@ -131,7 +131,7 @@ Availability of membership-specific functionalities[^2] MUST be as follows:
 | --------------------- | ------ | ----------- | ------- | ---------------------- | ------ |
 | Send a message        | Yes    | Yes         | Yes     | No                     | No     |
 | Extend the membership | No     | Yes         | No      | No                     | No     |
-| Withdraw the deposit  | No     | Yes         | Yes     | Yes                    | No     |
+| Withdraw the deposit  | No     | No          | No      | Yes                    | No     |
 
 [^2]: Sending a message is included here for completeness, although it is part of the RLN Relay protocol and not the contract.
 
@@ -180,7 +180,7 @@ Deposit withdrawal is subject to the following conditions:
 - The membership keeper MUST be able to withdraw their deposit.
 - Any user other than the membership keeper MUST NOT be able to withdraw its deposit.
 - A deposit MUST be withdrawn in full.
-- A withdrawal MUST fail if the membership is not in _GracePeriod_, _Expired_, or _ErasedAwaitsWithdrawal_.
+- A withdrawal MUST fail if the membership is not in _ErasedAwaitsWithdrawal_.
 - A membership MUST become _Erased_ after withdrawal.
 
 ## Governance and upgradability
@@ -210,7 +210,7 @@ The membership set MAY be implemented as a Merkle tree, such as an [Incremental 
 
 ### Choosing Which _Expired_ Memberships to Overwrite
 
-When registering a new membership, the smart contract may need to decide which _Expired_ memberships to overwrite.
+When registering a new membership, the contract needs to decide which _Expired_ memberships, if any, to overwrite.
 The criteria for this selection can vary depending on the implementation.
 
 Key considerations include:
