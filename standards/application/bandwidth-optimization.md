@@ -78,7 +78,13 @@ _Concerns:_
 
 **Option 3**
 
-Increase the time interval between message retransmissions to reduce bandwidth usage.
+Increase the time interval between message retransmissions to reduce bandwidth usage. The current resend epoch calculation in Status app is as follows:
+
+```
+next_epoch = current_epoch + (2^(send_count−1)×30×3) + rand(0,30)
+```
+
+The interval can be increased by adjusting the constant factor (30) to a higher value, e.g., 60 or 90, to reduce the frequency of message retransmissions.
 
 _Concerns:_
 - it may increase the latency of message delivery.
@@ -94,11 +100,14 @@ In the long term, such messages should persisted and updated with a decentralize
 
 In the short term, the application should optimize the frequency of updates and reduce the size of descriptive messages to minimize bandwidth usage, for example only publish the id or hash of the message content, store the original content in other places like IPFS or S3.
 
-### Store Node Queries
+### Store Node Queries for missing messages and messages sent check
 
-Regular queries to store nodes for missing messages can create additional network traffic.
+Regular queries to store nodes can create additional network traffic.
 
-Use e2e reliability for missing messages retrieval.
+**Option 1**
+
+Use e2e reliability for missing messages retrieval and messages sent check.
+
 
 ### Device Synchronization
 
