@@ -29,7 +29,7 @@ In the long term, the Waku Network should implement an incentivization model to 
 
 ## Potential Issues and Optimizations
 
-Multiple factors can cause excessive bandwidth usage, impacting overall bandwidth consumption in Status app. In following sections we will discuss some of the potential issues and optimizations.
+Multiple factors can cause excessive bandwidth usage, impacting overall bandwidth consumption in Status app. In following sections we will discuss some of the potential issues and options for optimizations, different options can be utilized together to achieve the best result.
 
 ### Global Shard Message Routing
 
@@ -90,15 +90,9 @@ _Concerns:_
 - it may increase the latency of message delivery.
 
 
-### Updates for Descriptive Messages
+### Community Description
 
-Repeated publication of large messages, such as community descriptions, can result in frequent network consumption (e.g., every hour). Such messages include,
-- Community descriptions published every hour.
-- User profiles (TODO)
-
-In the long term, such messages should persisted and updated with a decentralized storage provider like Codex.
-
-In the short term, the application should optimize the frequency of updates and reduce the size of descriptive messages to minimize bandwidth usage, for example only publish the id or hash of the message content, store the original content in other places like IPFS or S3.
+Refer to [Optimizing Community Description](https://forum.vac.dev/t/optimizing-community-description/339)
 
 ### Store Node Queries for missing messages and messages sent check
 
@@ -111,16 +105,55 @@ Use e2e reliability for missing messages retrieval and messages sent check.
 
 ### Device Synchronization
 
-Synchronizing messages across multiple devices can increase bandwidth consumption.
+ To ensure a consistent user experience across multiple devices, a lot of messages are sent through Waku global shard, for example user profile, contacts, communities, activies, etc.
 
-Utilize a transient shard for syncing messages between devices to ensure efficient bandwidth use without relying on permanent storage.
+[Scope of user profile data: what we need to backup to waku and sync](https://docs.google.com/spreadsheets/d/1VyVIg5ZaVSlKWZRHSLzSMCMGJsbprkWUfEqCUJKma8w/edit?usp=sharing)
 
-### Backup of User Data
+**Option 1**
 
-Frequent backups of user data, such as profile information, contacts, and communities (e.g., via ApplicationMetadataMessage_BACKUP), can be bandwidth-intensive.
+Change the product design to only allow sync through a negotiated shard when two devices are online at the same time.
+Waku can allocate a range of shards specifically for syncing messages, allowing users to subscribe to a shard only when needed. From the user's perspective, this operates as a transient shard, dynamically utilized for short-term tasks.
+
+
+_Concerns:_
+- UX is not matched with the current design.
+
+**Option 2**
+
+Do not sync messages through Waku, instead use a bittorrent or other systems to sync history messages, and use the following backup flow for profile, contacts, communities synchronization.
+
+### User Data Backup
+
+Frequent backups of user data, such as profile information, contacts, and communities ((e.g., `ApplicationMetadataMessage_BACKUP`)), can be bandwidth-intensive. It's also tightly coupled with the device synchronization.
+
 See: [PR 2413](https://github.com/status-im/status-go/pull/2413) and [PR 2976](https://github.com/status-im/status-go/pull/2976).
 
-The backup should be disabled by default, and manually triggered by the user when necessary. The application can also provide an option to schedule backups at specific intervals to reduce network traffic.
+**Option 1**
+
+Waku provides a new protocol (namely, stateful store),
+- there needs to be another table in store node's database, let’s call it states for now
+- each record in states table has fields (id, pubkeys, content, pubsubTopic, contentTopic), the pubkeys is a list of public keys of user's devices.
+- we will assign a new shard to route the messages of state creation and updates.
+
+How user backup their data, 
+- send user profile along with the device's pubkey and signature of the message hash
+- store node receives the message, verifies the content in message with the bundled pubkey, further save it to the state table. (TODO Status app may use the same key for different devices, need to confirm)
+- when new update event happens, it sends a new message just like the previous one
+- store node further check and updates the content
+
+_Note:_
+
+To handle the conflict between different devices, we use LWW (Last Write Wins) strategy, which means the last update message will be saved to the state table. 
+Each devices should fetch the latest stete from store, update local state, then compose and send the new backup message to store.
+
+_Concerns:_
+
+- it requires a significant amount of work to implement the stateful store protocol.
+
+**Option 2**
+
+The backup should be disabled by default, and manually triggered by the user when necessary. 
+User can enable periodically backup and set the intervals as needed. Currently, the periodically backup is enabled by default.
 
 ### Status Update Messages
 
@@ -141,3 +174,4 @@ Copyright and related rights waived via [CC0](https://creativecommons.org/public
 3. [Filter Protocl](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/12/filter.md)
 4. [MVDS - Minimum Viable Data Synchronization](https://github.com/vacp2p/rfc-index/blob/main/vac/2/mvds.md)
 5. [End-to-end reliability for scalable distributed logs](https://forum.vac.dev/t/end-to-end-reliability-for-scalable-distributed-logs/293)
+6. [Optimizing Community Description](https://forum.vac.dev/t/optimizing-community-description/339)
