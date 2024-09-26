@@ -157,7 +157,20 @@ User can enable periodically backup and set the intervals as needed. Currently, 
 
 ### Status Update Messages
 
-Users might receive status update messages for themselves, which should be filtered out to avoid unnecessary bandwidth usage.
+User sends status update messages to the global shard every a few minutes. With the increase of users, the traffic can be heavy.
+
+**Option 1**
+
+Favor lightpush and filter protocol for such messages.
+
+**Option 2**
+
+Don't broadcast the message via Waku pubsub protocol, instead use p2p connection (WebRTC) directly to the contacts for routing messages.
+If the status update message is for a community, it should bradcast to community assigned shard.
+
+_Concerns:_
+
+- it may require a significant amount of work to implement the p2p connection between contacts.
 
 ## Summary
 
