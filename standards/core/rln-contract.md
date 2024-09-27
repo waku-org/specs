@@ -153,7 +153,7 @@ Membership registration is subject to the following requirements:
 - The size of the deposit MUST depend on the specified rate limit.
 - In case of a successful registration:
 	- the new membership MUST become _Active_;
-	- the new membership MUST have an active state duration `A` and a grace period duration `G`;
+	- the new membership MUST have an active state duration `A > 0` and a grace period duration `G >= 0`;
 	- the current total rate limit MUST be incremented by the rate limit of the new membership.
 #### Overwriting other memberships
 
