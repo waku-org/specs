@@ -169,11 +169,13 @@ R_{free} = R_{max} - R_{active} - R_{grace_period} - R_{expired}
 ```
 
 Membership registration is additionally subject to the following requirements:
-- If `r <= R_{free}`, the new membership MUST be registered (assuming all other necessary conditions hold). The new membership MAY overwrite one or multiple _Expired_ memberships.
+- If `r <= R_{free}`, the new membership MUST be registered (assuming all other necessary conditions hold).
+	- The new membership MAY overwrite one or multiple _Expired_ memberships.
 - If `r > R_{free}`:
 	- if `r > R_{free} + R_{expired}`, registration MUST fail;
 	- if `r <= R_{free} + R_{expired}`, the new membership MUST be registered by overwriting some _Expired_ memberships.
-- The sender of the registration transaction MAY specify a list of _Expired_ memberships to be overwritten. If the list is not provided, the contract MAY use any criteria to select _Expired_ memberships to overwrite (see Implementation Suggestions).
+- The sender of the registration transaction MAY specify a list of _Expired_ memberships to be overwritten.
+	- If the list is not provided, the contract MAY use any criteria to select _Expired_ memberships to overwrite (see Implementation Suggestions).
 - If a new membership A overwrites an _Expired_ membership B:
 	- membership B MUST become _ErasedAwaitsWithdrawal_;
 	- the current total rate limit MUST be decremented by the rate limit of membership B;
