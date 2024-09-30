@@ -90,7 +90,7 @@ Any existing membership MUST always be in exactly one of the following states:
 ```mermaid
 graph TD;
     NonExistent --> |"register"| Active;
-    Active -.-> |"time T passed"| GracePeriod;
+    Active -.-> |"time A passed"| GracePeriod;
     GracePeriod ==> |"extend"| Active;
     GracePeriod -.-> |"time G passed"| Expired;
     GracePeriod ==> |"erase"| ErasedAwaitsWithdrawal;
@@ -191,7 +191,9 @@ Extending a membership is subject to the following conditions:
 - The extension MUST fail if the membership is in any state other than _GracePeriod_.
 - The membership keeper MUST be able to extend their membership.
 - Any user other than the membership keeper MUST NOT be able to extend a membership.
-- After a successful extension, the membership MUST become _Active_.
+- After an extension, the membership MUST become _Active_.
+- After an extension, the membership MUST stay _Active_ for time `g + A`, where `g` is the remaining time of the _GracePeriod_ after the extension, and `A` is this membership's active state duration.
+- The extended membership MUST retain its original parameters, including active state duration `A` and grace period duration `G`, even if the global default values of such parameters for new memberships have been changed.
 
 ### Withdraw the deposit
 
