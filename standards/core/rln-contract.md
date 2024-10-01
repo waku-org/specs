@@ -47,16 +47,17 @@ Let us define membership-related functionalities (hereinafter, functionalities) 
 
 The contract MUST provide the functionalities.
 
-A membership _holder_ is the entity that controls the secret associated with the respective RLN commitment.
-A membership _keeper_ is the sender (`msg.sender` in Solidity semantics) of the transaction that registered that membership.
-The holder and the keeper MAY be different entities for the same membership.
+A membership _holder_ is a role that grants special privileges in the context of membership management.
+Each membership MUST have exactly one holder.
+The holder role MUST be assigned at membership registration time to the sender (`msg.sender` in Solidity semantics) of the registration transaction.
 When authorizing membership-related requests,
-the contract SHOULD distinguish between the keeper and non-keepers,
+the contract MUST distinguish between the holder and non-holders,
 and MAY also use additional criteria.
+The holder MAY be a different entity from the one that controls the secret associated with the respective RLN commitment.
 
 The contract MUST support transactions sent directly from externally-owned accounts (EOA).
 The contract MAY support transactions sent via a chain of contract calls,
-in which case the last contract in the call chain MAY be designated as the membership keeper.
+in which case the last contract in the call chain MAY be designated as the membership holder.
 The contract MAY also support meta-transactions sent via paymasters or relayers,
 which MAY require additional authentication-related logic.
 
@@ -104,7 +105,7 @@ Different line types denote the types of state transitions:
 
 | Line type      | Triggered by     | Requirements                                                                         |
 | -------------- | ---------------- | ------------------------------------------------------------------------------------ |
-| Thick (`==`)   | Transaction      | MUST be initiable by the membership keeper and MUST NOT be initiable by other users. |
+| Thick (`==`)   | Transaction      | MUST be initiable by the membership holder and MUST NOT be initiable by other users. |
 | Thin (`--`)    | Transaction      | MAY be initiable by any user.                                                        |
 | Dotted (`-.-`) | Time progression | MAY be applied lazily.                                                               |
 
@@ -138,18 +139,18 @@ Availability of functionalities[^2] MUST be as follows:
 
 |                       | Active | GracePeriod       | Expired | ErasedAwaitsWithdrawal | Erased |
 | --------------------- | ------ | ----------------- | ------- | ---------------------- | ------ |
-| Extend the membership | No     | Yes (keeper only) | No      | No                     | No     |
-| Erase the membership  | No     | Yes (keeper only) | Yes     | No                     | No     |
-| Withdraw the deposit  | No     | No                | No      | Yes (keeper only)      | No     |
+| Extend the membership | No     | Yes (holder only) | No      | No                     | No     |
+| Erase the membership  | No     | Yes (holder only) | Yes     | No                     | No     |
+| Withdraw the deposit  | No     | No                | No      | Yes (holder only)      | No     |
 
 [^2]: Sending a message is not present in this table because it is part of the RLN Relay protocol and not the contract. For completeness, we note that the membership holder MUST be able to send a message if their membership is _Active_, in _GracePeriod_, or _Expired_. Sending messages with _Expired_ memberships is allowed, because the inclusion (Merkle) proof that the holder provides to RLN Relay only proves that the membership belongs to the membership set, and not that membership's state.
 
 ### Register a membership
 
 Membership registration is subject to the following requirements:
-- The keeper MUST specify the requested rate limit  `r` of a new membership at registration time[^3].
+- The holder MUST specify the requested rate limit  `r` of a new membership at registration time[^3].
 - Registration MUST fail if `r < r_{min}` or `r > r_{max}`.
-- The keeper MUST lock up a deposit to register a membership.
+- The holder MUST lock up a deposit to register a membership.
 - The size of the deposit MUST depend on the specified rate limit.
 - In case of a successful registration:
 	- the new membership MUST become _Active_;
@@ -181,16 +182,16 @@ Membership registration is additionally subject to the following requirements:
 - If a new membership A overwrites an _Expired_ membership B:
 	- membership B MUST become _ErasedAwaitsWithdrawal_;
 	- the current total rate limit MUST be decremented by the rate limit of membership B;
-	- the contract MUST take all necessary steps to ensure that the keeper of membership B can withdraw their deposit later.
+	- the contract MUST take all necessary steps to ensure that the holder of membership B can withdraw their deposit later.
 
-[^3]: A user-facing application SHOULD suggest default rate limits to the keeper (see Implementation Suggestions).
+[^3]: A user-facing application SHOULD suggest default rate limits to the holder (see Implementation Suggestions).
 
 ### Extend a membership
 
 Extending a membership is subject to the following conditions:
 - The extension MUST fail if the membership is in any state other than _GracePeriod_.
-- The membership keeper MUST be able to extend their membership.
-- Any user other than the membership keeper MUST NOT be able to extend a membership.
+- The membership holder MUST be able to extend their membership.
+- Any user other than the membership holder MUST NOT be able to extend a membership.
 - After an extension, the membership MUST become _Active_.
 - After an extension, the membership MUST stay _Active_ for time `g + A`, where `g` is the remaining time of the _GracePeriod_ after the extension, and `A` is this membership's active state duration.
 - The extended membership MUST retain its original parameters, including active state duration `A` and grace period duration `G`, even if the global default values of such parameters for new memberships have been changed.
@@ -198,8 +199,8 @@ Extending a membership is subject to the following conditions:
 ### Withdraw the deposit
 
 Deposit withdrawal is subject to the following conditions:
-- The membership keeper MUST be able to withdraw their deposit.
-- Any user other than the membership keeper MUST NOT be able to withdraw its deposit.
+- The membership holder MUST be able to withdraw their deposit.
+- Any user other than the membership holder MUST NOT be able to withdraw its deposit.
 - A deposit MUST be withdrawn in full.
 - A withdrawal MUST fail if the membership is not in _ErasedAwaitsWithdrawal_.
 - A membership MUST become _Erased_ after withdrawal.
