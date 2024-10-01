@@ -96,7 +96,7 @@ graph TD;
     GracePeriod -.-> |"time G passed"| Expired;
     GracePeriod ==> |"erase"| ErasedAwaitsWithdrawal;
     Expired --> |"erase"| ErasedAwaitsWithdrawal;
-    Expired --> |"overwritten by a new membership"| ErasedAwaitsWithdrawal;
+    Expired --> |"reused by a new membership"| ErasedAwaitsWithdrawal;
     ErasedAwaitsWithdrawal ==> |"withdraw"| Erased;
 
 ```
@@ -156,14 +156,14 @@ Membership registration is subject to the following requirements:
 	- the new membership MUST become _Active_;
 	- the new membership MUST have an active state duration `A > 0` and a grace period duration `G >= 0`;
 	- the current total rate limit MUST be incremented by the rate limit of the new membership.
-#### Overwriting other memberships
+#### Reusing the rate limit of _Expired_ memberships
 
 Let us define the following rate limits:
 - `R_{active}` is the total rate limit of all _Active_ memberships;
 - `R_{grace_period}` is the total rate limit of all _GracePeriod_ memberships;
 - `R_{expired}` is the total rate limit of all _Expired_ memberships.
 
-Let us define the free rate limit that is available without overwriting _Expired_ memberships as follows:
+Let us define the free rate limit that is available without reusing the rate limit of _Expired_ memberships as follows:
 
 ```
 R_{free} = R_{max} - R_{active} - R_{grace_period} - R_{expired}
@@ -171,15 +171,15 @@ R_{free} = R_{max} - R_{active} - R_{grace_period} - R_{expired}
 
 Membership registration is additionally subject to the following requirements:
 - If `r <= R_{free}`, the new membership MUST be registered (assuming all other necessary conditions hold).
-	- The new membership MAY overwrite one or multiple _Expired_ memberships.
+	- The new membership MAY erase one or multiple _Expired_ memberships and reuse their rate limit.
 - If `r > R_{free}`:
 	- if `r > R_{free} + R_{expired}`, registration MUST fail;
-	- if `r <= R_{free} + R_{expired}`, the new membership SHOULD be registered by overwriting some _Expired_ memberships.
-- The sender of the registration transaction MAY specify a list of _Expired_ memberships to be overwritten.
+	- if `r <= R_{free} + R_{expired}`, the new membership SHOULD be registered by reusing some _Expired_ memberships.
+- The sender of the registration transaction MAY specify a list of _Expired_ memberships to be erased and their rate limit reused.
 	- If any of the memberships in the list are not _Expired_, the registration MUST fail.
-	- If the list is not provided, the contract MAY use any criteria to select _Expired_ memberships to overwrite (see Implementation Suggestions).
-	- If the list is not provided, the registration MAY fail even if the membership set contains _Expired_ membership that, if erased, would provide sufficient rate limit.
-- If a new membership A overwrites an _Expired_ membership B:
+	- If the list is not provided, the contract MAY use any criteria to select _Expired_ memberships to reuse (see Implementation Suggestions).
+	- If the list is not provided, the registration MAY fail even if the membership set contains _Expired_ membership that, if erased, would free up sufficient rate limit.
+- If a new membership A erases an _Expired_ membership B to reuse its rate limit:
 	- membership B MUST become _ErasedAwaitsWithdrawal_;
 	- the current total rate limit MUST be decremented by the rate limit of membership B;
 	- the contract MUST take all necessary steps to ensure that the holder of membership B can withdraw their deposit later.
@@ -227,14 +227,14 @@ and the membership set SHOULD be migrated.
 
 The membership set MAY be implemented as a Merkle tree, such as an [Incremental Merkle Tree](https://zkkit.pse.dev/modules/_zk_kit_imt.html) (IMT).
 
-### Choosing Which _Expired_ Memberships to Overwrite
+### Choosing Which _Expired_ Memberships to Reuse
 
-When registering a new membership, the contract needs to decide which _Expired_ memberships, if any, to overwrite.
+When registering a new membership, the contract needs to decide which _Expired_ memberships, if any, to reuse.
 The criteria for this selection can vary depending on the implementation.
 
 Key considerations include:
-- To minimize gas costs, it's better to overwrite a single high-rate membership rather than multiple low-rate ones.
-- To encourage timely deposit withdrawals, it's better to overwrite memberships that have been _Expired_ for a long time.
+- To minimize gas costs, it's better to reuse a single high-rate membership rather than multiple low-rate ones.
+- To encourage timely deposit withdrawals, it's better to reuse memberships that have been _Expired_ for a long time.
 
 ### Considerations for User-facing Applications
 
@@ -262,7 +262,7 @@ The rationale is to make possible parameter changes that the contract _Owner_ mi
 ### What if I don't extend my membership within its _GracePeriod_?
 
 If the membership is not extended during its _GracePeriod_,
-it becomes _Expired_ and can be overwritten.  
+it becomes _Expired_ and can be erased at any time.  
 Users are expected to either extend their membership on time to avoid this risk,
 or erase them and withdraw their deposit.
 
@@ -272,8 +272,12 @@ An _Expired_ membership allows sending messages for a certain period.
 The RLN proof that message senders provide to RLN Relay nodes does not prove the state of the membership,
 only its inclusion in the membership set.
 
-_Expired_ memberships are not proactively erased from the membership set.  
-An _Expired_ membership is erased only when a new membership overwrites it or when its deposit is withdrawn.  
+_Expired_ memberships are not immediately erased from the membership set.
+An _Expired_ membership is erased in the following scenarios:
+- the holder erases it to withdraw the deposit;
+- a new membership erases it to free up rate limit during registration;
+- a public function is called that erases _Expired_ memberships from the given list.
+
 Once in _Erased_ or _ErasedAwaitsWithdrawal_ state, the membership can no longer be used to send messages.
 
 ### Will my deposit be slashed if I exceed the rate limit?
