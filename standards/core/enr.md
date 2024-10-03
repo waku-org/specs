@@ -135,9 +135,9 @@ We define a `waku2` field key:
 
 | bit 7   | bit 6   | bit 5   | bit 4   | bit 3       | bit 2    | bit 1   | bit 0   |
 | ------- | ------- | ------- | ------- | ----------- | -------- | ------- | ------- |
-| `undef` | `undef` | `undef` | `undef` | `lightpush` | `filter` | `store` | `relay` |
+| `undef` | `undef` | `undef` | `sync` | `lightpush` | `filter` | `store` | `relay` |
 
-- In the scheme above, the flags `lightpush`, `filter`, `store` and `relay` correlates with support for protocols with the same name.
+- In the scheme above, the flags `sync`, `lightpush`, `filter`, `store` and `relay` correlates with support for protocols with the same name.
   If a protocol is not supported, the corresponding field MUST be set to `false`.
   Indicating positive support for any specific protocol is OPTIONAL,
   though it MAY be required by the relevant application or discovery process.
