@@ -88,6 +88,13 @@ Any existing membership MUST always be in exactly one of the following states:
 - _ErasedAwaitsWithdrawal_;
 - _Erased_.
 
+The duration of each state MUST include the start timestamp.
+The duration of each state MUST exclude the end timestamp.
+For example, if a membership is registered at time `0`,
+and the active state duration `A = 5`,
+the membership is considered to be _Active_ at timestamps `0`, `1`, `2`, `3`, and `4`.
+At timestamp `5`, the membership is considered to be in _GracePeriod_.
+
 ```mermaid
 graph TD;
     NonExistent --> |"register"| Active;
