@@ -94,6 +94,12 @@ Notably by verifying messages RLN proof at reception.
 ## Implementation
 The following is not part of the specifications but good to know implementation details.
 
+### Peer Choice
+Peering strategies can lead to inadvertently segregating peers and reduce sampling diversity.
+We randomly select peers to sync with for simplicity and robustness.
+
+A good strategy can be devised but we chose not to.
+
 ### Interval
 Ad-hoc syncing can be useful in some cases but continuous periodic sync
 minimize the differences in messages stored across the network.
