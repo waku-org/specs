@@ -28,7 +28,7 @@ The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL 
 
 Rate-Limiting Nullifier (RLN) is a Zero-Knowledge (ZK) based gadget used for privacy-preserving rate limiting in Waku.
 The RLN smart contract (referred to as "the contract" hereinafter) is the central component of the RLN architecture.
-The contract stores the RLN tree, which contains all current memberships.
+The contract stores the membership set, which contains all current memberships.
 Users interact with the contract to manage their memberships
 and obtain the necessary data for proof generation and verification.
 
@@ -39,32 +39,45 @@ For the full specification of RLN Relay, see See [17/WAKU2-RLN-RELAY](https://gi
 
 ## Contract overview
 
-The contract MUST provide the following functionalities:
+Let us define membership-related functionalities (hereinafter, functionalities) as follows:
 - register a membership;
 - extend a membership;
+- erase a membership;
 - withdraw a deposit.
 
-A membership _holder_ is the entity that controls the secret associated with the respective RLN commitment.
-A membership _keeper_ is the entity that controls the Ethereum address used to register that membership.
-The holder and the keeper MAY be different entities for the same membership.
+The contract MUST provide the functionalities.
+
+A membership _holder_ is a role that grants special privileges in the context of membership management.
+Each membership MUST have exactly one holder.
+The holder role MUST be assigned at membership registration time to the sender (`msg.sender` in Solidity semantics) of the registration transaction.
 When authorizing membership-related requests,
-the contract SHOULD distinguish between the keeper and non-keepers,
+the contract MUST distinguish between the holder and non-holders,
 and MAY also use additional criteria.
+The holder MAY be a different entity from the one that controls the secret associated with the respective RLN commitment.
+
+The contract MUST support transactions sent directly from externally-owned accounts (EOA).
+The contract MAY support transactions sent via a chain of contract calls,
+in which case the last contract in the call chain MAY be designated as the membership holder.
+The contract MAY also support meta-transactions sent via paymasters or relayers,
+which MAY require additional authentication-related logic.
 
 Contract parameters and their RECOMMENDED values for the initial mainnet deployment are as follows:
 
-| Parameter                                               | Symbol    | Value    | Units                |
-| ------------------------------------------------------- | --------- | -------- | -------------------- |
-| Epoch length                                            | `epoch`   | `10`     | minutes              |
-| Maximum total rate limit of all memberships in the tree | `R_{max}` | `160000` | messages per `epoch` |
-| Minimum rate limit of one membership                    | `r_{min}` | `20`     | messages per `epoch` |
-| Maximum rate limit of one membership                    | `r_{max}` | `600`    | messages per `epoch` |
-| Membership price for `1` message per epoch              | `p_u`     | `0.05`   | `USD`                |
-| Membership expiration term                              | `T`       | `180`    | days                 |
-| Membership grace period                                 | `G`       | `30`     | days                 |
-| Accepted tokens                                         |           | `DAI`    |                      |
+| Parameter                                                         | Symbol    | Value    | Units              |
+| ----------------------------------------------------------------- | --------- | -------- | ------------------ |
+| Epoch length                                                      | `t_{ep}`  | `600`    | seconds            |
+| Maximum total rate limit of all memberships in the membership set | `R_{max}` | `160000` | messages per epoch |
+| Minimum rate limit of one membership                              | `r_{min}` | `20`     | messages per epoch |
+| Maximum rate limit of one membership                              | `r_{max}` | `600`    | messages per epoch |
+| Membership active state duration                                  | `A`       | `180`    | days               |
+| Membership grace period duration                                  | `G`       | `30`     | days               |
+| Membership price for `1` message per epoch for period `A`         | `p_u`     | `0.05`   | `USD`              |
+| Accepted tokens                                                   |           | `DAI`    |                    |
 
 The pricing function SHOULD be linear in the rate limit per epoch.
+
+Note: epoch length means the same as `period` as defined in [17/WAKU2-RLN-RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/17/rln-relay.md).
+This specification uses the term "epoch length" instead of "period" to avoid confusion with "grace period".
 
 ## Membership lifecycle
 
@@ -75,30 +88,44 @@ Any existing membership MUST always be in exactly one of the following states:
 - _ErasedAwaitsWithdrawal_;
 - _Erased_.
 
+The duration of each state MUST include the start timestamp.
+The duration of each state MUST exclude the end timestamp.
+For example, if a membership is registered at time `0`,
+and the active state duration `A = 5`,
+the membership is considered to be _Active_ at timestamps `0`, `1`, `2`, `3`, and `4`.
+At timestamp `5`, the membership is considered to be in _GracePeriod_.
+
 ```mermaid
 graph TD;
     NonExistent --> |"register"| Active;
-    Active -.-> |"time T passed"| GracePeriod;
-    GracePeriod --> |"extend"| Active;
+    Active -.-> |"time A passed"| GracePeriod;
+    GracePeriod ==> |"extend"| Active;
     GracePeriod -.-> |"time G passed"| Expired;
-    GracePeriod --> |"withdraw"| Erased;
-    Expired --> |"withdraw"| Erased;
-    Expired --> |"another membership reuses slot"| ErasedAwaitsWithdrawal;
-    ErasedAwaitsWithdrawal --> |"withdraw"| Erased;
+    GracePeriod ==> |"erase"| ErasedAwaitsWithdrawal;
+    Expired --> |"erase"| ErasedAwaitsWithdrawal;
+    Expired --> |"reused by a new membership"| ErasedAwaitsWithdrawal;
+    ErasedAwaitsWithdrawal ==> |"withdraw"| Erased;
 
 ```
 
-State updates triggered by a transaction (e.g., from _GracePeriod_ to _Active_ as a result of `extend`) MUST be applied immediately.
-State updates defined by time progression (e.g., from _GracePeriod_ to _Expired_ after time `G`) MAY be applied lazily.
+Different line types denote the types of state transitions:
+
+| Line type      | Triggered by     | Requirements                                                                         |
+| -------------- | ---------------- | ------------------------------------------------------------------------------------ |
+| Thick (`==`)   | Transaction      | MUST be initiable by the membership holder and MUST NOT be initiable by other users. |
+| Thin (`--`)    | Transaction      | MAY be initiable by any user.                                                        |
+| Dotted (`-.-`) | Time progression | MAY be applied lazily.                                                               |
+
+Transaction-triggered state transitions MUST be applied immediately.
 
 When handling a membership-specific transaction, the contract MUST:
 - check whether the state of the involved membership is up-to-date;
 - if necessary, update the membership state;
 - process the transaction in accordance with the updated membership state.
 
-Memberships MUST be included in the RLN tree according to the following table:
+Memberships MUST be included in the membership set according to the following table:
 
-| State                    | Included in the RLN tree |
+| State                    | Included in the membership set |
 | ------------------------ | ------------------------ |
 | _Active_                 | Yes                      |
 | _GracePeriod_            | Yes                      |
@@ -115,62 +142,85 @@ A user MAY use one Waku node[^1] to manage multiple memberships.
 
 ## Contract functionalities
 
-Availability of membership-specific functionalities[^2] MUST be as follows:
+Availability of functionalities[^2] MUST be as follows:
 
-|                       | Active | GracePeriod | Expired | ErasedAwaitsWithdrawal | Erased |
-| --------------------- | ------ | ----------- | ------- | ---------------------- | ------ |
-| Send a message        | Yes    | Yes         | Yes     | No                     | No     |
-| Extend the membership | No     | Yes         | No      | No                     | No     |
-| Withdraw the deposit  | No     | Yes         | Yes     | Yes                    | No     |
+|                       | Active | GracePeriod       | Expired | ErasedAwaitsWithdrawal | Erased |
+| --------------------- | ------ | ----------------- | ------- | ---------------------- | ------ |
+| Extend the membership | No     | Yes (holder only) | No      | No                     | No     |
+| Erase the membership  | No     | Yes (holder only) | Yes     | No                     | No     |
+| Withdraw the deposit  | No     | No                | No      | Yes (holder only)      | No     |
 
-[^2]: Sending a message is included here for completeness, although it is part of the RLN Relay protocol and not the contract.
+[^2]: Sending a message is not present in this table because it is part of the RLN Relay protocol and not the contract. For completeness, we note that the membership holder MUST be able to send a message if their membership is _Active_, in _GracePeriod_, or _Expired_. Sending messages with _Expired_ memberships is allowed, because the inclusion (Merkle) proof that the holder provides to RLN Relay only proves that the membership belongs to the membership set, and not that membership's state.
 
 ### Register a membership
 
-Membership registration is subject to the following conditions:
-- If there are _Expired_ memberships in the RLN tree, the new membership MUST overwrite an _Expired_ membership.
-- The new membership SHOULD overwrite the membership that has been _Expired_ for the longest time.
-- If a new membership A overwrites an _Expired_ membership B:
-	- membership B MUST become _ErasedAwaitsWithdrawal_;
-	- the current total rate limit MUST be decremented by the rate limit of membership B;
-	- the contract MUST take all necessary steps to ensure that the keeper of membership B can withdraw their deposit later.
-- Registration MUST fail if the total rate limit of _Active_, _GracePeriod_, and _Expired_ memberships, including the one being created, would exceed `R_{max}`.
-- Registration MUST fail if the requested rate limit for a new membership is lower than `r_{min}` or higher than `r_{max}`.
-- The keeper MUST lock up a deposit to register a membership.
-- The keeper MUST specify the rate limit[^3] of a membership at registration time.
+Membership registration is subject to the following requirements:
+- The holder MUST specify the requested rate limit  `r` of a new membership at registration time[^3].
+- Registration MUST fail if `r < r_{min}` or `r > r_{max}`.
+- The holder MUST lock up a deposit to register a membership.
 - The size of the deposit MUST depend on the specified rate limit.
 - In case of a successful registration:
 	- the new membership MUST become _Active_;
+	- the new membership MUST have an active state duration `A > 0` and a grace period duration `G >= 0`;
 	- the current total rate limit MUST be incremented by the rate limit of the new membership.
-- A membership MUST have an expiration time `T` and a grace period `G`.
+#### Reusing the rate limit of _Expired_ memberships
 
-[^3]: A user-facing application SHOULD suggest default rate limits to the keeper (see Implementation Suggestions).
+Let us define the following rate limits:
+- `R_{active}` is the total rate limit of all _Active_ memberships;
+- `R_{grace_period}` is the total rate limit of all _GracePeriod_ memberships;
+- `R_{expired}` is the total rate limit of all _Expired_ memberships.
+
+Let us define the free rate limit that is available without reusing the rate limit of _Expired_ memberships as follows:
+
+```
+R_{free} = R_{max} - R_{active} - R_{grace_period} - R_{expired}
+```
+
+Membership registration is additionally subject to the following requirements:
+- If `r <= R_{free}`, the new membership MUST be registered (assuming all other necessary conditions hold).
+	- The new membership MAY erase one or multiple _Expired_ memberships and reuse their rate limit.
+- If `r > R_{free}`:
+	- if `r > R_{free} + R_{expired}`, registration MUST fail;
+	- if `r <= R_{free} + R_{expired}`, the new membership SHOULD be registered by reusing some _Expired_ memberships.
+- The sender of the registration transaction MAY specify a list of _Expired_ memberships to be erased and their rate limit reused.
+	- If any of the memberships in the list are not _Expired_, the registration MUST fail.
+	- If the list is not provided, the contract MAY use any criteria to select _Expired_ memberships to reuse (see Implementation Suggestions).
+	- If the list is not provided, the registration MAY fail even if the membership set contains _Expired_ membership that, if erased, would free up sufficient rate limit.
+- If a new membership A erases an _Expired_ membership B to reuse its rate limit:
+	- membership B MUST become _ErasedAwaitsWithdrawal_;
+	- the current total rate limit MUST be decremented by the rate limit of membership B;
+	- the contract MUST take all necessary steps to ensure that the holder of membership B can withdraw their deposit later.
+
+[^3]: A user-facing application SHOULD suggest default rate limits to the holder (see Implementation Suggestions).
 
 ### Extend a membership
 
 Extending a membership is subject to the following conditions:
 - The extension MUST fail if the membership is in any state other than _GracePeriod_.
-- The membership keeper MUST be able to extend their membership.
-- Any user other than the membership keeper MUST NOT be able to extend a membership.
-- After a successful extension, the membership MUST become _Active_.
+- The membership holder MUST be able to extend their membership.
+- Any user other than the membership holder MUST NOT be able to extend a membership.
+- After an extension, the membership MUST become _Active_.
+- After an extension, the membership MUST stay _Active_ for time `g + A`, where `g` is the remaining time of the _GracePeriod_ after the extension, and `A` is this membership's active state duration.
+- The extended membership MUST retain its original parameters, including active state duration `A` and grace period duration `G`, even if the global default values of such parameters for new memberships have been changed.
 
 ### Withdraw the deposit
 
 Deposit withdrawal is subject to the following conditions:
-- The membership keeper MUST be able to withdraw their deposit.
-- Any user other than the membership keeper MUST NOT be able to withdraw its deposit.
+- The membership holder MUST be able to withdraw their deposit.
+- Any user other than the membership holder MUST NOT be able to withdraw its deposit.
 - A deposit MUST be withdrawn in full.
-- A withdrawal MUST fail if the membership is not in _GracePeriod_, _Expired_, or _ErasedAwaitsWithdrawal_.
+- A withdrawal MUST fail if the membership is not in _ErasedAwaitsWithdrawal_.
 - A membership MUST become _Erased_ after withdrawal.
 
 ## Governance and upgradability
 
 At initial mainnet deployment, the contract MUST have an _Owner_.
 The _Owner_ MUST be able to change the values of all contract parameters.
-The _Owner_ MUST be able to pause any of the following contract functionalities:
-- register a membership;
-- extend a membership;
-- withdraw a deposit.
+The updated parameter values MUST apply to all new memberships.
+The parameters of existing memberships MUST NOT change if the _Owner_ updates global parameters.
+The contract MAY restrict extensions for memberships created before the latest parameter update.
+
+The _Owner_ MUST be able to pause any of the functionalities (see definition above).
 
 At some point, the _Owner_ SHOULD renounce their privileges,
 and the contract MUST become immutable.
@@ -180,12 +230,27 @@ and the membership set SHOULD be migrated.
 
 ## Implementation Suggestions
 
+### Membership Set Implementation
+
+The membership set MAY be implemented as a Merkle tree, such as an [Incremental Merkle Tree](https://zkkit.pse.dev/modules/_zk_kit_imt.html) (IMT).
+
+### Choosing Which _Expired_ Memberships to Reuse
+
+When registering a new membership, the contract needs to decide which _Expired_ memberships, if any, to reuse.
+The criteria for this selection can vary depending on the implementation.
+
+Key considerations include:
+- To minimize gas costs, it's better to reuse a single high-rate membership rather than multiple low-rate ones.
+- To encourage timely deposit withdrawals, it's better to reuse memberships that have been _Expired_ for a long time.
+
+### Considerations for User-facing Applications
+
 User-facing applications SHOULD suggest one or more rate limits (tiers) to simplify user selection among the following RECOMMENDED options:
 - `20` messages per epoch as low-tier;
 - `200` messages per epoch as mid-tier;
 - `600` messages per epoch as high-tier.
 
-User-facing applications SHOULD save membership expiration dates in a local keystore during registration,
+User-facing applications SHOULD save membership expiration timestamps in a local keystore during registration,
 and notify the user when their membership is about to expire.
 
 ## Q&A
@@ -203,19 +268,24 @@ The rationale is to make possible parameter changes that the contract _Owner_ mi
 
 ### What if I don't extend my membership within its _GracePeriod_?
 
-If a user does not extend their membership during the _GracePeriod_,
-they risk having their _Expired_ membership overwritten.  
-Generally, users are expected to either extend their membership or withdraw their deposit to avoid this risk.
+If the membership is not extended during its _GracePeriod_,
+it becomes _Expired_ and can be erased at any time.  
+Users are expected to either extend their membership on time to avoid this risk,
+or erase them and withdraw their deposit.
 
 ### Can I send messages when my membership is _Expired_?
 
 An _Expired_ membership allows sending messages for a certain period.
 The RLN proof that message senders provide to RLN Relay nodes does not prove the state of the membership,
-only its inclusion in the tree.
+only its inclusion in the membership set.
 
-_Expired_ memberships are not proactively erased from the tree.  
-An _Expired_ membership is erased only when a new membership overwrites it or when its deposit is withdrawn.  
-Once erased (i.e., _Erased_ or _ErasedAwaitsWithdrawal_), the membership can no longer be used to send messages.
+_Expired_ memberships are not immediately erased from the membership set.
+An _Expired_ membership is erased in the following scenarios:
+- the holder erases it to withdraw the deposit;
+- a new membership erases it to free up rate limit during registration;
+- a public function is called that erases _Expired_ memberships from the given list.
+
+Once in _Erased_ or _ErasedAwaitsWithdrawal_ state, the membership can no longer be used to send messages.
 
 ### Will my deposit be slashed if I exceed the rate limit?
 
@@ -254,7 +324,7 @@ we define a cap `R_{max}` on the total rate limit.
 
 ### Why is there a minimum rate limit?
 
-The minimum rate limit `r_{min}` prevents an attack where a large number of tiny memberships cause RLN tree bloat.
+The minimum rate limit `r_{min}` prevents an attack where a large number of tiny memberships cause membership set bloat.
 
 ### Why is there a maximum rate limit?
 
@@ -289,7 +359,7 @@ publicly associates a membership with an Ethereum address.
 However, this association does not compromise the privacy of the relayed messages,
 as the protocol does not require the sender to disclose their specific membership to RLN Relay nodes.
 
-To generate an RLN proof, a message sender must obtain a Merkle proof confirming that their membership belongs to the RLN tree.
+To generate an RLN proof, a message sender must obtain a proof that their membership belongs to the membership set.
 This proof can be requested directly from the contract.
 Requesting the proof through a third-party RPC provider could compromise the sender's privacy,
 as the provider might link the requester's Ethereum address, their RLN membership, and the corresponding API key.
