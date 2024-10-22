@@ -42,7 +42,7 @@ For the new version. "think of a specification as a heuristic/set of directives 
 -->
 
 Nodes that stay online can still miss messages.
-[Waku Sync](TODO link to spec) is the protocol used to find those message hashes by periodically syncing with random nodes.
+[Waku Sync](https://github.com/waku-org/specs/blob/master/standards/core/sync.md) is the protocol used to find those message hashes by periodically syncing with random nodes.
 It is RECOMMENDED to trigger a sync with a random peer every 5 minutes for a time range of the last hour.
 After both message hash sets are reconciled,
 the Store protocol SHOULD be used to reciprocally query the other node with the message hash differences found.
@@ -57,4 +57,4 @@ Copyright and related rights waived via [CC0](https://creativecommons.org/public
 
 ## References
 
-- [Waku Sync](TODO link to spec)
+- [Waku Sync](https://github.com/waku-org/specs/blob/master/standards/core/sync.md)
