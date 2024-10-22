@@ -59,9 +59,9 @@ message SyncPayload {
 ```
 
 ### Session Flow
-A client initiate a session with a server
+A client initiates a session with a server
 by sending a `SyncPayload` with
-only the `negentropy` field set to it.
+only the `negentropy` field set.
 This field MUST contain
 the first negentropy payload
 created by the client
@@ -79,8 +79,9 @@ the client computes an empty payload.
 This client computation also outputs any hash differences found,
 those MUST be stored.
 In the case of an empty payload,
+the reconciliation is done,
 the client MUST send back a `SyncPayload`
-with all the hashes previously found in the `hashes` field and
+with all the missing server hashes in the `hashes` field and
 an empty `nengentropy` field.
 
 ## Attack Vectors
