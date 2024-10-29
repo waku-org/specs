@@ -35,7 +35,7 @@ Definitions:
 * Operator: Entity running `nwaku` that has deposited a stake and is eligible for root voting.
 * Stake: Collateral posted by each operator, entitling it to participate in consensus.
 * Slash: Penalty applied to a node operator, subtracted from its stake.
-* node vs operator. uno tiene stake el otro no.
+* node vs operator. one holds a stake, the other not.
 * RLN contract: EVM compatible smart contract used to settle between operators and users.
 * Consensus: Onchain agreement on a given Merkle root.
 
