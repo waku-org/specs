@@ -9,7 +9,7 @@ contributors:
 
 ## Abstract
 
-This draft spec proposes how to economically incentivise node operators to participate in waku, by distributing the rewards paid by users when registering their RLN memberships.
+This draft spec proposes how to economically incentivise node operators to participate in Waku RLN Relay, by distributing the rewards paid by users when registering their RLN memberships.
 It is assumed that users pay recurrently for their RLN membership. The generated fees are distributed evenly to the operators participating in each epoch.
 Only registered operators that put a bond at stake are eligible for such rewards. And only the nodes that vote on the correct Merkle root get the reward.
 
