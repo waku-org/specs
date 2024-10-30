@@ -15,8 +15,10 @@ In an incentivized request-response protocol, only eligible (e.g., paying) clien
 Clients include eligibility proofs in their requests.
 
 Eligibility proofs are designed to be used in multiple Waku protocols, such as Store, Lightpush, and Filter.
-Store is planned to become the first Waku protocol to support incentivization.
-We discuss the proof-of-concept implementation of incentivization for Store in a later section.
+Lightpush is planned to become the first Waku protocol with an incentivization component.
+In particular, a Lightpush client will be able to publish messages without their own RLN membership.
+Instead, the client would pay the server for publishing the client's message using the server's RLN proof.
+We will discuss a proof-of-concept implementation of this incentivization component in a later section.
 
 ## Background / Rationale / Motivation
 
@@ -41,13 +43,13 @@ In that case, a client MUST provide a valid eligibility proof as part of its req
 Forms of eligibility proofs include:
 
 - Proof of payment: for paid non-authenticated requests. A proof of payment, in turn, may also take different forms, such as a transaction hash or a ZK-proof. In order to interpret a proof of payment, the server needs information about its type.
-- Proof of membership: for services for a predefined group of users. An example use case: an application developer pays in bulk for their users' requests. A client then prove that they belong to the user set of that application. A similar concept (RLN) is used in Waku Relay for spam prevention.
+- Proof of membership: for services for a predefined group of users. An example use case: an application developer pays in bulk for their users' requests. A client then prove that they belong to the user set of that application. Rate limiting in Waku RLN Relay is based on a similar concept.
 - Service credential: a proof of membership in a set of clients who have prepaid for the service (which may be considered a special case of proof of membership).
 
 Upon a receiving a request:
 
 - the server SHOULD check if the eligibility proof is included and valid;
-- if that proof is absent or invalid, the server SHOULD send back response with a corresponding error code and error description;
+- if that proof is absent or invalid, the server SHOULD send back a response with a corresponding error code and an error description;
 - if the proof is valid, the server SHOULD send back the response that the client has requested.
 
 Note that the protocol does not ensure atomicity.
@@ -76,48 +78,43 @@ message EligibilityStatus {
 
 We include the `other_eligibility_proof` field in `EligibilityProof` to reflect other types of eligibility proofs that could be added to the protocol later.
 
-## Implementation in Store (PoC version)
+## Implementation in Lightpush (PoC version)
 
-This Section describes a proof-of-concept (PoC) implementation of incentivization in the Store protocol.
-Note: this section may later be moved to Store RFC.
+This Section describes a proof-of-concept (PoC) implementation of incentivization in the Lightpush protocol.
+Note: this section may later be moved to Lightpush RFC.
 
-Store is one of Waku's request-response protocols.
-A Store client queries the server for historic messages.
-A Store server responds with a list of messages that pass the user's filter.
-See [13/WAKU2-STORE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/13/store.md) for the definitions of `HistoryQuery` and `HistoryResponse`.
+Lightpush is one of Waku's request-response protocols.
+A Lightpush client sends a request to the server containing the message to be published to the Waku network on the client's behalf.
+A Lightpush server responds to indicate whether the client's message was successfully published.
+See [19/WAKU2-LIGHTPUSH](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/19/lightpush.md) for the definitions of `PushRequest` and `PushResponse`.
 
-The PoC Store incentivization makes the following simplifying assumptions:
+The PoC Lightpush incentivization makes the following simplifying assumptions:
 
-- the client knows the server's on-chain address `A`;
-- the client and the server have agreed on a constant price `r` per hour of message history.
+- the client knows the server's on-chain address `A` (likely on an L2 network);
+- the client and the server have agreed on a constant price `p` per published message.
 
-To query messages from a period of length `t`, the client:
+To publish a message, the client:
 
-1. calculates the total price `p` as `p = r * t`;
-2. pays `p` to the server's address `A` with an on-chain transaction;
-3. waits until the transaction is confirmed with identifier `txid`;
-4. includes `txid` in the request as a proof of payment.
+1. pays `p` to the server's address `A` with an on-chain transaction;
+2. waits until the transaction is confirmed with identifier `txid`;
+3. includes `txid` in the request as a proof of payment.
 
 It is the server's responsibility to keep track of the `txid`s from prior requests and to make sure they are not reused.
 
 Note that `txid` may not always be practical as proof of payment due to on-chain confirmation latency.
-To address this issue, future versions of the protocol may involve:
+To address this issue, future versions of the protocol may involve bulk payments, that is, paying for multiple requests in one transaction.
+In that scheme, after a bulk payment is made, the client will not have to face on-chain latency for each new prepaid request.
 
-- paying for multiple requests in one transaction;
-- using faster (likely L2-based) payment mechanisms.
-
-### Wire Format Specifications for Store PoC incentivization
+### Wire Format Specifications for Lightpush PoC incentivization
 
 #### Request
 
-We extend `HistoryQuery` to include an eligibility proof:
+We extend `PushRequest` to include an eligibility proof:
 
 ```protobuf
-message HistoryQuery {
-  // the first field is reserved for future use
-  string pubsubtopic = 2;
-  repeated ContentFilter contentFilters = 3;
-  PagingInfo pagingInfo = 4;
+message PushRequest {
+  string pubsub_topic = 1;
+  WakuMessage message = 2;
   // numbering gap left for non-eligibility-related protocol extensions
   + optional bytes eligibility_proof = 10;
 }
@@ -126,60 +123,48 @@ message HistoryQuery {
 An example of usage with `txid` as a proof of payment:
 
 ```protobuf
-HistoryQuery history_query {
-  // the first field is reserved for future use
-  pubsubtopic: "example_pubsub_topic"
-  contentFilters: []
-  pagingInfo: {
-    // provide values for PagingInfo fields
-  }
+PushRequest push_request {
+  pubsub_topic: "example_pubsub_topic"
+  message: "example_message"
   eligibility_proof: {
-	  proof_of_payment: 0xabc123  // txid for the client's payment
-	  // eligibility proofs of other types are not included
+    proof_of_payment: 0xabc123  // txid for the client's payment
+    // eligibility proofs of other types are not included
   };
 }
 ```
 
 #### Response
 
-We extend the `HistoryResponse` to indicate the eligibility status:
+We extend the `PushResponse` to indicate the eligibility status:
 
 ```protobuf
-message HistoryResponse {
-  // the first field is reserved for future use
-  repeated WakuMessage messages = 2;
-  PagingInfo pagingInfo = 3;
-  enum Error {
-    NONE = 0;
-    INVALID_CURSOR = 1;
-    + NON_ELIGIBLE = 2;
-  }
-  Error error = 4;
-  + EligibilityStatus eligibility_status = 5;
+message PushResponse {  
+    bool is_success = 1;
+    // Error messages, etc
+    string info = 2;
+  + EligibilityStatus eligibility_status = 3;
 }
 ```
 
 Example of a response if the client is eligible:
 
 ```protobuf
-HistoryResponse response_example {
-  messages: [message_1, message_2]
-  pagingInfo: paging_info
-  error: NONE
+PushResponse response_example {
+  is_success: true
+  info: "Request successful"
   eligibility_status: {
-	  status_code: 200
-	  status_desc: "OK"
+    status_code: 200
+    status_desc: "OK"
+    }
   }
-}
 ```
 
 Example of a response if the client is not eligible:
 
 ```protobuf
-HistoryResponse response_example {
-  messages: [] // no messages sent to non-eligible clients
-  pagingInfo: paging_info
-  error: NON_ELIGIBLE
+PushResponse response_example {
+  is_success: false
+  info: "Request failed"
   eligibility_status: {
     status_code: 402
     status_desc: "PAYMENT_REQUIRED"
@@ -216,7 +201,7 @@ Copyright and related rights waived via [CC0](https://creativecommons.org/public
 ### normative
 
 - A high-level [incentivization outline](https://github.com/waku-org/research/blob/master/incentivization.md)
-- [13/WAKU2-STORE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/13/store.md) (for Store-specific sections)
+- [19/WAKU2-LIGHTPUSH](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/19/lightpush.md) (for Lightpush-specific sections)
 
 ### informative
 
