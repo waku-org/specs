@@ -41,7 +41,7 @@ In that case, a client MUST provide a valid eligibility proof as part of its req
 Forms of eligibility proofs include:
 
 - Proof of payment: for paid non-authenticated requests. A proof of payment, in turn, may also take different forms, such as a transaction hash or a ZK-proof. In order to interpret a proof of payment, the server needs information about its type.
-- Proof of membership: for services for a predefined group of users. An example use case: an application developer pays in bulk for their users' requests. A client then prove that they belong to the user set of that application. Rate limiting in Waku RLN Relay is based a similar concept.
+- Proof of membership: for services for a predefined group of users. An example use case: an application developer pays in bulk for their users' requests. A client then prove that they belong to the user set of that application. Rate limiting in Waku RLN Relay is based on a similar concept.
 - Service credential: a proof of membership in a set of clients who have prepaid for the service (which may be considered a special case of proof of membership).
 
 Upon a receiving a request:
