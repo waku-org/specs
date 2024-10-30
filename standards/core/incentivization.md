@@ -15,8 +15,10 @@ In an incentivized request-response protocol, only eligible (e.g., paying) clien
 Clients include eligibility proofs in their requests.
 
 Eligibility proofs are designed to be used in multiple Waku protocols, such as Store, Lightpush, and Filter.
-Lightpush is planned to become the first Waku protocol to support incentivization.
-We discuss the proof-of-concept implementation of incentivization for Lightpush in a later section.
+Lightpush is planned to become the first Waku protocol with an incentivization component.
+In particular, a Lightpush client will be able to publish messages without their own RLN membership.
+Instead, the client would pay the server for publishing the client's message using the server's RLN proof.
+We will discuss a proof-of-concept implementation of this incentivization component in a later section.
 
 ## Background / Rationale / Motivation
 
