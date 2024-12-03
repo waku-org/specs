@@ -23,7 +23,7 @@ To contribute well, a Waku node must know a sufficient number of peers with
 a wide variety of capabilities.
 By using rendezvous in combination with
 [Discv5](https://github.com/ethereum/devp2p/blob/master/discv5/discv5.md#node-discovery-protocol-v5) and
-[Waku peer exchange](https://github.com/waku-org/specs/blob/master/standards/core/peer-exchange.md#abstract),
+[Waku peer exchange](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/34/peer-exchange.md#abstract),
 Waku nodes will reach a good number of meaningful peers
 faster than through a single discovery method.
 
@@ -69,6 +69,6 @@ Copyright and related rights waived via
 
 # References
  - [Discv5](https://github.com/ethereum/devp2p/blob/master/discv5/discv5.md#node-discovery-protocol-v5)
- - [Peer Exchange](https://github.com/waku-org/specs/blob/master/standards/core/peer-exchange.md#abstract)
+ - [Peer Exchange](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/34/peer-exchange.md#abstract)
  - [Libp2p Rendezvous](https://github.com/libp2p/specs/blob/master/rendezvous/README.md#rendezvous-protocol)
  - [Relay](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md)
