@@ -23,7 +23,7 @@ This repository contains specifications for the Waku suite of protocols.
 |[19/WAKU2-LIGHTPUSH](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/19/lightpush.md)| Waku Lightpush |
 |[33/WAKU2-DISCV5](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/33/discv5.md)| Waku Discovery v5 Ambient Peer Discovery |
 |[36/WAKU2-BINDINGS-API](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/36/bindings-api.md)| Waku C Bindings API |
-|[WAKU2-PEER-EXCHANGE](standards/core/peer-exchange.md)| Waku Peer Exchange |
+|[34/WAKU2-PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/34/peer-exchange.md#abstract)| Waku Peer Exchange |
 |[WAKU2-ENR](standards/core/enr.md)| Waku Usage of ENR |
 |[WAKU2-INCENTIVIZATION](standards/core/incentivization.md)| Waku Incentivization |
 |[66/WAKU2-METADATA](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/66/metadata.md)| Waku Metadata |
