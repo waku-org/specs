@@ -9,13 +9,13 @@ contributors:
 
 # Abstract
 This specification explains `WAKU-SYNC`
-which enables the syncronization of messages between 2 Store nodes.
+which enables the synchronization of messages between 2 Store nodes.
 
 # Specification
 
 Waku Sync consists of 2 protocols; reconciliation and transfer.
 Reconciliation is the process of finding differences in 2 sets of message hashes.
-Transfer is then used to bilateraly send messages to the other peer.
+Transfer is then used to bilaterally send messages to the other peer.
 The end goal being that both peers have the same set of hashes and messages.
 
 #### Terminology
@@ -57,16 +57,16 @@ Every range MUST have one of the following types; skip, fingerprint or item set.
 save network roundtrips.
 
 #### Range Processing
-Ranges have to be processed differently acording to their types.
+Ranges have to be processed differently according to their types.
 
-- Skip ranges MUST be merged with other consequtive ones if possible.
+- Skip ranges MUST be merged with other consecutive ones if possible.
 - Equal fingerprint ranges MUST become skip ranges.
 - Unequal fingerprint ranges MUST be splitted into smaller ranges. The new type MAY be either fingerprint or item set.
 - Unresolved item set ranges MUST be checked for differences and marked resolved.
 - Resolved item set ranges MUST be checked for differences and become skip ranges.
 
 ### Delta Encoding
-For efficient transmition of timestamps, hashes and ranges. Payloads are delta encoded as follow.
+For efficient transmission of timestamps, hashes and ranges. Payloads are delta encoded as follow.
 
 All ranges to be transmitted MUST be ordered and only upper bounds used.
 > Inclusive lower bounds can be omitted because they are always
@@ -79,7 +79,7 @@ This way the receiving peer knows to ignore the range from zero to the start of 
 
 Every timestamps after the first MUST be noted as the difference from the previous one.
 If the timestamp is the same, zero MUST be used and the hash MUST be added.
-The added hash MUST be trucated up to and including the first differetiating byte.
+The added hash MUST be truncated up to and including the first differentiating byte.
 
 | Timestamp | Hash | Timestamp (encoded) | Hash (encoded) 
 | - | - | - | -
@@ -109,13 +109,11 @@ The wire level payload MUST be encoded as follow.
 
 **Libp2p Protocol identifier**: `/vac/waku/transfer/1.0.0`
 
-TODO
-
-should not accept messages from peers not being syncing with.
-
-should send message as soon as a diff is found.
-
-in the future verify RLN proof of messages.
+The transfer protocol SHOULD send messages as soon as
+a difference is found via reconciliation.
+It MUST only accept messages from peers the node is reconciliating with.
+New message Ids MUST be added to the reconciliation protocol.
+The payload sent MUST follow the wire specification below.
 
 ### Wire specification
 ```protobuf
@@ -133,16 +131,19 @@ message WakuMessageAndTopic {
 ```
 
 # Implementation
-The flexibitity of the protocol implies that much is left to the implementers.
+The flexibility of the protocol implies that much is left to the implementers.
 What will follow is NOT part of the specification.
 This section was created to inform implementations.
 
 #### Parameters 
-#TODO fix copy pasta from research issue
+Two useful parameters to add to your implementation are partitioning count and the item set threshold.
 
-T -> Item set threshold. If a range length is <= than T, all items are sent. Higher T sends more items which means higher chance of duplicates but reduce the amount of round trips overall.
+The partitioning count is the number of time a range is splitted.
+Higher value reduce round trips at the cost of computing more fingerprints.
 
-B -> Partitioning count. When recursively splitting a range, it is split into B sub ranges. Higher B reduce round trips at the cost of computing more fingerprints.
+The threshold for which item sets are sent instead of fingerprints.
+Higher value sends more items which means higher chance of duplicates but
+reduce the amount of round trips overall.
 
 #### Storage
 The storage implementation should reflect the context.
@@ -153,31 +154,24 @@ It is expected to be a less likely case than time based insertion and removal.
 Last but not least it must be optimized for fingerprinting
 as it is the most often used operation.
 
-TODO mention trees vs arrays???
-
-#### Sync Window
-TODO rephrase
-
-We also offset the sync window by 20 seconds in the past.
-The actual start of the sync range is T-01:00:20 and the end T-00:00:20
-This is to handle the inherent jitters of GossipSub.
-In other words, it is the amount of time needed to confirm if a message is missing or not.
-
 #### Sync Interval
-TODO rephrase
-
 Ad-hoc syncing can be useful in some cases but continuous periodic sync
 minimize the differences in messages stored across the network.
 Syncing early and often is the best strategy.
-The default used in nwaku is 5 minutes interval between sync with a range of 1 hour.
+The default used in Nwaku is 5 minutes interval between sync with a range of 1 hour.
+
+#### Sync Window
+By default we offset the sync window by 20 seconds in the past.
+The actual start of the sync range is T-01:00:20 and the end T-00:00:20 in most cases.
+This is to handle the inherent jitters of GossipSub.
+In other words, it is the amount of time needed to confirm if a message is missing or not.
 
 #### Peer Choice
-TODO rephrase
+Wrong peering strategies can lead to inadvertently segregating peers and
+reduce sampling diversity.
+Nwaku randomly select peers to sync with for simplicity and robustness.
 
-Peering strategies can lead to inadvertently segregating peers and reduce sampling diversity.
-We randomly select peers to sync with for simplicity and robustness.
-
-A good strategy can be devised but we chose not to.
+Good strategies can be devised but we chose not to.
 
 ## Attack Vectors
 Nodes using `WAKU-SYNC` are fully trusted.
