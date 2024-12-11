@@ -9,14 +9,14 @@ contributors:
 
 # Abstract
 This specification explains `WAKU-SYNC`
-which enables the synchronization of messages between 2 Store nodes.
+which enables the synchronization of messages between nodes storing sets of [`14/WAKU2-MESSAGE`](https://rfc.vac.dev/waku/standards/core/14/message)
 
 # Specification
 
-Waku Sync consists of 2 protocols; reconciliation and transfer.
-Reconciliation is the process of finding differences in 2 sets of message hashes.
-Transfer is then used to bilaterally send messages to the other peer.
-The end goal being that both peers have the same set of hashes and messages.
+Waku Sync consists of 2 libp2p protocols; reconciliation and transfer.
+The Reconciliation protocol finds differences in sets of messages.
+The Transfer protocol is used to exchange the differences found with other peers.
+The end goal being that peers have the same set of messages.
 
 #### Terminology
 The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, 
@@ -26,58 +26,63 @@ The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL 
 
 **Libp2p Protocol identifier**: `/vac/waku/reconciliation/1.0.0`
 
+The protocol finds differences between 2 peers by comparing _fingerprints_ of _ranges_ of messages.
+When the _fingerprints_ are different, _ranges_ are splitted into smaller ones.
+This process repeats until _ranges_ include a small number of messages.
+At this point, messages are individually compared.
+
 #### Message Ids
-Message Ids MUST be composed of the timestamp and the hash of the Waku messages.
+Message _Ids_ MUST be composed of the timestamp and the hash of the Waku messages.
 
 The timestamp MUST be the time of creation and
 the hash MUST follow the
 [deterministic message hashing specification](https://rfc.vac.dev/waku/standards/core/14/message#deterministic-message-hashing)
 
-> This way the message Ids can always be totally ordered.
-Chronologically according to the timestamp and
+> This way the message Ids can always be totally ordered,
+first chronologically according to the timestamp and then
 disambiguate based on the hash lexical order
 in cases where the timestamp is the same.
 
 #### Range Bounds
-A range MUST consists of 2 Id bounds, the first bound is
+A _range_ MUST consists of 2 _Ids_, the first bound is
 inclusive the second bound exclusive.
 The first bound MUST be strictly smaller than the second one.
 
 #### Range Fingerprinting
-The fingerprint of a range MUST be the XOR operation applied to
-all the hashes of the messages included in that range.
+The _fingerprint_ of a range MUST be the XOR operation applied to
+the hash of all message _IDs_ included in that _range_.
 
 #### Range Type
-Every range MUST have one of the following types; skip, fingerprint or item set.
+Every _range_ MUST have one of the following types; _fingerprint_, _skip_ or _item set_.
 
-- Skip type is used to signal already processed ranges that MUST be ignored.
-- Fingerprint type signify that fingerprints MUST be compared when received.
-- Item set type contain multiple message Ids that MUST all be compared when received.
-> Item sets are an optimization, stopping the recursion early can
+- _Fingerprint_ type contains a _fingerprint_.
+- _Skip_ type contains nothing and is used to signal already processed _ranges_.
+- _Item set_ type contains message _Ids_ and a _resolved_ boolean.
+> _Item sets_ are an optimization, stopping the recursion early can
 save network roundtrips.
 
 #### Range Processing
-Ranges have to be processed differently according to their types.
+_Ranges_ have to be processed differently according to their types and sent back.
 
-- Skip ranges MUST be merged with other consecutive ones if possible.
-- Equal fingerprint ranges MUST become skip ranges.
-- Unequal fingerprint ranges MUST be splitted into smaller ranges. The new type MAY be either fingerprint or item set.
-- Unresolved item set ranges MUST be checked for differences and marked resolved.
-- Resolved item set ranges MUST be checked for differences and become skip ranges.
+- _Skip_ ranges MUST be merged with other consecutive _skip ranges_.
+- **Equal** _fingerprint ranges_ MUST become _skip ranges_.
+- **Unequal** _fingerprint ranges_ MUST be splitted into smaller ranges. The new type MAY be either _fingerprint_ or _item set_.
+- **Unresolved** _item set_ ranges MUST be checked for differences and marked resolved.
+- **Resolved** _item set_ ranges MUST be checked for differences and become skip ranges.
 
 ### Delta Encoding
-For efficient transmission of timestamps, hashes and ranges. Payloads are delta encoded as follow.
+Payloads MUST be delta encoded as follows for efficient transmission of _IDs_ and _ranges_.
 
-All ranges to be transmitted MUST be ordered and only upper bounds used.
+All _ranges_ to be transmitted MUST be ordered and only upper bounds used.
 > Inclusive lower bounds can be omitted because they are always
 the same as the exclusive upper bounds of the previous range or zero.
 
-To achieve this, it MAY be needed to add skip ranges.
-> For example, a skip range can be added with
+To achieve this, it MAY be needed to add _skip ranges_.
+> For example, a _skip range_ can be added with
 an exclusive upper bound equal to the first range lower bound.
-This way the receiving peer knows to ignore the range from zero to the start of the sync window.
+This way the receiving peer knows to ignore the range from zero to the start of the sync time window.
 
-Every timestamps after the first MUST be noted as the difference from the previous one.
+Every _ID_'s timestamps after the first MUST be noted as the difference from the previous one.
 If the timestamp is the same, zero MUST be used and the hash MUST be added.
 The added hash MUST be truncated up to and including the first differentiating byte.
 
@@ -89,19 +94,19 @@ The added hash MUST be truncated up to and including the first differentiating b
 | 1003 | 0xbeabef25... | 1 | -
 
 #### Varints
-TODO
+All _varints_ MUST be little-endian base 128 variable length integers (LEB128) and minimally encoded.
 
 #### Payload encoding
 The wire level payload MUST be encoded as follow.
 > The & denote concatenation
 
-1. varint bytes of the delta encoded timestamp &
-2. if timestamp is zero, delta encoded hash bytes  &
-3. 1 byte, the range type &
+1. _varint_ bytes of the delta encoded timestamp &
+2. if timestamp is zero, 1 byte for the hash bytes length & the hash bytes &
+3. 1 byte, the _range_ type &
 4. either
-    - 32 bytes fingerprint &
-    - varint bytes of the item set length & bytes of every items &
-    - if skip range, nothing
+    - 32 bytes _fingerprint_ &
+    - _varint_ bytes of the item set length & bytes of every items &
+    - if _skip range_, nothing
 
 5. repeat 1 to 4 for all ranges
 
@@ -171,7 +176,7 @@ Wrong peering strategies can lead to inadvertently segregating peers and
 reduce sampling diversity.
 Nwaku randomly select peers to sync with for simplicity and robustness.
 
-Good strategies can be devised but we chose not to.
+More sophisticated strategies may be implemented in future.
 
 ## Attack Vectors
 Nodes using `WAKU-SYNC` are fully trusted.
