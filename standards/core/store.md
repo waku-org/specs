@@ -26,7 +26,7 @@ refers to any piece of data that can be used to uniquely identify a user.
 For example, the signature verification key, and 
 the hash of one's static IP address are unique for each user and hence count as PII.
 
-# Wire Specification
+## Wire Specification
 The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”,
 “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
 “OPTIONAL” in this document are to be interpreted as described in [RFC2119](https://www.ietf.org/rfc/rfc2119.txt).
@@ -372,23 +372,24 @@ In specific, the communication channels are assumed to be secure.
 # Future Work
 
 - **Anonymous query**: This feature guarantees that nodes can anonymously query historical messages from other nodes i.e.,
-without disclosing the exact topics of [14/WAKU2-MESSAGE](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/14/message.md) they are interested in.  
+without disclosing the exact topics of [14/WAKU2-MESSAGE](/waku/standards/core/14/message.md) they are interested in.  
 As such, no adversary in the `WAKU2-STORE` protocol would be able to learn which peer is interested in which content filters i.e.,
-content topics of [14/WAKU2-MESSAGE](/spec/14). 
+content topics of [14/WAKU2-MESSAGE](/waku/standards/core/14/message.md). 
 The current version of the `WAKU2-STORE` protocol does not provide anonymity for historical queries,
 as the querying node needs to directly connect to another node in the `WAKU2-STORE` protocol and
 explicitly disclose the content filters of its interest to retrieve the corresponding messages. 
-However, one can consider preserving anonymity through one of the following ways: 
-  - By hiding the source of the request i.e., anonymous communication.
-  That is the querying node shall hide all its PII in its history request e.g., its IP address.
-  This can happen by the utilization of a proxy server or by using Tor. 
-  Note that the current structure of historical requests does not embody any piece of PII, otherwise,
-  such data fields must be treated carefully to achieve query anonymity. 
-  <!-- TODO: if nodes have to disclose their PeerIDs (e.g., for authentication purposes) when connecting to other nodes in the store protocol, then Tor does not preserve anonymity since it only helps in hiding the IP. So, the PeerId usage in switches must be investigated further. Depending on how PeerId is used, one may be able to link between a querying node and its queried topics despite hiding the IP address--> 
-  - By deploying secure 2-party computations in which the querying node obtains the historical messages of a certain topic,
-  the queried node learns nothing about the query. 
-  Examples of such 2PC protocols are secure one-way Private Set Intersections (PSI). 
-  <!-- TODO: add a reference for PSIs? --> <!-- TODO: more techniques to be included --> 
+However, one can consider preserving anonymity through one of the following ways:
+ 
+- By hiding the source of the request i.e., anonymous communication.
+That is the querying node shall hide all its PII in its history request e.g., its IP address.
+This can happen by the utilization of a proxy server or by using Tor. 
+Note that the current structure of historical requests does not embody any piece of PII, otherwise,
+such data fields must be treated carefully to achieve query anonymity. 
+<!-- TODO: if nodes have to disclose their PeerIDs (e.g., for authentication purposes) when connecting to other nodes in the store protocol, then Tor does not preserve anonymity since it only helps in hiding the IP. So, the PeerId usage in switches must be investigated further. Depending on how PeerId is used, one may be able to link between a querying node and its queried topics despite hiding the IP address--> 
+- By deploying secure 2-party computations in which the querying node obtains the historical messages of a certain topic,
+the queried node learns nothing about the query. 
+Examples of such 2PC protocols are secure one-way Private Set Intersections (PSI). 
+<!-- TODO: add a reference for PSIs? --> <!-- TODO: more techniques to be included --> 
 <!-- TODO: Censorship resistant: this is about a node that hides the historical messages from other nodes. This attack is not included in the specs since it does not fit the passive adversarial model (the attacker needs to deviate from the store protocol).-->
 
 - **Robust and verifiable timestamps**: Messages timestamp is a way to show that the message existed prior to some point in time.
@@ -419,13 +420,12 @@ That is, messages contain the most recent block height perceived by their sender
 This proves accuracy within a range of minutes (e.g., in Bitcoin blockchain) or 
 seconds (e.g., in Ethereum 2.0) from the time of origination. 
 
-# Copyright
+## Copyright
 
 Copyright and related rights waived via
 [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
 
-# References
-1. [14/WAKU2-MESSAGE](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/14/message.md)
+## References
+1. [14/WAKU2-MESSAGE](/waku/standards/core/14/message.md)
 2. [protocol buffers v3](https://developers.google.com/protocol-buffers/)
-3. [11/WAKU2-RELAY](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/11/relay.md)
-4. [Open timestamps](https://opentimestamps.org/) 
+3. [Open timestamps](https://opentimestamps.org/) 
