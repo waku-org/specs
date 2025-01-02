@@ -19,17 +19,17 @@ It also supports pagination for more efficient querying of historical messages.
 
 **Protocol identifier***: `/vac/waku/store-query/3.0.0`
 
-# Wire Specification
-The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”,
-“SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
-“OPTIONAL” in this document are to be interpreted as described in [RFC2119](https://www.ietf.org/rfc/rfc2119.txt).
-
 ### Terminology
 
 The term PII, Personally Identifiable Information, 
 refers to any piece of data that can be used to uniquely identify a user. 
 For example, the signature verification key, and 
 the hash of one's static IP address are unique for each user and hence count as PII.
+
+# Wire Specification
+The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”,
+“SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in [RFC2119](https://www.ietf.org/rfc/rfc2119.txt).
 
 ### Design Requirements
 
@@ -236,7 +236,8 @@ the store query client MUST populate the `message_hashes` field in the `StoreQue
 for which it wants to verify presence in the store service node.
 The `include_data` property MUST be set to `false`.
 The client SHOULD interpret every `message_hash` returned in the `messages` field of the `StoreQueryResponse` as present in the store.
-The client SHOULD assume that all other message hashes included in the original `StoreQueryRequest` but not in the `StoreQueryResponse` is not present in the store.
+The client SHOULD assume that all other message hashes included in the original `StoreQueryRequest` but
+not in the `StoreQueryResponse` is not present in the store.
 
 ### Pagination info
 
@@ -347,7 +348,8 @@ In response to a _backward_ `StoreQueryRequest`:
 
 # Security Consideration
 
-The main security consideration to take into account while using this protocol is that a querying node have to reveal their content filters of interest to the queried node, hence potentially compromising their privacy.
+The main security consideration while using this protocol is that a querying node has to reveal its content filters of interest to the queried node,
+hence potentially compromising their privacy.
 
 ## Adversarial Model
 
