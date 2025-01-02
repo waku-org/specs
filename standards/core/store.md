@@ -122,7 +122,7 @@ both the `message` and `pubsub_topic` fields MUST be populated.
 The message MUST NOT have either `message` or `pubsub_topic` populated with the other unset.
 Both fields MUST either be set or unset.
 
-### Waku Message Store Eligibility
+#### Waku Message Store Eligibility
 
 In order for a message to be eligible for storage:
 
@@ -134,16 +134,16 @@ either into the past or the future when compared to the store node’s internal 
 the store node MAY reject the message.
 - the `ephemeral` field MUST be set to `false`.
 
-### Waku message sorting
+#### Waku message sorting
 
 The key-value entries in the store MUST be time-sorted by the [14/WAKU2-MESSAGE](/waku/standards/core/14/message.md) `timestamp` attribute.
 Where two or more key-value entries have identical `timestamp` values,
-the entries MUST be further sorted by the natural order of their `message_hash`.
+the entries MUST be further sorted by the natural order of their message hash keys.
 Within the context of traversing over key-value entries in the store,
 _"forward"_ indicates traversing the entries in ascending order,
 whereas _"backward"_ indicates traversing the entries in descending order.
 
-### Pagination
+#### Pagination
 
 If a large number of entries in the store service node match the query criteria provided in a `StoreQueryRequest`,
 the client MAY make use of pagination
@@ -170,7 +170,7 @@ All other fields and query criteria MUST be the same as in the preceding `StoreQ
 A `StoreQueryRequest` without a populated `pagination_cursor` indicates that
 the client wants to retrieve the "first page" of the stored entries matching the query.
 
-## Store Query Request
+### Store Query Request
 
 A client node MUST send all historical message queries within a `StoreQueryRequest` message.
 This request MUST contain a `request_id`.
@@ -178,7 +178,7 @@ The `request_id` MUST be a uniquely generated string.
 
 If the store query client requires the store service node to include [14/WAKU2-MESSAGE](/waku/standards/core/14/message.md) values in the query response,
 it MUST set `include_data` to `true`.
-If the store query client requires the store service node to return only `message_hash` in the query response,
+If the store query client requires the store service node to return only message hash keys in the query response,
 it SHOULD set `include_data` to `false`.
 By default, therefore, the store service node assumes `include_data` to be `false`.
 
@@ -187,7 +187,7 @@ There are two types of filter use cases:
 1. Content filtered queries and
 2. Message hash lookup queries
 
-### Content filtered queries
+#### Content filtered queries
 
 A store query client MAY request the store service node to filter historical entries by a content filter.
 Such a client MAY create a filter on content topic, on time range or on both.
@@ -209,7 +209,7 @@ If any of the content filter fields are set,
 namely `pubsub_topic`, `content_topic`, `time_start`, or `time_end`,
 the client MUST NOT set the `message_hashes` field.
 
-### Message hash lookup queries
+#### Message hash lookup queries
 
 A store query client MAY request the store service node to filter historical entries by one or
 more matching message hash keys.
@@ -223,7 +223,7 @@ If the `message_hashes` field is set,
 the client MUST NOT set any of the content filter fields,
 namely `pubsub_topic`, `content_topic`, `time_start`, or `time_end`.
 
-### Presence queries
+#### Presence queries
 
 A presence query is a special type of lookup query that allows a client to check for the presence of one or
 more messages in the store service node,
@@ -239,7 +239,7 @@ The client SHOULD interpret every `message_hash` returned in the `messages` fiel
 The client SHOULD assume that all other message hashes included in the original `StoreQueryRequest` but
 not in the `StoreQueryResponse` is not present in the store.
 
-### Pagination info
+#### Pagination info
 
 The store query client MAY include a message hash as `pagination_cursor`,
 to indicate at which key-value entry a store service node SHOULD start the query.
@@ -267,7 +267,7 @@ or larger than the service node's internal page size limit.
 
 See [pagination](#pagination) for more on how the pagination info is used in store transactions.
 
-## Store Query Response
+### Store Query Response
 
 In response to any `StoreQueryRequest`,
 a store service node SHOULD respond with a `StoreQueryResponse` with a `requestId` matching that of the request.
@@ -278,7 +278,7 @@ assume that the requested operation had failed.
 In addition,
 the store service node MAY choose to provide a more detailed status description in the `status_desc` field.
 
-### Filter matching
+#### Filter matching
 
 For [content filtered queries](#content-filtered-queries),
 an entry in the store service node matches the filter criteria in a `StoreQueryRequest` if each of the following conditions are met:
@@ -299,7 +299,7 @@ The store service node SHOULD respond with an error code and
 discard the request if the store query request contains both content filter criteria
 and message hashes.
 
-### Populating response messages
+#### Populating response messages
 
 The store service node SHOULD populate the `messages` field in the response
 only with entries matching the filter criteria provided in the corresponding request.
@@ -313,7 +313,7 @@ the service node SHOULD populate both the `message_hash` and
 In all other cases,
 the store service node SHOULD populate only the `message_hash` field for each entry in the response.
 
-### Paginating the response
+#### Paginating the response
 
 The response SHOULD NOT contain more `messages` than the `pagination_limit` provided in the corresponding `StoreQueryRequest`.
 It is RECOMMENDED that the store node defines its own maximum page size internally.
@@ -346,12 +346,12 @@ In response to a _backward_ `StoreQueryRequest`:
   the store service node SHOULD populate the `pagination_cursor` in the `StoreQueryResponse`
   with the message hash key of the _first_ entry _included_ in the response.
 
-# Security Consideration
+### Security Consideration
 
 The main security consideration while using this protocol is that a querying node has to reveal its content filters of interest to the queried node,
 hence potentially compromising their privacy.
 
-## Adversarial Model
+#### Adversarial Model
 
 Any peer running the `WAKU2-STORE` protocol, i.e. 
 both the querying node and the queried node, are considered as an adversary. 
@@ -369,7 +369,7 @@ The following are not considered as part of the adversarial model:
 - An adversary that can eavesdrop on communication links between arbitrary pairs of peers (unless the adversary is one end of the communication). 
 In specific, the communication channels are assumed to be secure.
 
-# Future Work
+### Future Work
 
 - **Anonymous query**: This feature guarantees that nodes can anonymously query historical messages from other nodes i.e.,
 without disclosing the exact topics of [14/WAKU2-MESSAGE](/waku/standards/core/14/message.md) they are interested in.  
