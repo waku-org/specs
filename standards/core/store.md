@@ -1,69 +1,55 @@
 ---
-title: WAKU2-STORE
+slug: 13
+title: 13/WAKU2-STORE
 name: Waku Store Query
 editor: Hanno Cornelius <hanno@status.im>
 contributors:
   - Dean Eigenmann <dean@status.im>
   - Oskar Thorén <oskarth@titanproxy.com>
-  - Aaryamann Challani <aaryamann@status.im>
+  - Aaryamann Challani <p1ge0nh8er@proton.me>
   - Sanaz Taheri <sanaz@status.im>
 ---
 
-> **Note:** This version of WAKU2-STORE is earmarked to replace RFC [13/WAKU2-STORE](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/13/store.md) once it reaches draft status
+## Abstract
 
----
-
-# Abstract
-
-This specification explains the `WAKU2-STORE` protocol which enables querying of messages received through the relay protocol and 
+This specification explains the `WAKU2-STORE` protocol,
+which enables querying of messages received through the relay protocol and 
 stored by other nodes. 
 It also supports pagination for more efficient querying of historical messages. 
 
 **Protocol identifier***: `/vac/waku/store-query/3.0.0`
 
-## Terminology
+# Wire Specification
+The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”,
+“SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and
+“OPTIONAL” in this document are to be interpreted as described in [RFC2119](https://www.ietf.org/rfc/rfc2119.txt).
+
+### Terminology
+
 The term PII, Personally Identifiable Information, 
 refers to any piece of data that can be used to uniquely identify a user. 
 For example, the signature verification key, and 
 the hash of one's static IP address are unique for each user and hence count as PII.
 
-# Design Requirements
-The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, 
-“RECOMMENDED”, “MAY”, and “OPTIONAL” in this document are to be interpreted as described in [RFC2119](https://www.ietf.org/rfc/rfc2119.txt).
+### Design Requirements
 
 Nodes willing to provide the storage service using `WAKU2-STORE` protocol,
 SHOULD provide a complete and full view of message history.
 As such, they are required to be *highly available* and 
-specifically have a *high uptime* to consistently receive and store network messages. 
-The high uptime requirement makes sure that no message is missed out hence a complete and 
+specifically have a *high uptime* to consistently receive and
+store network messages. 
+The high uptime requirement makes sure that no message is missed out,
+hence a complete and 
 intact view of the message history is delivered to the querying nodes.
-Nevertheless, in case storage provider nodes cannot afford high availability, 
-the querying nodes may retrieve the historical messages from multiple sources to achieve a full and intact view of the past.
+Nevertheless, in case storage service nodes cannot afford high availability, 
+the querying nodes may retrieve the historical messages from multiple sources to achieve a full and
+intact view of the past.
 
-The concept of `ephemeral` messages introduced in [`WAKU2-MESSAGE`](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/14/message.md) affects `WAKU2-STORE` as well.
-Nodes running `WAKU2-STORE` SHOULD support `ephemeral` messages as specified in [14/WAKU2-MESSAGE](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/14/message.md).
+The concept of `ephemeral` messages introduced in [14/WAKU2-MESSAGE](/waku/standards/core/14/message.md) affects `WAKU2-STORE` as well.
+Nodes running `WAKU2-STORE` SHOULD support `ephemeral` messages as specified in [14/WAKU2-MESSAGE](/waku/standards/core/14/message.md).
 Nodes running `WAKU2-STORE` SHOULD NOT store messages with the `ephemeral` flag set to `true`.
 
-# Adversarial Model
-Any peer running the `WAKU2-STORE` protocol, i.e. 
-both the querying node and the queried node, are considered as an adversary. 
-Furthermore, 
-we currently consider the adversary as a passive entity that attempts to collect information from other peers to conduct an attack but 
-it does so without violating protocol definitions and instructions. 
-As we evolve the protocol, 
-further adversarial models will be considered.
-For example, under the passive adversarial model, 
-no malicious node hides or 
-lies about the history of messages as it is against the description of the `WAKU2-STORE` protocol. 
-
-The following are not considered as part of the adversarial model:
-- An adversary with a global view of all the peers and their connections.
-- An adversary that can eavesdrop on communication links between arbitrary pairs of peers (unless the adversary is one end of the communication). 
-In specific, the communication channels are assumed to be secure.
-
-# Wire Specification
-
-## Payloads
+### Payloads
 
 ```protobuf
 syntax = "proto3";
@@ -111,28 +97,38 @@ message StoreQueryResponse {
   optional bytes pagination_cursor = 51;
 }
 ```
-## General store query concepts
 
-### Waku message key-value pairs
+### General Store Query Concepts
 
-The store query protocol operates as a query protocol for a key-value store of historical Waku messages,
-with each entry having a [14/WAKU2-MESSAGE](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/14/message.md) and associated pubsub topic as value,
-and [deterministic message hash](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/14/message.md#deterministic-message-hashing) as key.
+#### Waku Message Key-Value Pairs
+
+The store query protocol operates as a query protocol for a key-value store of historical messages,
+with each entry having a [14/WAKU2-MESSAGE](/waku/standards/core/14/message.md)
+and associated `pubsub_topic` as the value,
+and [deterministic message hash](/waku/standards/core/14/message.md#deterministic-message-hashing) as the key.
 The store can be queried to return either a set of keys or a set of key-value pairs.
-Within the store query protocol, Waku message keys and values MUST be represented in a `WakuMessageKeyValue` message.
-This message MUST contain the deterministic `message_hash` as key.
-It MAY contain the full `WakuMessage` and associated pubsub topic as value in the `message` and `pubsub_topic` fields,
-depending on the use case as set out below.
+
+Within the store query protocol,
+the [14/WAKU2-MESSAGE](/waku/standards/core/14/message.md) keys and
+values MUST be represented in a `WakuMessageKeyValue` message.
+
+- MUST contain the deterministic `message_hash` as the key.
+- it MAY contain the full [14/WAKU2-MESSAGE](/waku/standards/core/14/message.md) and 
+associated pubsub topic as the value in the `message` and
+`pubsub_topic` fields, depending on the use case as set out below.
+
 If the message contains a value entry in addition to the key,
 both the `message` and `pubsub_topic` fields MUST be populated.
 The message MUST NOT have either `message` or `pubsub_topic` populated with the other unset.
 Both fields MUST either be set or unset.
 
-### Waku message store eligibility
+### Waku Message Store Eligibility
 
-In order for a Waku message to be eligible for storage:
-- it MUST be a _valid_ [14/WAKU2-MESSAGE](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/14/message.md).
-- the `timestamp` field MUST be populated with the Unix epoch time at which the message was generated in nanoseconds.
+In order for a message to be eligible for storage:
+
+- it MUST be a _valid_ [14/WAKU2-MESSAGE](/waku/standards/core/14/message.md).
+- the `timestamp` field MUST be populated with the Unix epoch time,
+at which the message was generated in nanoseconds.
 If at the time of storage the `timestamp` deviates by more than 20 seconds
 either into the past or the future when compared to the store node’s internal clock,
 the store node MAY reject the message.
@@ -140,9 +136,9 @@ the store node MAY reject the message.
 
 ### Waku message sorting
 
-The key-value entries in the store MUST be time-sorted by the `WakuMessage` `timestamp` attribute.
-Where two or more key-value entries have identical `timestamps`,
-the entries MUST be further sorted by the natural order of their message hash keys.
+The key-value entries in the store MUST be time-sorted by the [14/WAKU2-MESSAGE](/waku/standards/core/14/message.md) `timestamp` attribute.
+Where two or more key-value entries have identical `timestamp` values,
+the entries MUST be further sorted by the natural order of their `message_hash`.
 Within the context of traversing over key-value entries in the store,
 _"forward"_ indicates traversing the entries in ascending order,
 whereas _"backward"_ indicates traversing the entries in descending order.
@@ -167,7 +163,8 @@ A `StoreQueryResponse` without a populated `pagination_cursor` indicates that
 there are no more matching entries in the store.
 
 The client MAY request the next page of entries from the store service node
-by populating a subsequent `StoreQueryRequest` with the `pagination_cursor` received in the `StoreQueryResponse`.
+by populating a subsequent `StoreQueryRequest` with the `pagination_cursor`
+received in the `StoreQueryResponse`.
 All other fields and query criteria MUST be the same as in the preceding `StoreQueryRequest`.
 
 A `StoreQueryRequest` without a populated `pagination_cursor` indicates that
@@ -179,9 +176,9 @@ A client node MUST send all historical message queries within a `StoreQueryReque
 This request MUST contain a `request_id`.
 The `request_id` MUST be a uniquely generated string.
 
-If the store query client requires the store service node to include Waku message values in the query response,
+If the store query client requires the store service node to include [14/WAKU2-MESSAGE](/waku/standards/core/14/message.md) values in the query response,
 it MUST set `include_data` to `true`.
-If the store query client requires the store service node to return only message hash keys in the query response,
+If the store query client requires the store service node to return only `message_hash` in the query response,
 it SHOULD set `include_data` to `false`.
 By default, therefore, the store service node assumes `include_data` to be `false`.
 
@@ -195,10 +192,13 @@ There are two types of filter use cases:
 A store query client MAY request the store service node to filter historical entries by a content filter.
 Such a client MAY create a filter on content topic, on time range or on both.
 
-To filter on content topic, the client MUST populate _both_ the `pubsub_topic` _and_ `content_topics` field.
-The client MUST NOT populate either `pubsub_topic` or `content_topics` and leave the other unset.
+To filter on content topic,
+the client MUST populate _both_ the `pubsub_topic` _and_ `content_topics` field.
+The client MUST NOT populate either `pubsub_topic` or
+`content_topics` and leave the other unset.
 Both fields MUST either be set or unset.
-A mixed content topic filter with just one of either `pubsub_topic` or `content_topics` set, SHOULD be regarded as an invalid request.
+A mixed content topic filter with just one of either `pubsub_topic` or
+`content_topics` set, SHOULD be regarded as an invalid request.
 
 To filter on time range, the client MUST set `time_start`, `time_end` or both.
 Each `time_` field should contain a Unix epoch timestamp in nanoseconds.
@@ -211,10 +211,13 @@ the client MUST NOT set the `message_hashes` field.
 
 ### Message hash lookup queries
 
-A store query client MAY request the store service node to filter historical entries by one or more matching message hash keys.
-This type of query acts as a "lookup" against a message hash key or set of keys already known to the client.
+A store query client MAY request the store service node to filter historical entries by one or
+more matching message hash keys.
+This type of query acts as a "lookup" against a message hash key or
+set of keys already known to the client.
 
-In order to perform a lookup query, the store query client MUST populate the `message_hashes` field with the list of message hash keys it wants to lookup in the store service node.
+In order to perform a lookup query, 
+the store query client MUST populate the `message_hashes` field with the list of message hash keys it wants to lookup in the store service node.
 
 If the `message_hashes` field is set,
 the client MUST NOT set any of the content filter fields,
@@ -222,7 +225,8 @@ namely `pubsub_topic`, `content_topic`, `time_start`, or `time_end`.
 
 ### Presence queries
 
-A presence query is a special type of lookup query that allows a client to check for the presence of one or more messages in the store service node,
+A presence query is a special type of lookup query that allows a client to check for the presence of one or
+more messages in the store service node,
 without retrieving the full contents (values) of the messages.
 This can, for example, be used as part of a reliability mechanism,
 whereby store query clients verify that previously published messages have been successfully stored.
@@ -241,8 +245,12 @@ to indicate at which key-value entry a store service node SHOULD start the query
 The `pagination_cursor` is treated as exclusive
 and the corresponding entry will not be included in subsequent store query responses.
 
-For forward queries, only messages following (see [sorting](#waku-message-sorting)) the one indexed at `pagination_cursor` will be returned.
-For backward queries, only messages preceding (see [sorting](#waku-message-sorting)) the one indexed at `pagination_cursor` will be returned.
+For forward queries,
+only messages following (see [sorting](#waku-message-sorting)) the one indexed at `pagination_cursor`
+will be returned.
+For backward queries,
+only messages preceding (see [sorting](#waku-message-sorting)) the one indexed at `pagination_cursor`
+will be returned.
 
 If the store query client requires the store service node to perform a forward query,
 it MUST set `pagination_forward` to `true`.
@@ -264,35 +272,45 @@ In response to any `StoreQueryRequest`,
 a store service node SHOULD respond with a `StoreQueryResponse` with a `requestId` matching that of the request.
 This response MUST contain a `status_code` indicating if the request was successful or not.
 Successful status codes are in the `2xx` range.
-Client nodes SHOULD consider all other status codes as error codes and assume that the requested operation had failed.
-In addition, the store service node MAY choose to provide a more detailed status description in the `status_desc` field.
+A client node SHOULD consider all other status codes as error codes and
+assume that the requested operation had failed.
+In addition,
+the store service node MAY choose to provide a more detailed status description in the `status_desc` field.
 
 ### Filter matching
 
-For [content filtered queries](#content-filtered-queries), an entry in the store service node matches the filter criteria in a `StoreQueryRequest` if each of the following conditions are met:
+For [content filtered queries](#content-filtered-queries),
+an entry in the store service node matches the filter criteria in a `StoreQueryRequest` if each of the following conditions are met:
+
 - its `content_topic` is in the request `content_topics` set
-and it was published on a matching `pubsub_topic` OR the request `content_topics` and `pubsub_topic` fields are unset
+and it was published on a matching `pubsub_topic` OR the request `content_topics` and
+`pubsub_topic` fields are unset
 - its `timestamp` is _larger or equal_ than the request `start_time` OR the request `start_time` is unset
 - its `timestamp` is _smaller_ than the request `end_time` OR the request `end_time` is unset
 
-Note that for content filtered queries, `start_time` is treated as _inclusive_ and `end_time` is treated as _exclusive_.
+Note that for content filtered queries, `start_time` is treated as _inclusive_ and
+`end_time` is treated as _exclusive_.
 
-For [message hash lookup queries](#message-hash-lookup-queries), an entry in the store service node matches the filter criteria if its `message_hash` is in the request `message_hashes` set.
+For [message hash lookup queries](#message-hash-lookup-queries),
+an entry in the store service node matches the filter criteria if its `message_hash` is in the request `message_hashes` set.
 
-The store service node SHOULD respond with an error code and discard the request
-if the store query request contains both content filter criteria and message hashes.
+The store service node SHOULD respond with an error code and
+discard the request if the store query request contains both content filter criteria
+and message hashes.
 
 ### Populating response messages
 
 The store service node SHOULD populate the `messages` field in the response
 only with entries matching the filter criteria provided in the corresponding request.
 Regardless of whether the response is to a _forward_ or _backward_ query,
-the `messages`field in the response MUST be ordered in a forward direction
+the `messages` field in the response MUST be ordered in a forward direction
 according to the [message sorting rules](#waku-message-sorting).
 
 If the corresponding `StoreQueryRequest` has `include_data` set to true,
-the service node SHOULD populate both the `message_hash` and `message` for each entry in the response.
-In all other cases, the store service node SHOULD populate only the `message_hash` field for each entry in the response.
+the service node SHOULD populate both the `message_hash` and
+`message` for each entry in the response.
+In all other cases,
+the store service node SHOULD populate only the `message_hash` field for each entry in the response.
 
 ### Paginating the response
 
@@ -300,7 +318,8 @@ The response SHOULD NOT contain more `messages` than the `pagination_limit` prov
 It is RECOMMENDED that the store node defines its own maximum page size internally.
 If the `pagination_limit` in the request is unset,
 or exceeds this internal maximum page size,
-the store service node SHOULD ignore the `pagination_limit` field and apply its own internal maximum page size.
+the store service node SHOULD ignore the `pagination_limit` field and
+apply its own internal maximum page size.
 
 In response to a _forward_ `StoreQueryRequest`:
 - if the `pagination_cursor` is set,
@@ -329,6 +348,24 @@ In response to a _backward_ `StoreQueryRequest`:
 # Security Consideration
 
 The main security consideration to take into account while using this protocol is that a querying node have to reveal their content filters of interest to the queried node, hence potentially compromising their privacy.
+
+## Adversarial Model
+
+Any peer running the `WAKU2-STORE` protocol, i.e. 
+both the querying node and the queried node, are considered as an adversary. 
+Furthermore, 
+we currently consider the adversary as a passive entity that attempts to collect information from other peers to conduct an attack but 
+it does so without violating protocol definitions and instructions. 
+As we evolve the protocol, 
+further adversarial models will be considered.
+For example, under the passive adversarial model, 
+no malicious node hides or 
+lies about the history of messages as it is against the description of the `WAKU2-STORE` protocol. 
+
+The following are not considered as part of the adversarial model:
+- An adversary with a global view of all the peers and their connections.
+- An adversary that can eavesdrop on communication links between arbitrary pairs of peers (unless the adversary is one end of the communication). 
+In specific, the communication channels are assumed to be secure.
 
 # Future Work
 
@@ -390,4 +427,3 @@ Copyright and related rights waived via
 2. [protocol buffers v3](https://developers.google.com/protocol-buffers/)
 3. [11/WAKU2-RELAY](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/11/relay.md)
 4. [Open timestamps](https://opentimestamps.org/) 
-5. [13/WAKU2-STORE v2 previous version](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/13/store.md)
