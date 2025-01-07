@@ -26,13 +26,13 @@ The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL 
 
 **Libp2p Protocol identifier**: `/vac/waku/reconciliation/1.0.0`
 
-The protocol finds differences between 2 peers by comparing _fingerprints_ of _ranges_ of messages.
+The protocol finds differences between 2 peers by comparing _fingerprints_ of _ranges_ of message _IDs_.
 When the _fingerprints_ are different, _ranges_ are splitted into smaller ones.
-This process repeats until _ranges_ include a small number of messages.
-At this point, messages are individually compared.
+This process repeats until _ranges_ include a small number of message _IDs_.
+At this point, message _IDs_ are individually compared.
 
 #### Message Ids
-Message _Ids_ MUST be composed of the timestamp and the hash of the Waku messages.
+Message _Ids_ MUST be composed of the timestamp and the hash of the [`14/WAKU2-MESSAGE`](https://rfc.vac.dev/waku/standards/core/14/message).
 
 The timestamp MUST be the time of creation and
 the hash MUST follow the
