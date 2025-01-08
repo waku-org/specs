@@ -30,8 +30,17 @@ The protocol finds differences between 2 peers by
 comparing _fingerprints_ of _ranges_ of message _IDs_.
 _Ranges_ are encoded into payloads, exchanged between the peers and when the range _fingerprints_ are different, splitted into smaller ones.
 This process repeats until _ranges_ include a small number of messages
-at this point _IDs_ are sent instead of _fingerprints_.
-When received, _IDs_ are individually compared for differences.
+at this point _IDs_ are sent for comparison instead of _fingerprints_.
+
+#### Overview
+
+1. The requestor choose a time range to sync.
+2. The range is encoded into a payload and sent.
+3. The requestee receive the payload and decode it.
+4. The range is processed and more ranges produced.
+5. The new ranges are encoded and sent.
+6. Payloads are repeatedly exchanged and differences between the peers are discovered.
+7. The synchronization is done when no ranges are left to process.
 
 #### Message Ids
 Message _IDs_ MUST be composed of the timestamp and the hash of the [`14/WAKU2-MESSAGE`](https://rfc.vac.dev/waku/standards/core/14/message).
@@ -60,17 +69,19 @@ Every _range_ MUST have one of the following types; _fingerprint_, _skip_ or _it
 - _Fingerprint_ type contains a _fingerprint_.
 - _Skip_ type contains nothing and is used to signal already processed _ranges_.
 - _Item set_ type contains message _Ids_ and a _resolved_ boolean.
-> _Item sets_ are an optimization, stopping the recursion early can
-save network roundtrips.
+> _Item sets_ are an optimization, sending multiple _IDs_ instead of
+recursing further reduce the number of round-trips.
 
 #### Range Processing
-_Ranges_ have to be processed differently according to their types and sent back.
+_Ranges_ have to be processed differently according to their types.
 
-- _Skip_ ranges MUST be merged with other consecutive _skip ranges_.
 - **Equal** _fingerprint ranges_ MUST become _skip ranges_.
 - **Unequal** _fingerprint ranges_ MUST be splitted into smaller ranges. The new type MAY be either _fingerprint_ or _item set_.
 - **Unresolved** _item set_ ranges MUST be checked for differences and marked resolved.
 - **Resolved** _item set_ ranges MUST be checked for differences and become skip ranges.
+- _Skip_ ranges MUST be merged with other consecutive _skip ranges_.
+
+In the case where only skip ranges remains, the synchronization is done.
 
 ### Delta Encoding
 Payloads MUST be delta encoded as follows for efficient transmission of _IDs_ and _ranges_.
