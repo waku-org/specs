@@ -26,13 +26,15 @@ The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL 
 
 **Libp2p Protocol identifier**: `/vac/waku/reconciliation/1.0.0`
 
-The protocol finds differences between 2 peers by comparing _fingerprints_ of _ranges_ of message _IDs_.
-When the _fingerprints_ are different, _ranges_ are splitted into smaller ones.
-This process repeats until _ranges_ include a small number of message _IDs_.
-At this point, message _IDs_ are individually compared.
+The protocol finds differences between 2 peers by
+comparing _fingerprints_ of _ranges_ of message _IDs_.
+_Ranges_ are encoded into payloads, exchanged between the peers and when the range _fingerprints_ are different, splitted into smaller ones.
+This process repeats until _ranges_ include a small number of messages
+at this point _IDs_ are sent instead of _fingerprints_.
+When received, _IDs_ are individually compared for differences.
 
 #### Message Ids
-Message _Ids_ MUST be composed of the timestamp and the hash of the [`14/WAKU2-MESSAGE`](https://rfc.vac.dev/waku/standards/core/14/message).
+Message _IDs_ MUST be composed of the timestamp and the hash of the [`14/WAKU2-MESSAGE`](https://rfc.vac.dev/waku/standards/core/14/message).
 
 The timestamp MUST be the time of creation and
 the hash MUST follow the
@@ -44,7 +46,7 @@ disambiguate based on the hash lexical order
 in cases where the timestamp is the same.
 
 #### Range Bounds
-A _range_ MUST consists of 2 _Ids_, the first bound is
+A _range_ MUST consists of 2 _IDs_, the first bound is
 inclusive the second bound exclusive.
 The first bound MUST be strictly smaller than the second one.
 
@@ -98,7 +100,7 @@ All _varints_ MUST be little-endian base 128 variable length integers (LEB128) a
 
 #### Payload encoding
 The wire level payload MUST be encoded as follow.
-> The & denote concatenation
+> The & denote concatenation.
 
 1. _varint_ bytes of the delta encoded timestamp &
 2. if timestamp is zero, 1 byte for the hash bytes length & the hash bytes &
@@ -106,9 +108,9 @@ The wire level payload MUST be encoded as follow.
 4. either
     - 32 bytes _fingerprint_ &
     - _varint_ bytes of the item set length & bytes of every items &
-    - if _skip range_, nothing
+    - if _skip range_, do nothing
 
-5. repeat 1 to 4 for all ranges
+5. repeat steps 1 to 4 for all ranges.
 
 ## Transfer Protocol
 
@@ -117,7 +119,7 @@ The wire level payload MUST be encoded as follow.
 The transfer protocol SHOULD send messages as soon as
 a difference is found via reconciliation.
 It MUST only accept messages from peers the node is reconciliating with.
-New message Ids MUST be added to the reconciliation protocol.
+New message IDs MUST be added to the reconciliation protocol.
 The payload sent MUST follow the wire specification below.
 
 ### Wire specification
