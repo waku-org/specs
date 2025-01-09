@@ -84,7 +84,7 @@ _Ranges_ have to be processed differently according to their types.
 In the case where only skip ranges remains, the synchronization is done.
 
 ### Delta Encoding
-Payloads MUST be delta encoded as follows for efficient transmission of _IDs_ and _ranges_.
+_Ranges_ and timestamps MUST be delta encoded as follows for efficient transmission.
 
 All _ranges_ to be transmitted MUST be ordered and only upper bounds used.
 > Inclusive lower bounds can be omitted because they are always
