@@ -16,7 +16,7 @@ Message propagation in the network is not perfect,
 even with GossipSub mechanisms to detect missed messages.
 Nodes can also go offline for various reason outside our control.
 Store nodes that want to provide a good service must be able to remedy situations like these.
-By having store nodes syncronize with each other through various protocols,
+By having store nodes synchronize with each other through various protocols,
 the set of archived messages network wide will be eventually consistent.
 
 ## Theory / Semantics
@@ -36,7 +36,7 @@ It is RECOMMENDED to limit the time interval to a maximum of 6 hours.
 ### Waku Sync
 
 Nodes that stay online can still miss messages.
-[Waku Sync](https://github.com/waku-org/specs/blob/master/standards/core/sync.md) is 2 libp2p protocols used to find those messages by periodically syncing with random nodes.
+[Waku Sync](https://github.com/waku-org/specs/blob/master/standards/core/sync.md) is 2 libp2p protocols used to find those messages and mend the differences by periodically syncing with random nodes.
 It is RECOMMENDED to trigger a sync with a random peer that supports the protocols every 5 minutes for a time range of the last hour.
 
 ## Copyright
