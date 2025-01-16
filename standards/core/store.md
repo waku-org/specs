@@ -15,7 +15,6 @@ contributors:
 This specification explains the `WAKU2-STORE` protocol,
 which enables querying of messages received through the relay protocol and 
 stored by other nodes. 
-It also supports pagination for more efficient querying of historical messages. 
 
 **Protocol identifier***: `/vac/waku/store-query/3.0.0`
 
