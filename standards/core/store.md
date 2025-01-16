@@ -13,8 +13,8 @@ contributors:
 ## Abstract
 
 This specification explains the `WAKU2-STORE` protocol,
-which enables querying of messages received through the relay protocol and 
-stored by other nodes. 
+which enables querying of [14/WAKU2-MESSAGE](/waku/standards/core/14/message.md)s. 
+It also supports pagination for more efficient querying of historical messages. 
 
 **Protocol identifier***: `/vac/waku/store-query/3.0.0`
 
@@ -31,18 +31,6 @@ The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL 
 “OPTIONAL” in this document are to be interpreted as described in [RFC2119](https://www.ietf.org/rfc/rfc2119.txt).
 
 ### Design Requirements
-
-Nodes willing to provide the storage service using `WAKU2-STORE` protocol,
-SHOULD provide a complete and full view of message history.
-As such, they are required to be *highly available* and 
-specifically have a *high uptime* to consistently receive and
-store network messages. 
-The high uptime requirement makes sure that no message is missed out,
-hence a complete and 
-intact view of the message history is delivered to the querying nodes.
-Nevertheless, in case storage service nodes cannot afford high availability, 
-the querying nodes may retrieve the historical messages from multiple sources to achieve a full and
-intact view of the past.
 
 The concept of `ephemeral` messages introduced in [14/WAKU2-MESSAGE](/waku/standards/core/14/message.md) affects `WAKU2-STORE` as well.
 Nodes running `WAKU2-STORE` SHOULD support `ephemeral` messages as specified in [14/WAKU2-MESSAGE](/waku/standards/core/14/message.md).
@@ -110,9 +98,8 @@ The store can be queried to return either a set of keys or a set of key-value pa
 Within the store query protocol,
 the [14/WAKU2-MESSAGE](/waku/standards/core/14/message.md) keys and
 values MUST be represented in a `WakuMessageKeyValue` message.
-
-- MUST contain the deterministic `message_hash` as the key.
-- it MAY contain the full [14/WAKU2-MESSAGE](/waku/standards/core/14/message.md) and 
+This message MUST contain the deterministic `message_hash` as the key.
+It MAY contain the full [14/WAKU2-MESSAGE](/waku/standards/core/14/message.md) and 
 associated pubsub topic as the value in the `message` and
 `pubsub_topic` fields, depending on the use case as set out below.
 
@@ -366,7 +353,7 @@ lies about the history of messages as it is against the description of the `WAKU
 The following are not considered as part of the adversarial model:
 - An adversary with a global view of all the peers and their connections.
 - An adversary that can eavesdrop on communication links between arbitrary pairs of peers (unless the adversary is one end of the communication). 
-Specifically, the communication channels are assumed to be secure.
+In specific, the communication channels are assumed to be secure.
 
 ### Future Work
 
