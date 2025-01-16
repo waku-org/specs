@@ -14,8 +14,7 @@ contributors:
 
 This specification explains the `WAKU2-STORE` protocol,
 which enables querying of [14/WAKU2-MESSAGE](/waku/standards/core/14/message.md)s. 
-It also supports pagination for more efficient querying of historical messages. 
-
+ 
 **Protocol identifier***: `/vac/waku/store-query/3.0.0`
 
 ### Terminology
@@ -353,7 +352,7 @@ lies about the history of messages as it is against the description of the `WAKU
 The following are not considered as part of the adversarial model:
 - An adversary with a global view of all the peers and their connections.
 - An adversary that can eavesdrop on communication links between arbitrary pairs of peers (unless the adversary is one end of the communication). 
-In specific, the communication channels are assumed to be secure.
+Specifically, the communication channels are assumed to be secure.
 
 ### Future Work
 
