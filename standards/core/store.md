@@ -367,7 +367,7 @@ lies about the history of messages as it is against the description of the `WAKU
 The following are not considered as part of the adversarial model:
 - An adversary with a global view of all the peers and their connections.
 - An adversary that can eavesdrop on communication links between arbitrary pairs of peers (unless the adversary is one end of the communication). 
-In specific, the communication channels are assumed to be secure.
+Specifically, the communication channels are assumed to be secure.
 
 ### Future Work
 
