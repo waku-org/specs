@@ -137,7 +137,7 @@ The payload sent MUST follow the wire specification below.
 ```protobuf
 syntax = "proto3";
 
-package waku.sync.v2;
+package waku.sync.transfer.v1;
 
 import "waku/message/v1/message.proto";
 
