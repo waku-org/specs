@@ -16,7 +16,7 @@ Message propagation in the network is not perfect,
 even with GossipSub mechanisms to detect missed messages.
 Nodes can also go offline for various reason outside our control.
 Store nodes that want to provide a good service must be able to remedy situations like these.
-By having store nodes syncronize with each other through various protocols,
+By having store nodes synchronize with each other through various protocols,
 the set of archived messages network wide will be eventually consistent.
 
 ## Theory / Semantics
@@ -27,28 +27,18 @@ Various protocols and features that help with message consistency are described 
 
 ### Store Resume
 
-<!-- restating this as a heuristic rather than a high-level description of functionality allows the spec to be useful for new implementers -->
-
 This feature allow a node to fill the gap in messages for the period it was last offline.
-At startup, a node use the Store protocol to query a random node for
+At startup, a node SHOULD use the Store protocol to query a random node for
 the time interval since it was last online.
-Messages returned by the query are then added to the node local archive storage.
+Messages returned by the query are then added to the local node storage.
 It is RECOMMENDED to limit the time interval to a maximum of 6 hours.
 
 ### Waku Sync
 
-<!--
-For the new version. "think of a specification as a heuristic/set of directives that almost form a kind of pseudocode. This becomes easier if you use the RFC keywords for each directive"
--->
-
 Nodes that stay online can still miss messages.
-[Waku Sync](https://github.com/waku-org/specs/blob/master/standards/core/sync.md) is the protocol used to find those message hashes by periodically syncing with random nodes.
-It is RECOMMENDED to trigger a sync with a random peer every 5 minutes for a time range of the last hour.
-After both message hash sets are reconciled,
-the Store protocol SHOULD be used to reciprocally query the other node with the message hash differences found.
-Messages returned by the query MUST be added to the node local Waku sync and archive storage.
-
-<!-- TODO add the number of node to sync with -->
+[Waku Sync](https://github.com/waku-org/specs/blob/master/standards/core/sync.md) consists of two libp2p protocols,
+respectively used to (i) find those messages and (ii) mend the differences by periodically syncing with random nodes.
+It is RECOMMENDED to trigger a sync with a random peer that supports the protocols every 5 minutes for a time range of the last hour.
 
 ## Copyright
 
