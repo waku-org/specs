@@ -36,7 +36,8 @@ It is RECOMMENDED to limit the time interval to a maximum of 6 hours.
 ### Waku Sync
 
 Nodes that stay online can still miss messages.
-[Waku Sync](https://github.com/waku-org/specs/blob/master/standards/core/sync.md) is 2 libp2p protocols used to find those messages and mend the differences by periodically syncing with random nodes.
+[Waku Sync](https://github.com/waku-org/specs/blob/master/standards/core/sync.md) consists of two libp2p protocols,
+respectively used to (i) find those messages and (ii) mend the differences by periodically syncing with random nodes.
 It is RECOMMENDED to trigger a sync with a random peer that supports the protocols every 5 minutes for a time range of the last hour.
 
 ## Copyright
