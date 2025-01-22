@@ -117,8 +117,8 @@ The wire level payload MUST be encoded as follow.
 2. if timestamp is zero, 1 byte for the hash bytes length & the hash bytes &
 3. 1 byte, the _range_ type &
 4. either
-    - 32 bytes _fingerprint_ &
-    - _varint_ bytes of the item set length & bytes of every items &
+    - 32 bytes _fingerprint_ or
+    - _varint_ bytes of the item set length & bytes of every items or
     - if _skip range_, do nothing
 
 5. repeat steps 1 to 4 for all ranges.
