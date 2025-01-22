@@ -26,7 +26,7 @@ The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL 
 
 **Libp2p Protocol identifier**: `/vac/waku/reconciliation/1.0.0`
 
-The protocol finds differences between 2 peers by
+The protocol finds differences between two peers by
 comparing _fingerprints_ of _ranges_ of message _IDs_.
 _Ranges_ are encoded into payloads, exchanged between the peers and when the range _fingerprints_ are different, splitted into smaller ones.
 This process repeats until _ranges_ include a small number of messages
