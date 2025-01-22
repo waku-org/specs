@@ -29,18 +29,18 @@ The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL 
 The protocol finds differences between two peers by
 comparing _fingerprints_ of _ranges_ of message _IDs_.
 _Ranges_ are encoded into payloads, exchanged between the peers and when the range _fingerprints_ are different, split into smaller (sub)ranges.
-This process repeats until _ranges_ include a small number of messages
-at this point _IDs_ are sent for comparison instead of _fingerprints_.
+This process repeats until _ranges_ include a small number of messages.
+At this point lists of message _IDs_ are sent for comparison instead of _fingerprints_ over entire ranges of messages.
 
 #### Overview
 The `reconciliation` protocol follows the following heuristic:
-1. The requestor choose a time range to sync.
+1. The requestor chooses a time range to sync.
 2. The range is encoded into a payload and sent.
 3. The requestee receives the payload and decodes it.
 4. The range is processed and, if a difference with the local range is detected, a set of subranges are produced.
 5. The new ranges are encoded and sent.
-6. Payloads are repeatedly exchanged and differences between the peers are discovered.
-7. The synchronization is done when no ranges are left to process.
+6. This process repeats while differences found are sent to the `transfer` protocol.
+7. The synchronization ends when all ranges have been processed and no differences are left.
 
 #### Message IDs
 Message _IDs_ MUST be composed of the timestamp and the hash of the [`14/WAKU2-MESSAGE`](https://rfc.vac.dev/waku/standards/core/14/message).
@@ -75,10 +75,11 @@ recursing further reduce the number of round-trips.
 #### Range Processing
 _Ranges_ have to be processed differently according to their types.
 
-- **Equal** _fingerprint ranges_ MUST become _skip ranges_.
-- **Unequal** _fingerprint ranges_ MUST be splitted into smaller ranges. The new type MAY be either _fingerprint_ or _item set_.
-- **Unresolved** _item set_ ranges MUST be checked for differences and marked resolved.
-- **Resolved** _item set_ ranges MUST be checked for differences and become skip ranges.
+- _Fingerprint_ ranges MUST be compared.
+  - **Equal** ranges MUST become _skip ranges_.
+  - **Unequal** ranges MUST be split into smaller _fingerprint_ or _item set_ ranges based on a implementation specific threshold.
+- **Unresolved** _item set_ ranges MUST be compared, differences sent to the `transfer` protocol and marked resolved.
+- **Resolved** _item set_ ranges MUST be compared, differences sent to the `transfer` protocol and become skip ranges.
 - _Skip_ ranges MUST be merged with other consecutive _skip ranges_.
 
 In the case where only skip ranges remains, the synchronization is done.
