@@ -156,7 +156,7 @@ This section was created to inform implementations.
 #### Parameters 
 Two useful parameters to add to your implementation are partitioning count and the item set threshold.
 
-The partitioning count is the number of time a range is splitted.
+The partitioning count is the number of time a range is split.
 Higher value reduce round trips at the cost of computing more fingerprints.
 
 The threshold for which item sets are sent instead of fingerprints.
