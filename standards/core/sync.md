@@ -28,7 +28,7 @@ The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL 
 
 The protocol finds differences between two peers by
 comparing _fingerprints_ of _ranges_ of message _IDs_.
-_Ranges_ are encoded into payloads, exchanged between the peers and when the range _fingerprints_ are different, splitted into smaller ones.
+_Ranges_ are encoded into payloads, exchanged between the peers and when the range _fingerprints_ are different, split into smaller (sub)ranges.
 This process repeats until _ranges_ include a small number of messages
 at this point _IDs_ are sent for comparison instead of _fingerprints_.
 
