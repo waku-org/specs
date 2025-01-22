@@ -49,7 +49,7 @@ The timestamp MUST be the time of creation and
 the hash MUST follow the
 [deterministic message hashing specification](https://rfc.vac.dev/waku/standards/core/14/message#deterministic-message-hashing)
 
-> This way the message Ids can always be totally ordered,
+> This way the message IDs can always be totally ordered,
 first chronologically according to the timestamp and then
 disambiguate based on the hash lexical order
 in cases where the timestamp is the same.
