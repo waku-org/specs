@@ -55,7 +55,7 @@ disambiguated based on the hash lexical order
 in cases where the timestamp is the same.
 
 #### Range Bounds
-A _range_ MUST consists of 2 _IDs_, the first bound is
+A _range_ MUST consist of two _IDs_, the first bound is
 inclusive the second bound exclusive.
 The first bound MUST be strictly smaller than the second one.
 
