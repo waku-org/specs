@@ -13,7 +13,7 @@ which enables the synchronization of messages between nodes storing sets of [`14
 
 # Specification
 
-Waku Sync consists of 2 libp2p protocols; reconciliation and transfer.
+Waku Sync consists of two libp2p protocols: `reconciliation` and `transfer`.
 The Reconciliation protocol finds differences in sets of messages.
 The Transfer protocol is used to exchange the differences found with other peers.
 The end goal being that peers have the same set of messages.
