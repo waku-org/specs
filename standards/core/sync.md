@@ -161,7 +161,7 @@ A higher value reduces round trips at the cost of computing more fingerprints.
 
 The item set threshold determines when item sets are sent instead of fingerprints.
 A higher value sends more items which means higher chance of duplicates but
-reduce the amount of round trips overall.
+reduces the amount of round trips overall.
 
 #### Storage
 The storage implementation should reflect the context.
