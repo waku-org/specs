@@ -42,7 +42,7 @@ The `reconciliation` protocol follows the following heuristic:
 6. Payloads are repeatedly exchanged and differences between the peers are discovered.
 7. The synchronization is done when no ranges are left to process.
 
-#### Message Ids
+#### Message IDs
 Message _IDs_ MUST be composed of the timestamp and the hash of the [`14/WAKU2-MESSAGE`](https://rfc.vac.dev/waku/standards/core/14/message).
 
 The timestamp MUST be the time of creation and
