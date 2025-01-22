@@ -51,7 +51,7 @@ the hash MUST follow the
 
 > This way the message IDs can always be totally ordered,
 first chronologically according to the timestamp and then
-disambiguate based on the hash lexical order
+disambiguated based on the hash lexical order
 in cases where the timestamp is the same.
 
 #### Range Bounds
