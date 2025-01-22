@@ -68,7 +68,7 @@ Every _range_ MUST have one of the following types; _fingerprint_, _skip_ or _it
 
 - _Fingerprint_ type contains a _fingerprint_.
 - _Skip_ type contains nothing and is used to signal already processed _ranges_.
-- _Item set_ type contains message _Ids_ and a _resolved_ boolean.
+- _Item set_ type contains message _IDs_ and a _resolved_ boolean.
 > _Item sets_ are an optimization, sending multiple _IDs_ instead of
 recursing further reduce the number of round-trips.
 
