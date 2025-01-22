@@ -33,7 +33,7 @@ This process repeats until _ranges_ include a small number of messages
 at this point _IDs_ are sent for comparison instead of _fingerprints_.
 
 #### Overview
-
+The `reconciliation` protocol follows the following heuristic:
 1. The requestor choose a time range to sync.
 2. The range is encoded into a payload and sent.
 3. The requestee receive the payload and decode it.
