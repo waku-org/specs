@@ -159,7 +159,7 @@ Two useful parameters to add to your implementation are partitioning count and t
 The partitioning count is the number of time a range is split.
 A higher value reduces round trips at the cost of computing more fingerprints.
 
-The threshold for which item sets are sent instead of fingerprints.
+The item set threshold determines when item sets are sent instead of fingerprints.
 Higher value sends more items which means higher chance of duplicates but
 reduce the amount of round trips overall.
 
