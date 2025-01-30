@@ -128,7 +128,7 @@ RFC for cluster and shard specification.
     - _varint_ bytes of the item set length & bytes of every items or
     - if _skip range_, do nothing
 
-8. repeat steps 1 to 4 for all ranges.
+8. repeat steps 4 to 7 for all ranges.
 
 ## Transfer Protocol
 
