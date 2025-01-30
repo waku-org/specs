@@ -114,15 +114,21 @@ All _varints_ MUST be little-endian base 128 variable length integers (LEB128) a
 The wire level payload MUST be encoded as follow.
 > The & denote concatenation.
 
-1. _varint_ bytes of the delta encoded timestamp &
-2. if timestamp is zero, 1 byte for the hash bytes length & the hash bytes &
-3. 1 byte, the _range_ type &
-4. either
+> Refer to [RELAY-SHARDING](https://github.com/waku-org/specs/blob/master/standards/core/relay-sharding.md#static-sharding)
+RFC for cluster and shard specification.
+
+1. _varint_ bytes of the node's cluster ID &
+2. _varint_ bytes of the node's number of shard supported &
+3. _varint_ bytes for each shard index supported &
+4. _varint_ bytes of the delta encoded timestamp &
+5. if timestamp is zero, 1 byte for the hash bytes length & the hash bytes &
+6. 1 byte, the _range_ type &
+7. either
     - 32 bytes _fingerprint_ or
     - _varint_ bytes of the item set length & bytes of every items or
     - if _skip range_, do nothing
 
-5. repeat steps 1 to 4 for all ranges.
+8. repeat steps 1 to 4 for all ranges.
 
 ## Transfer Protocol
 
@@ -153,6 +159,11 @@ message WakuMessageAndTopic {
 The flexibility of the protocol implies that much is left to the implementers.
 What will follow is NOT part of the specification.
 This section was created to inform implementations.
+
+#### Cluster & Shards
+To prevent nodes from synchronizing messages from shard they don't support,
+cluster and shards information has been added to each payload.
+On reception, if two peers don't share the same set of shards the sync is aborted.
 
 #### Parameters 
 Two useful parameters to add to your implementation are partitioning count and the item set threshold.
