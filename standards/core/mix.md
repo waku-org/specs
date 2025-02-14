@@ -44,7 +44,7 @@ Nodes that want higher anonymity while publishing a message or performing a stor
 
 In order to preserve the originator identify from the service node, the reply for a request SHOULD be implemented via `Single Use reply blocks`.
 
-A node that sends message using `mix` MAY use 2 redundant mix paths to have better reliability of the message being delivered.
+A node that sends messages using `mix` MAY use 2 redundant mix paths to have better reliability of the message being delivered.
 
 ## Terminology
 The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, 
@@ -57,13 +57,13 @@ Each node in the network can have all 3 roles or can act as just an entry/exit n
 
 - An `entry` node is the originator node of a message, i.e a node that wishes to publish/query messages to/from the waku network.
 - An `exit` node is responsible for delivery messages to destination peer in the network.
-- An `intermediary` node is responsible for just forwarding mix packet to the next mix node in the path.
+- An `intermediary` node is responsible for forwarding a mix packet to the next mix node in the path.
 
 All the relay nodes would by default act as mix `intermediary` and `exit` nodes in the network. 
 Any node that wishes to publish/query messages from the waku network would act as an entry node. 
 The implementation can provide a configuration to disable a node from acting as an `intermediary` node.
 
-Light/Edge nodes will only be acting as `entry` nodes.
+Light nodes with short connection windows will only be acting as `entry` nodes.
 
 ## Flow
 
@@ -73,15 +73,15 @@ TBD
 
 Each waku node that supports `mix` SHOULD indicate this in its discoverable [ENR](https://github.com/waku-org/specs/blob/master/standards/core/enr.md).
 The following fields MUST be set as part of its discoverable ENR:
-- The `bit 5` in the [waku2 ENR key](https://github.com/waku-org/specs/blob/master/standards/core/enr.md#waku2-enr-key) is reserved to indicate `mix`support.This bit must be set to true to indicate `mix` support.
-- a new field `mix-key` set to the `ed25519 public key`which is used for sphinx encryption.
+- The `bit 5` in the [waku2 ENR key](https://github.com/waku-org/specs/blob/master/standards/core/enr.md#waku2-enr-key) is reserved to indicate `mix`support. This bit MUST be set to true to indicate `mix` support.
+- A new field `mix-key` set to the `ed25519 public key`which is used for sphinx encryption.
 
 ### Discovery
 
 Mix protocol provides better anonymity when an originator node has a large pool of mix nodes to choose randomly from. 
 This moves the problem into discovery domain and requires the following from discovery mechanisms:
-1. it is important for nodes to be able to discover as many nodes as possible quickly. This becomes especially important for edge nodes that come online just to publish/query messages for a short period of time.
-2. it is important to have the most recent online status of the nodes so that broken mix paths are not selected leading to reliability issues.
+1. It is important for nodes to be able to discover as many nodes as possible quickly. This becomes especially important for edge nodes that come online just to publish/query messages for a short period of time.
+2. It is important to have the most recent online status of the nodes so that broken mix paths are not selected leading to reliability issues.
 
 Point-2 above can be mitigated partially by choosing redundant mix paths for the same message by the originator but this may not be effective.
 
@@ -89,9 +89,9 @@ Point-2 above can be mitigated partially by choosing redundant mix paths for the
 
 Mix protocol in waku network SHOULD require `rate-limiting/spam` protection to handle scenarios such as:
 
-1. any node can generate a mix packet and publish into the mix network. Hence there needs to be some validation as to who is allowed to publish and whether the user is within allowed rate-limits.
-2. any node can generate paths which are broken intentionally and send messages into the mix network.
-3. an attacker can spawn a huge number of mix nodes so that user behaviour is observed in order to determine traffic patterns and deanonymize users. 
+1. Any node can generate a mix packet and publish into the mix network. Hence there needs to be some validation as to who is allowed to publish and whether the user is within allowed rate-limits.
+2. Any node can generate paths which are broken intentionally and send messages into the mix network.
+3. An attacker can spawn a huge number of mix nodes so that user behaviour is observed in order to determine traffic patterns and deanonymize users. 
 
 The current [WAKU RLN](https://rfc.vac.dev/waku/standards/core/17/rln-relay) can address scenario-3 by making it restrictive for users to be able to spawn a lot of nodes in the network.
 
@@ -135,3 +135,5 @@ Copyright and related rights waived via
  - [waku lightpush](https://rfc.vac.dev/waku/standards/core/19/lightpush)
  - [waku relay](https://rfc.vac.dev/waku/standards/core/11/relay)
  - [Single Use Reply Blocks]()
+ - [ENR](https://github.com/waku-org/specs/blob/master/standards/core/enr.md)
+ - [sphinx encryption](https://www.researchgate.net/publication/220713667_Sphinx_A_Compact_and_Provably_Secure_Mix_Format)
