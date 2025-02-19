@@ -24,13 +24,14 @@ This repository contains specifications for the Waku suite of protocols.
 |[33/WAKU2-DISCV5](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/33/discv5.md)| Waku Discovery v5 Ambient Peer Discovery |
 |[34/WAKU2-PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/34/peer-exchange.md#abstract)| Waku Peer Exchange |
 |[36/WAKU2-BINDINGS-API](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/36/bindings-api.md)| Waku C Bindings API |
-|[WAKU2-ENR](standards/core/enr.md)| Waku Usage of ENR |
-|[WAKU2-INCENTIVIZATION](standards/core/incentivization.md)| Waku Incentivization |
 |[64/WAKU2-NETWORK](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/64/network.md)| Waku Network |
 |[66/WAKU2-METADATA](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/66/metadata.md)| Waku Metadata |
+|[WAKU2-ENR](standards/core/enr.md)| Waku Usage of ENR |
+|[WAKU2-INCENTIVIZATION](standards/core/incentivization.md)| Waku Incentivization |
+|[WAKU2-RLN-CONTRACT](standards/core/rln-contract.md) | Waku RLN Contract Specification |
 |[RELAY-SHARDING](standards/core/relay-sharding.md)| Waku Relay Sharding |
 |[WAKU2-STORE](standards/core/store.md) | Waku Store Query |
-|[WAKU2-RLN-CONTRACT](standards/core/rln-contract.md) | Waku RLN Contract Specification |
+|[WAKU2-SYNC](standards/core/sync.md) | Waku Sync |
 
 ### Application standards
 
