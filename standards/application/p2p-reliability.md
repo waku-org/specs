@@ -49,7 +49,7 @@ It does _not_ cover:
 - End-to-end message reliability protocols, covered by higher-layer application logic.
 
 We focus on p2p reliability within the context of the following [10/WAKU2](https://rfc.vac.dev/waku/standards/core/10/waku2) protocols:
-- [17/WAKU2-RLN-RELAY](https://rfc.vac.dev/waku/standards/core/17/rln-relay): used by nodes to publish and receive messages on a pub/sub topic by participating in [libp2p gossipsub] routing
+- [17/WAKU2-RLN-RELAY](https://rfc.vac.dev/waku/standards/core/17/rln-relay): used by nodes to publish and receive messages on a pub/sub topic by participating in [libp2p gossipsub](https://github.com/libp2p/specs/blob/master/pubsub/gossipsub/gossipsub-v1.1.md) routing
 - [12/WAKU2-FILTER](https://rfc.vac.dev/waku/standards/core/12/filter): used by nodes to receive messages from a pub/sub topic without participating in gossipsub routing
 - [WAKU2-LIGHTPUSH](../core/lightpush.md): used by nodes to publish messages to a pub/sub topic without participating in gossipsub routing
 - [13/WAKU2-STORE](https://rfc.vac.dev/waku/standards/core/13/store): used by any node to query and retrieve historical messages
@@ -310,6 +310,10 @@ Increasing redundancy 20-fold may significantly improve reliability,
 but the accompanying bump in resource usage will be unacceptable for the average Waku user.
 At the same time,
 none of the reliability strategies described here can _guarantee_ end-to-end reliability from an application's perspective.
+This is due to the inherent probabilistic nature of p2p message propagation on the routing layer.
+For example, certain sections of the network may become temporarily unreachable due to a network split,
+without this being visible on a hop-to-hop basis.
+Only the application has the end-to-end view to ensure reliability spanning all routing layer hops between that application's publishers and intended recipients.
 For applications with an integrated end-to-end reliability protocol,
 most p2p reliability strategies can be minimally configured (or even disabled) to save resources.
 
