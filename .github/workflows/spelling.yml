@@ -1,25 +1,18 @@
-name: Spellcheck
+name: Spellcheck(Repo)
 
 on:
-  push:
-    branches: 
-      - '**'
-  pull_request:
-    branches: 
-      - '**'
+  schedule:
+    - cron: "0 0 * * 2"   # Every Tuesday
   workflow_dispatch:
 
 jobs:
   spellcheck:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-      - name: Install aspell
-        run: sudo apt-get install -y aspell aspell-en
-
-      - name: Run spellcheck
-        uses: igsekor/pyspelling-any@v1.0.4
+      - name: Run Spellcheck
+        uses: rojopolis/spellcheck-github-actions@v0
         with:
-          args: "-c ./spellcheck.yaml"
-
+          task_name: Markdown
+          config_path: .spellcheck.yml

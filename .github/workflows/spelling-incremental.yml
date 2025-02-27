@@ -1,0 +1,28 @@
+name: Spellcheck(Incremental)
+
+on:
+  pull_request:
+    branches: 
+      - '**'
+  workflow_dispatch:
+
+jobs:
+  spelling:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get all changed markdown files
+        uses: tj-actions/changed-files@v45
+        id: changed_files
+        with:
+          files: |
+            **.md
+            
+      - name: Run Spellcheck
+        id: spellcheck
+        uses: rojopolis/spellcheck-github-actions@v0
+        with:
+          task_name: Markdown
+          source_files: ${{ steps.changed_files.outputs.all_changed_files }}
+          config_path: .spellcheck.yml
