@@ -49,14 +49,14 @@ Assigning content topics to specific shards is up to app protocols,
 but the discovery of these shards is managed by Waku.
 
 Static shards are managed in shard clusters of 1024 shards per cluster.
-Waku static sharding can manage $2^16$ shard clusters.
-Each shard cluster is identified by its index (between $0$ and $2^16-1$).
+Waku static sharding can manage $2^{16}$ shard clusters.
+Each shard cluster is identified by its index (between $0$ and $2^{16}-1$).
 
 A specific shard cluster is either globally available to all apps,
 specific for an app protocol,
 or reserved for automatic sharding (see next section).
 
-> _Note:_ This leads to $2^16 * 1024 = 2^26$ shards for which Waku manages discovery.
+> _Note:_ This leads to $2^{16} * 1024 = 2^{26}$ shards for which Waku manages discovery.
 
 App protocols can either choose to use global shards, or app specific shards.
 
