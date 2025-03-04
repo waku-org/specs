@@ -37,7 +37,7 @@ instead of _fingerprints_ over entire ranges of messages.
 
 #### Overview
 The `reconciliation` protocol operate on the following heuristic:
-1. The requestor chooses a sync range including time, cluster id and topics.
+1. The requestor chooses a sync range including time, cluster id, pubsub and content topics.
 2. The range is encoded into a payload and sent.
 3. The requestee receives the payload and decodes it.
 4. The range is processed and, if a difference with the local range is detected, a set of subranges are produced.
@@ -76,10 +76,10 @@ Every _range_ MUST have one of the following types; _fingerprint_, _skip_ or _it
 recursing further reduce the number of round-trips.
 
 #### Sync Scope
-On payload reception, the intersection of the two peers topic sets is used as the sync scope.
+On payload reception, the intersection of the two peers pubsub and content topic sets is used as the sync scope.
 If the intersection is empty the sync is aborted.
-If a peer does not specify a set of supported topics,
-the protocol assumes all topics are supproted for that peer.
+If a peer does not specify a set of supported pubsub or content topics,
+the protocol assumes all pubsub or content topics are supported for that peer.
 
 #### Range Processing
 _Ranges_ have to be processed differently according to their types.
@@ -188,8 +188,8 @@ What will follow is NOT part of the specification.
 This section was created to inform implementations.
 
 #### Cluster, Pubsub and Content Topics
-To prevent nodes from synchronizing messages from cluster and topics they don't support,
-cluster and topics information is added to each payload.
+To prevent nodes from synchronizing messages from cluster, pubsub and content topics they don't support,
+cluster and topic information is added to each payload.
 
 #### Parameters 
 Two useful parameters to add to your implementation are partitioning count and the item set threshold.
