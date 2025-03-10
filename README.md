@@ -22,14 +22,16 @@ This repository contains specifications for the Waku suite of protocols.
 |[17/WAKU2-RLN-RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/17/rln-relay.md)| Waku RLN Relay |
 |[19/WAKU2-LIGHTPUSH](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/19/lightpush.md)| Waku Lightpush |
 |[33/WAKU2-DISCV5](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/33/discv5.md)| Waku Discovery v5 Ambient Peer Discovery |
+|[34/WAKU2-PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/34/peer-exchange.md#abstract)| Waku Peer Exchange |
 |[36/WAKU2-BINDINGS-API](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/36/bindings-api.md)| Waku C Bindings API |
-|[WAKU2-PEER-EXCHANGE](standards/core/peer-exchange.md)| Waku Peer Exchange |
+|[64/WAKU2-NETWORK](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/64/network.md)| Waku Network |
+|[66/WAKU2-METADATA](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/66/metadata.md)| Waku Metadata |
 |[WAKU2-ENR](standards/core/enr.md)| Waku Usage of ENR |
 |[WAKU2-INCENTIVIZATION](standards/core/incentivization.md)| Waku Incentivization |
-|[WAKU2-METADATA](standards/core/metadata.md)| Waku Metadata |
-|[WAKU2-NETWORK](standards/core/network.md)| Waku Network |
+|[WAKU2-RLN-CONTRACT](standards/core/rln-contract.md) | Waku RLN Contract Specification |
 |[RELAY-SHARDING](standards/core/relay-sharding.md)| Waku Relay Sharding |
-| WAKU2-STOREV3 | Coming Soon |
+|[WAKU2-STORE](standards/core/store.md) | Waku Store Query |
+|[WAKU2-SYNC](standards/core/sync.md) | Waku Sync |
 
 ### Application standards
 
@@ -45,6 +47,9 @@ This repository contains specifications for the Waku suite of protocols.
 |[WAKU2-DEVICE-PAIRING](standards/application/device-pairing.md)| Device Pairing and Secure Transfers with Noise |
 |[WAKU2-NOISE](standards/application/noise.md)| Noise Protocols for Waku Payload Encryption |
 |[TOR-PUSH](standards/application/tor-push.md)| Waku Tor Push |
+|[RLN-KEYSTORE](standards/application/rln-keystore.md)| Waku RLN Keystore JSON schema |
+|[TRANSPORT-RELIABILITY](standards/application/transport-reliability.md)| Waku Transport Reliability |
+|[REQ-RES-RELIABILITY](standards/application/req-res-reliability.md)| Reliability for request-response protocols |
 
 ### Informational
 
@@ -67,7 +72,15 @@ Relevant Waku resources related to the specifications located in this repository
 Contributions are welcome from any party. 
 Contributors can create specifications relating to the Waku domain and
 create a pull request to begin discussion.
-The recommended [template](./template.md) may be used for new proposed specifications.
+
+Please adhere to the following contribution guidelines:
+- use the recommended [template](./template.md) for new proposed specifications
+- use keywords as per the language recommendations in the [template](./template.md) and [Vac COSS](https://github.com/vacp2p/rfc-index/blob/a5b24ac0a27da361312260f9da372a0e6e812212/vac/1/coss.md#language)
+- use [semantic breaks](https://sembr.org/)
+- links to Waku, Vac or other [IFT](https://free.technology/)-related specifications must be to the corresponding Github repository and not to a webpage.
+For example, Waku specs reside in [waku-org/specs](https://github.com/waku-org/specs) and Vac RFCs in [vacp2p/rfc-index](https://github.com/vacp2p/rfc-index/).
+- we no longer use "v2" in the _name_ of new specifications (and existing spec names inconsistent with this rule will eventually be revised). For example, do not call your specification "Waku v2 New Protocol" but simply "Waku New Protocol"
+- the _title_ of new specifications must be prefixed with `WAKU2-` to differentiate it from other projects' specs and previous RFC generations. For example, "Waku New Protocol" could be titled `WAKU2-NEW-PROTOCOL`.
 
 New specifications are considered a proof of concept.
 Once a rough consensus is reached towards stabilization, 

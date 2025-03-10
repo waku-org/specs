@@ -1,4 +1,0 @@
-matrix:
-- name: markdown
-  sources:
-  - '**/*.md'

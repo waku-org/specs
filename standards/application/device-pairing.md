@@ -55,7 +55,7 @@ This protocol is designed in order to achieve two main security objectives:
 
 The devices execute a custom handshake derived from `XX`,
 where they mutually exchange and authenticate their respective device static key
-by exchanging messages over the content topic with the following [format](https://rfc.vac.dev/spec/23/#content-topic-format)
+by exchanging messages over the content topic with the following [format](https://github.com/vacp2p/rfc-index/blob/main/waku/informational/23/topics.md/#content-topic-format)
 
 ```
 contentTopic = /{application-name}/{application-version}/wakunoise/1/sessions_shard-{shard-id}/proto
@@ -369,7 +369,8 @@ Copyright and related rights waived via [CC0](https://creativecommons.org/public
 
 ### Informative
 
-- [26/WAKU2-PAYLOAD](https://rfc.vac.dev/spec/35/#abnf)
+- [26/WAKU2-PAYLOAD](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/application/26/payload.md/#abnf)
+- [format](https://github.com/vacp2p/rfc-index/blob/main/waku/informational/23/topics.md/#content-topic-format)
 - [The Double-Ratchet Algorithm](https://signal.org/docs/specifications/doubleratchet/)
 - [The Noise Protocol Framework specifications](http://www.noiseprotocol.org/noise.html)
 - [IETF RFC 4648 - The Base16, Base32, and Base64 Data Encodings](https://datatracker.ietf.org/doc/html/rfc4648)

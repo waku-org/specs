@@ -8,7 +8,7 @@ contributors:
 
 ## Abstract
 
-This RFC describes the usage of the ENR (Ethereum Node Records) format for [10/WAKU2](https://rfc.vac.dev/spec/10/) purposes.
+This RFC describes the usage of the ENR (Ethereum Node Records) format for [10/WAKU2](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/10/waku2.md) purposes.
 The ENR format is defined in [EIP-778](https://eips.ethereum.org/EIPS/eip-778) [[3]](#references).
 
 This RFC is an extension of EIP-778, ENR used in Waku v2 MUST adhere to both EIP-778 and 31/WAKU2-ENR.
@@ -41,7 +41,7 @@ Would carry some ambiguity: Is the certificate securing the websocket port valid
 the ipv4 address?
 the ipv6 address?
 
-The [10/WAKU2](https://rfc.vac.dev/spec/10/) protocol family is built on the [libp2p](https://github.com/libp2p/specs) protocol stack.
+The [10/WAKU2](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/10/waku2.md) protocol family is built on the [libp2p](https://github.com/libp2p/specs) protocol stack.
 Hence, it uses [multiaddr](https://github.com/multiformats/multiaddr) to format network addresses.
 
 Directly storing one or several multiaddresses in the ENR would fix the issues listed above:
@@ -135,9 +135,9 @@ We define a `waku2` field key:
 
 | bit 7   | bit 6   | bit 5   | bit 4   | bit 3       | bit 2    | bit 1   | bit 0   |
 | ------- | ------- | ------- | ------- | ----------- | -------- | ------- | ------- |
-| `undef` | `undef` | `undef` | `undef` | `lightpush` | `filter` | `store` | `relay` |
+| `undef` | `undef` | `undef` | `sync` | `lightpush` | `filter` | `store` | `relay` |
 
-- In the scheme above, the flags `lightpush`, `filter`, `store` and `relay` correlates with support for protocols with the same name.
+- In the scheme above, the flags `sync`, `lightpush`, `filter`, `store` and `relay` correlates with support for protocols with the same name.
   If a protocol is not supported, the corresponding field MUST be set to `false`.
   Indicating positive support for any specific protocol is OPTIONAL,
   though it MAY be required by the relevant application or discovery process.
@@ -162,7 +162,8 @@ Copyright and related rights waived via [CC0](https://creativecommons.org/public
 
 ## References
 
-- [1](https://github.com/status-im/nim-waku/pull/690)
-- [2](https://github.com/vacp2p/rfc/issues/462#issuecomment-943869940)
-- [3](https://eips.ethereum.org/EIPS/eip-778)
-- [4](https://github.com/ethereum/devp2p/blob/master/discv5/discv5.md)
+- [1](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/10/waku2.md)
+- [2](https://github.com/status-im/nim-waku/pull/690)
+- [3](https://github.com/vacp2p/rfc/issues/462#issuecomment-943869940)
+- [4](https://eips.ethereum.org/EIPS/eip-778)
+- [5](https://github.com/ethereum/devp2p/blob/master/discv5/discv5.md)
