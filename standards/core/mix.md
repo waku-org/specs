@@ -54,7 +54,7 @@ Sender Node that would like to use `mix` protocol SHOULD discover enough mix nod
 The pool size of mix nodes SHOULD be large enough for the mixing to be effective.
 We RECOMMEND a pool size of at least 100 mix nodes for the mixing to be effective.
 
-The serialized [Waku Message](https://rfc.vac.dev/waku/standards/core/14/message) SHOULD be the payload in the [sphinx packet](https://rfc.vac.dev/vac/raw/mix#4-sphinx-packet-format).
+The serialized [Waku Message](https://rfc.vac.dev/waku/standards/core/14/message) MUST be the payload in the [sphinx packet](https://rfc.vac.dev/vac/raw/mix#4-sphinx-packet-format).
 
 In order to provide anonymity of the sender node from the `service-node`,  `Single Use reply blocks` or `anonymous replies` as specified in the original [sphinx](#references) paper SHALL be used.
 
@@ -78,9 +78,9 @@ Resource-restricted/Edge nodes with short connection windows SHOULD always be ac
 
 ## ENR updates
 
-Each waku node that supports `mix` SHOULD indicate the same in its discoverable [ENR](https://github.com/waku-org/specs/blob/master/standards/core/enr.md).
+Each waku node that supports the `mix intermediary or exit role` SHOULD indicate the same in its discoverable [ENR](https://github.com/waku-org/specs/blob/master/standards/core/enr.md).
 The following fields MUST be set as part of the discoverable ENR of a mix waku node:
-- The `bit 5` in the [waku2 ENR key](https://github.com/waku-org/specs/blob/master/standards/core/enr.md#waku2-enr-key) is reserved to indicate `mix`support. This bit MUST be set to true to indicate `mix` support.
+- The `bit 5` in the [waku2 ENR key](https://github.com/waku-org/specs/blob/master/standards/core/enr.md#waku2-enr-key) is reserved to indicate `mix` support. This bit MUST be set to true to indicate `mix` support.
 - A new field `mix-key` SHOULD be set to the `ed25519 public key` which is used for sphinx encryption.
 
 ### Discovery
@@ -102,7 +102,7 @@ Mix protocol in waku network SHOULD have `rate-limiting/spam` protection to hand
 3. An attacker can spawn a huge number of mix nodes so that user behaviour is observed in order to determine traffic patterns and deanonymize users. 
 
 There is a need to enforce rate-limits and spam protect the mix network. 
-The rate-limiting and spam protection SHALL be addressed as part of future work.
+The rate-limiting and spam protection shall be addressed as part of future work.
 
 ## Tradeoffs
 
