@@ -33,7 +33,7 @@ Same applies for topic subscriptions via [Filter](https://rfc.vac.dev/waku/stand
 Anonymity is achieved by using the [Sphinx packet format](#references), which encrypts and routes messages through a series of mix nodes before reaching the recipient.
 
 By integrating the `mix` protocol into the waku network, we can improve the anonymity for publishers and store query users.
-Each waku relay node will be acting as a mix node that forms an `overlay mix network`.
+Each waku relay node SHOULD be acting as a mix node that forms an `overlay mix network`.
 This network of mix nodes SHALL relay mix messages anonymously to the recepient.
 
 Anonymity of [Filter](https://rfc.vac.dev/waku/standards/core/12/filter) users is not addressed by this document.
@@ -44,9 +44,9 @@ The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL 
 
 ## Theory / Semantics
 
-Waku Mix creates an `overlay network` of all the waku nodes that support the `mix` protocol.
+Waku Mix creates an `overlay network` of all the Waku nodes that support the `mix` protocol.
 
-Nodes with `mix` protocol mounted SHOULD advertise that they support mix protocol via their their chosen discovery method.
+Nodes with `mix` protocol mounted SHOULD advertise that they support `mix` protocol via their their chosen discovery method.
 They MAY do so by updating their [ENR](#enr-updates) and using one of the ENR based discovery methods.
 
 Nodes that want higher anonymity while publishing a message via [lightpush](https://rfc.vac.dev/waku/standards/core/19/lightpush) or performing a [store](https://rfc.vac.dev/waku/standards/core/13/store) query SHOULD use the `mix` protocol to route their messages to the destination.
@@ -72,7 +72,7 @@ Mix protocol defines 3 roles for the nodes in the mix network - `sender`, `exit`
 A Waku relay node SHOULD by default have mix `intermediary` and `exit` node roles in the network.
 The implementation MAY provide a configuration to disable a node from acting as an `intermediary\exit` node.
 
-Any waku node that wishes to publish/query messages from the waku network MUST act as a `sender` node.
+Any waku node that wishes to publish/query messages via `mix` from the waku network MUST act as a `sender` node.
 
 Resource-restricted/Edge nodes with short connection windows SHOULD always be acting as `sender` nodes.
 
@@ -85,7 +85,7 @@ The following fields MUST be set as part of the discoverable ENR of a mix waku n
 
 ### Discovery
 
-Mix protocol provides better anonymity when an originator node has a sufficiently large pool of mix nodes to do path selection.
+Mix protocol provides better anonymity when a sender node has a sufficiently large pool of mix nodes to do path selection.
 This moves the problem into discovery domain and requires the following from discovery mechanisms:
 1. It is important for nodes to be able to discover as many nodes as possible quickly. This becomes especially important for edge nodes that come online just to publish/query messages for a short period of time.
 2. It is important to have the most recent online status of the nodes so that mix paths that are selected are not broken which lead to reliability issues.
