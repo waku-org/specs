@@ -108,9 +108,9 @@ If not provided, nodes discovered through the network SHOULD be used.
 A list of `Multiaddr` addresses to remote peers that SHOULD be used for obtaining various network resources.
 
 These resources MAY include:
-- infrequent [STORE]() queries;
-- a [LIGHTPUSH]() endpoint for broadcasting data;
-- a [FILTER]() endpoint for receiving circulating data.
+- infrequent [STORE](../standards/core/store.md) queries;
+- a [LIGHTPUSH](../standards/core/lightpush.md) endpoint for broadcasting data;
+- a [FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md) endpoint for receiving circulating data.
 
 If not provided, nodes discovered through the network SHOULD be used.
 
@@ -124,13 +124,13 @@ A list of `Multiaddr` addresses to remote peers that SHOULD be used for any appl
 
 ##### `confirmStored`
 An optional property that defaults to `false`.
-If set to `true` and `confirmContentTopics` are provided, a recurring background [STORE]() query (as described in the `Message Storage API` section) MUST be initiated.
-If set to `true` without `confirmContentTopics`, the background [STORE]() query (as described in the `Messaging Storage API` section) MUST only be initiated after the `Subscribe API` is called.
+If set to `true` and `confirmContentTopics` are provided, a recurring background [STORE](../standards/core/store.md) query (as described in the `Message Storage API` section) MUST be initiated.
+If set to `true` without `confirmContentTopics`, the background [STORE](../standards/core/store.md) query (as described in the `Messaging Storage API` section) MUST only be initiated after the `Subscribe API` is called.
 If set to `false`, the `stored` property on the `MessageRecord` (defined in the `Message Storage API`) MUST NOT be populated, unless `History API` is triggered.
 
 ##### `confirmReceived`
 An optional property that defaults to `true`.
-If set to `true`, the node MUST initiate a network listener for messages circulated under `confirmContentTopics` via either [FILTER]() or [RELAY]() using the `Subscribe API`.
+If set to `true`, the node MUST initiate a network listener for messages circulated under `confirmContentTopics` via either [FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md) or [RELAY](https://github.com/vacp2p/rfc-index/blob/0277fd0c4dbd907dfb2f0c28b6cde94a335e1fae/waku/standards/core/11/relay.md) using the `Subscribe API`.
 If set to `true` but `confirmContentTopics` are not provided, the received property on the `MessageRecord` (as defined in the `Message Storage API`) MUST be populated only after the `Subscribe API` is called.
 If set to `false`, the received property MUST NOT be populated, unless `Subscribe API` is called.
 
@@ -148,15 +148,15 @@ Instead, the initial configuration MUST be supplied at node creation time accord
 
 The `Send API` is responsible for broadcasting messages across the network using the configured protocol.
 The node SHOULD select the appropriate protocol based on its configuration and the protocols that are mounted:
-- If the initial configuration specifies mode: "edge", then [LIGHTPUSH]() MUST be used to send messages.
-- If the initial configuration specifies mode: "service", then [RELAY]() MUST be used to send messages.
+- If the initial configuration specifies mode: "edge", then [LIGHTPUSH](../standards/core/lightpush.md) MUST be used to send messages.
+- If the initial configuration specifies mode: "service", then [RELAY](https://github.com/vacp2p/rfc-index/blob/0277fd0c4dbd907dfb2f0c28b6cde94a335e1fae/waku/standards/core/11/relay.md) MUST be used to send messages.
 
 The `Send API` is also responsible for ensuring message delivery and MUST attempt retries as described in the `Retry` section.
 
 #### Retry
 
 If a message fails to satisfy any of the following conditions, it MUST be automatically resent:
-- The message is not successfully sent using [LIGHTPUSH]() or [RELAY]().
+- The message is not successfully sent using [LIGHTPUSH](../standards/core/lightpush.md) or [RELAY](https://github.com/vacp2p/rfc-index/blob/0277fd0c4dbd907dfb2f0c28b6cde94a335e1fae/waku/standards/core/11/relay.md).
 - The message is not acknowledged by `Message Storage API` described below.
 - Retry attempts MUST NOT continue if the node’s health state changes to unhealthy (as defined in the `Health API` described below).
 - Retry attempts MUST resume when the node’s health state transitions to either `minimally healthy` or `healthy` defined in the `Health API` below.
@@ -199,7 +199,7 @@ Additionally, it MUST provide information regarding the `pubsubTopic` and `conte
 The specific types of encoders, their extended functionalities, and the mechanisms for their instantiation are considered out of scope for this document.
 
 ##### `Message`
-A `Message` object MUST conform to the [MESSAGE]() specification.
+A `Message` object MUST conform to the [MESSAGE](https://github.com/vacp2p/rfc-index/blob/8ee2a6d6b232838d83374c35e2413f84436ecf64/waku/standards/core/14/message.md) specification.
 - The payload property MUST be provided.
 - All other properties are optional; if omitted, they SHOULD be supplied by the `Encoder`.
 
@@ -209,7 +209,7 @@ This `GUID` MAY be used to cancel a scheduled request or to retrieve information
 
 ##### `send`
 An `Encoder` and a `Message` MUST be provided as parameters.
-When invoked, the method schedules the message to be sent via [LIGHTPUSH]() or [RELAY]() based on the node’s configuration.
+When invoked, the method schedules the message to be sent via [LIGHTPUSH](../standards/core/lightpush.md) or [RELAY](https://github.com/vacp2p/rfc-index/blob/0277fd0c4dbd907dfb2f0c28b6cde94a335e1fae/waku/standards/core/11/relay.md) based on the node’s configuration.
 The method MUST throw an error if the `pubsubTopic` provided by the `Encoder` is not supported by the underlying node.
 The method MUST return the associated `RequestID` for the scheduled send attempt.
 If the send operation fails, it MAY be retried from the `Message Storage API` using the `RequestID`.
@@ -305,14 +305,14 @@ Content-Type: application/json
 
 ### Subscribe
 
-The `Subscribe API` SHOULD be used to initiate a subscription over [FILTER]() or [RELAY]() for continuous message retrieval.
+The `Subscribe API` SHOULD be used to initiate a subscription over [FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md) or [RELAY](https://github.com/vacp2p/rfc-index/blob/0277fd0c4dbd907dfb2f0c28b6cde94a335e1fae/waku/standards/core/11/relay.md) for continuous message retrieval.
 
 When the `Subscribe API` is invoked, the following behaviors MUST occur.
 
-A subscription is established via [FILTER]() or [RELAY]() based on the node’s configuration for ongoing message reception.
+A subscription is established via [FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md) or [RELAY](https://github.com/vacp2p/rfc-index/blob/0277fd0c4dbd907dfb2f0c28b6cde94a335e1fae/waku/standards/core/11/relay.md) based on the node’s configuration for ongoing message reception.
 
 If `confirmStored` is set to `true`,
-a recurring [STORE]() query MUST be initiated for the specified `contentTopics` to continuously update the stored property in the `MessageRecord` (as defined in the `Message Storage API`) for messages circulating in the network after the `Subscribe API` call.
+a recurring [STORE](../standards/core/store.md) query MUST be initiated for the specified `contentTopics` to continuously update the stored property in the `MessageRecord` (as defined in the `Message Storage API`) for messages circulating in the network after the `Subscribe API` call.
 For details on the recurring query, refer to the `Message Storage API` section.
 
 Once the `Subscribe API` is called, the received property in the `MessageRecord` (as described in the `Message Storage API`) MUST be populated.
@@ -352,14 +352,14 @@ which MUST be used for managing the subscription (e.g., for later unsubscribing)
 The method MUST throw an error if the `pubsubTopic` provided by the `Decoder` is not supported by the underlying node.
 No specific order is guaranteed for callback invocation;
 subscription callbacks MUST be executed as messages are received from the protocol in use.
-If `confirmStored` is set to `true`, a recurring [STORE]() query MUST be started.
+If `confirmStored` is set to `true`, a recurring [STORE](../standards/core/store.md) query MUST be started.
 
 ##### `unsubscribe`
 Removes a previously created subscription identified by its unique `SubscriptionID`.
 Once unsubscribed, the associated `SubscriptionListener` MUST NOT receive any further messages.
 If the provided `SubscriptionID` does not correspond to an active subscription,
 the call MUST be ignored.
-If recurring [STORE]() query was initiated by this `SubscriptionID`, it MUST be stopped.
+If recurring [STORE](../standards/core/store.md) query was initiated by this `SubscriptionID`, it MUST be stopped.
 
 ##### `getActiveSubscriptions`
 Returns an array of unique `SubscriptionID` values representing all currently active subscriptions.
@@ -469,7 +469,7 @@ Messages can be identified by:
 
 These identifiers SHOULD be passed to the appropriate methods described below to retrieve or manage messages.
 
-Depending on the presence of the `confirmStored` or `confirmReceived` options in the `Initial configuration`, the `Message Storage API` will trigger either the `Subscribe API` or the periodic [STORE]() query as described in the `Acknowledgements` section below.
+Depending on the presence of the `confirmStored` or `confirmReceived` options in the `Initial configuration`, the `Message Storage API` will trigger either the `Subscribe API` or the periodic [STORE](../standards/core/store.md) query as described in the `Acknowledgements` section below.
 
 Once a message is added to the `Message Storage API`, or if any details about it change,
 the appropriate events from the `message:*` event family (as described in the `Event Source API` section) MUST be invoked after the message is added or updated in the underlying storage.
@@ -477,21 +477,21 @@ the appropriate events from the `message:*` event family (as described in the `E
 #### Acknowledgements
 
 Message acknowledgement is a background operation that performs the following functions:
-- It subscribes to [FILTER]() or [RELAY]() and marks messages as `received` when detected.
-- It periodically queries [STORE]() and marks messages as `stored` when available.
+- It subscribes to [FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md) or [RELAY](https://github.com/vacp2p/rfc-index/blob/0277fd0c4dbd907dfb2f0c28b6cde94a335e1fae/waku/standards/core/11/relay.md) and marks messages as `received` when detected.
+- It periodically queries [STORE](../standards/core/store.md) and marks messages as `stored` when available.
 
 This operation MUST be initiated if either of the following conditions is met:
 - Either `confirmStored` or `confirmReceived` is set to `true` and `confirmContentTopics` is provided.
 - The `Subscribe API` has been initiated for one or more `contentTopics`.
 
-The recurring [STORE]() query MUST prioritize the `storeNodes` specified in the initial configuration before using other available nodes.
+The recurring [STORE](../standards/core/store.md) query MUST prioritize the `storeNodes` specified in the initial configuration before using other available nodes.
 These queries SHOULD occur once every 60 seconds for all `confirmContentTopics` provided as part of the initial configuration.
 
 Furthermore, if the node’s health status transitions to `unhealthy` (as defined by the `Health API`),
-the periodic [STORE]() query MUST be halted,
+the periodic [STORE](../standards/core/store.md) query MUST be halted,
 and it MUST resume once the health status transitions to either `minimally healthy` or `healthy`.
 
-Recurring [STORE]() query and background subscription to `confirmContentTopics` is a subscription defined in the `Subscribe API` and can be handled the same way.
+Recurring [STORE](../standards/core/store.md) query and background subscription to `confirmContentTopics` is a subscription defined in the `Subscribe API` and can be handled the same way.
 This background subscription has a reserved `SubscriptionID` of `1692854c-cbde-4afe-901f-1c86ecbd9ea1`.
 
 Additionally, the `stored` property MUST be updated for any other messages received via the `History API`.
@@ -539,8 +539,8 @@ This update occurs only after the `sending` property has transitioned back to `f
 
 ##### `stored`
 Defaults to `false`.
-Indicates whether a message has been confirmed to be present in the underlying [STORE]() protocol.
-This property is populated based on a recurring [STORE]() query described in `Acknowledgements` section or via the `History API`.
+Indicates whether a message has been confirmed to be present in the underlying [STORE](../standards/core/store.md) protocol.
+This property is populated based on a recurring [STORE](../standards/core/store.md) query described in `Acknowledgements` section or via the `History API`.
 Once a message is confirmed as stored, the `stored` property MUST be updated to `true` as a final state.
 If an error occurs during reception, the `error` field MUST be populated with implementation-specific details.
 
@@ -781,20 +781,20 @@ Refer to `Event Source API` for more details.
 Indicates that the node’s connectivity is insufficient for reliable operation.
 In this state:
 - No connections to service nodes are available, regardless of protocol.
-- No peers are present in the [RELAY]() mesh.
+- No peers are present in the [RELAY](https://github.com/vacp2p/rfc-index/blob/0277fd0c4dbd907dfb2f0c28b6cde94a335e1fae/waku/standards/core/11/relay.md) mesh.
 
 ##### `minimally healthy`
 Indicates that the node meets the minimum connectivity requirements necessary to function,
 although performance or reliability may be compromised.
 In this state:
-- The node has at least one connection to a service node implementing [FILTER]() and one connection to a service node implementing [LIGHTPUSH]().
-- The [RELAY]() mesh includes connections to at least four other peers.
+- The node has at least one connection to a service node implementing [FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md) and one connection to a service node implementing [LIGHTPUSH](../standards/core/lightpush.md).
+- The [RELAY](https://github.com/vacp2p/rfc-index/blob/0277fd0c4dbd907dfb2f0c28b6cde94a335e1fae/waku/standards/core/11/relay.md) mesh includes connections to at least four other peers.
 
 ##### `healthy`
 Indicates that the node’s connectivity meets or exceeds optimal operational thresholds.
 In this state:
-- The node has at least two connections to service nodes implementing [FILTER]() and at least two connections to service nodes implementing [LIGHTPUSH]().
-- The [RELAY]() mesh includes connections to at least six other peers.
+- The node has at least two connections to service nodes implementing [FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md) and at least two connections to service nodes implementing [LIGHTPUSH](../standards/core/lightpush.md).
+- The [RELAY](https://github.com/vacp2p/rfc-index/blob/0277fd0c4dbd907dfb2f0c28b6cde94a335e1fae/waku/standards/core/11/relay.md) mesh includes connections to at least six other peers.
 
 ##### Programmatic API
 
@@ -943,7 +943,7 @@ node.events.addEventListener("message:received", (event: CustomEvent<MessageReco
 For the `REST API`, long polling over the `Message Store API` SHOULD be used.
 
 ##### `message:stored`
-This event MUST be dispatched when a message is confirmed to be `stored` in the underlying [STORE]() protocol or via the `History API`.
+This event MUST be dispatched when a message is confirmed to be `stored` in the underlying [STORE](../standards/core/store.md) protocol or via the `History API`.
 When the message is stored, the `stored` property in the corresponding `MessageRecord` is updated to `true`.
 The payload is the updated `MessageRecord`.
 
