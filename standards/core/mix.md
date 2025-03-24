@@ -56,7 +56,7 @@ We RECOMMEND a pool size of at least 100 mix nodes for the mixing to be effectiv
 
 The serialized [Waku Message](https://rfc.vac.dev/waku/standards/core/14/message) MUST be the payload in the [sphinx packet](https://rfc.vac.dev/vac/raw/mix#4-sphinx-packet-format).
 
-In order to provide anonymity of the sender node from the `service-node`,  `Single Use reply blocks` or `anonymous replies` as specified in the original [sphinx](#references) paper SHALL be used.
+To allow acknowledgments from the `service-node` while preserving sender anonymity, `Single Use Reply Blocks` or `anonymous replies` as specified in the original [sphinx](#references) paper SHALL be used.
 
 A node that sends messages using `mix` MAY use two redundant (paths)[https://rfc.vac.dev/vac/raw/mix#24-node-discovery] to have better reliability of the message being delivered.
 It is up to the higher-layer mixed protocol to deduplicate redundant messages received in this way.
@@ -74,7 +74,7 @@ The implementation MAY provide a configuration to disable a node from acting as 
 
 Any waku node that wishes to publish/query messages via `mix` from the waku network MUST act as a `sender` node.
 
-Resource-restricted/Edge nodes with short connection windows SHOULD always be acting as `sender` nodes.
+Resource-restricted/Edge nodes with short connection windows MUST _only_ act as `sender` nodes and cannot function as intermediaries or exit nodes.
 
 ## ENR updates
 
