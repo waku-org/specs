@@ -20,7 +20,6 @@ Both of these are `request-response` based protocols that follow a service-user 
 A node that initiates the request is a `service-user/client` whereas a node that replies to the request is the `service-provider/service-node`.
 
 This document also covers the aspect of relay nodes acting as mix nodes.
-Integration of [waku relay](https://rfc.vac.dev/waku/standards/core/11/relay) with mix is not covered in this document.
 
 ## Background / Rationale / Motivation
 
@@ -83,14 +82,17 @@ The following fields MUST be set as part of the discoverable ENR of a mix waku n
 - The `bit 5` in the [waku2 ENR key](https://github.com/waku-org/specs/blob/master/standards/core/enr.md#waku2-enr-key) is reserved to indicate `mix` support. This bit MUST be set to true to indicate `mix` support.
 - A new field `mix-key` SHOULD be set to the `ed25519 public key` which is used for sphinx encryption.
 
+Adding these fields to the ENR may cause the ENR size to cross the 300 byte limit especially in case a node supports multiple transports. 
+This limitation will have to be addressed in future.
 ### Discovery
 
 Mix protocol provides better anonymity when a sender node has a sufficiently large pool of mix nodes to do path selection.
 This moves the problem into discovery domain and requires the following from discovery mechanisms:
 1. It is important for nodes to be able to discover as many nodes as possible quickly. This becomes especially important for edge nodes that come online just to publish/query messages for a short period of time.
-2. It is important to have the most recent online status of the nodes so that mix paths that are selected are not broken which lead to reliability issues.
+2. The discovery mechanism MUST be unbiased and not biased toward specific subsets (e.g., nodes that are topologically closer).
+3. It is important to have the most recent online status of the nodes so that mix paths that are selected are not broken which lead to reliability issues.
 
-Point-2 above can be mitigated partially by choosing redundant mix paths for the same message by the sender node.
+Point-3 above can be mitigated partially by choosing redundant mix paths for the same message by the sender node.
 This may not be an effective solution as it increases the overall bandwidth usage.
 
 ## Spam Protection
@@ -114,6 +116,12 @@ The overall additional delay `D` depends on the following params:
 - processing delay `dp`
 
 Delay overhead can be calculated as `D =  L * (dm + dc +dp)`
+
+## Future Work
+
+- Integration of [waku relay](https://rfc.vac.dev/waku/standards/core/11/relay) with mix.
+- [Spam protection](#spam-protection) of mix overlay network.
+- Alternative way to communicate mix-public-key in order to overcome [ENR](#enr-updates) size limitations.
 
 ## Copyright
 
