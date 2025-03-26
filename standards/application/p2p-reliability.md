@@ -157,9 +157,12 @@ A publisher MAY consider a message publication as having failed irremediably aft
 - A receiving node using this strategy MUST have a local cache of the [deterministic message hashes](https://rfc.vac.dev/waku/standards/core/14/message#deterministic-message-hashing) of all received messages
 spanning _at least_ the time period for which reliability is required.
 - The node MUST periodically perform a [content filtered query](https://rfc.vac.dev/waku/standards/core/13/store#content-filtered-queries) to the [13/WAKU2-STORE](https://rfc.vac.dev/waku/standards/core/13/store) service,
-spanning the time period for which reliability is required
+spanning the time period for which reliability is required ("reliability window")
 and including all content topics over which it is interested to receive messages.
 The `include_data` field SHOULD be set to `false` to retrieve only the matching message hashes from the [13/WAKU2-STORE](https://rfc.vac.dev/waku/standards/core/13/store) service.
+If a connection loss is detected (e.g. if a query fails due to disconnection),
+the next query MAY span at least the time period since the last successful query
+if this is longer than the reliability window.
 - The node MUST compare the received message hashes to those in the local cache.
 Any message hashes in the response that are not in the local cache MUST be considered "missing".
 - The node SHOULD perform a [message hash lookup query](https://rfc.vac.dev/waku/standards/core/13/store#message-hash-lookup-queries) for all missing message hashes
@@ -186,7 +189,7 @@ the publisher SHOULD consider the corresponding message as "acknowledged" and re
 the publisher MUST consider the corresponding messages as still "unacknowledged".
 - In addition, the node MUST compare the message hashes in the content filtered query response to the message hashes in the local cache.
 Any message hashes in the response that are not in the local cache MUST be considered "missing".
-- The node SHOULD retransmit all unacknowledged messages in the ougoing buffer,
+- The node SHOULD retransmit all unacknowledged messages in the outgoing buffer,
 either periodically or upon reception of the query response,
 until a positive inclusion in a follow-up query response for the corresponding message hashes.
 The node MAY consider a message publication as having failed irremediably after a set number of query attempts without inclusion.
