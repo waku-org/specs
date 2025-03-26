@@ -237,7 +237,7 @@ The interval between each retransmission attempt is up to the implementation,
 but we RECOMMEND starting with `1 second` and increasing it after each failure.
 - The client MAY consider a message publication as having failed irremediably after a set number of failed lightpush requests.
 
-#### 4. Retransmit on loss detection
+#### 4. Retransmit on possible message loss detection
 
 > *_Note:_* Lightpush clients participating in [Store-based reliability](#store-based-reliability) already performs this strategy and can ignore this section.
 
@@ -293,7 +293,7 @@ or after a single `SUBSCRIBE` failure.
 by submitting the same filter criteria as before in a new [`SUBSCRIBE`](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md#subscribe) request to the same service node.
 This helps ensure that local and remote views of filter criteria remains synchronised.
 
-#### 4. Store query on loss detection
+#### 4. Store query on possible message loss detection
 
 > *_Note:_* Filter clients participating in [Store-based reliability](#store-based-reliability) already performs this strategy and can ignore this section.
 
