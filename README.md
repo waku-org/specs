@@ -32,6 +32,7 @@ This repository contains specifications for the Waku suite of protocols.
 |[RELAY-SHARDING](standards/core/relay-sharding.md)| Waku Relay Sharding |
 |[WAKU2-STORE](standards/core/store.md) | Waku Store Query |
 |[WAKU2-SYNC](standards/core/sync.md) | Waku Sync |
+|[WAKU-MIX](standards/core/mix.md) | Waku Mix |
 
 ### Application standards
 
