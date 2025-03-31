@@ -36,7 +36,7 @@ At this point lists of message _IDs_ are sent for comparison
 instead of _fingerprints_ over entire ranges of messages.
 
 #### Overview
-The `reconciliation` protocol operate on the following heuristic:
+The `reconciliation` protocol operates on the following heuristic:
 1. The requestor chooses a sync range including time, cluster id, pubsub and content topics.
 2. The range is encoded into a payload and sent.
 3. The requestee receives the payload and decodes it.
