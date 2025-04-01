@@ -11,13 +11,8 @@ contributors:
 
 ## Abstract
 
-This document specifies an Application Programming Interface (API) that is RECOMMENDED for consumers of the [WAKU2](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/10/waku2.md) protocol suite as a single entry point to its functionalities.
-
-The API generalizes the following core protocols provided by Waku:
-- [RELAY](https://github.com/vacp2p/rfc-index/blob/0277fd0c4dbd907dfb2f0c28b6cde94a335e1fae/waku/standards/core/11/relay.md)
-- [STORE](../standards/core/store.md)
-- [LIGHTPUSH](../standards/core/lightpush.md)
-- [FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md)
+This document specifies an Application Programming Interface (API) that is RECOMMENDED for developers of the [WAKU2](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/10/waku2.md) clients to implement,
+and for consumers to use as a single entry point to its functionalities.
 
 This API extends the core protocols with additional functionality
 required for peer-to-peer messaging applications, including:
