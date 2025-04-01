@@ -77,10 +77,10 @@ focusing exclusively on settings explicitly required by the `Messaging API`.
   clusterId: number;
   shards: number[];
   storeNodes?: string[];
-  serviceNodes?: string[];
+  preferredServiceNodes?: string[];
   bootstrapNodes: string[];
-  confirmStored?: boolean;
-  confirmReceived?: boolean;
+  storeConfirmation?: boolean;
+  filterConfirmation?: boolean;
   confirmContentTopics?: string[];
 }
 ```
@@ -113,7 +113,7 @@ An array of shard under a specified cluster that node MUST operate at as per [RE
 A list of `Multiaddr` addresses to remote peers that SHOULD be used for retrieving past messages or performing infrequent queries using the [STORE](https://github.com/vacp2p/rfc-index/blob/8ee2a6d6b232838d83374c35e2413f84436ecf64/waku/standards/core/13/store.md) protocol.
 If not provided, nodes discovered through the network SHOULD be used.
 
-##### `serviceNodes`
+##### `preferredServiceNodes`
 A list of `Multiaddr` addresses to remote peers that SHOULD be used for obtaining various network resources.
 
 These resources MAY include:
@@ -131,20 +131,20 @@ A list of `Multiaddr` addresses to remote peers that SHOULD be used for any appl
 - [DISCV5](https://github.com/vacp2p/rfc-index/blob/8ee2a6d6b232838d83374c35e2413f84436ecf64/waku/standards/core/33/discv5.md);
 - [PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/8ee2a6d6b232838d83374c35e2413f84436ecf64/waku/standards/core/34/peer-exchange.md).
 
-##### `confirmStored`
+##### `storeConfirmation`
 An optional property that defaults to `false`.
 If set to `true` and `confirmContentTopics` are provided, a recurring background [STORE](../standards/core/store.md) query (as described in the `Message Storage API` section) MUST be initiated.
 If set to `true` without `confirmContentTopics`, the background [STORE](../standards/core/store.md) query (as described in the `Messaging Storage API` section) MUST only be initiated after the `Subscribe API` is called.
 If set to `false`, the `stored` property on the `MessageRecord` (defined in the `Message Storage API`) MUST NOT be populated, unless `History API` is triggered.
 
-##### `confirmReceived`
+##### `filterConfirmation`
 An optional property that defaults to `true`.
 If set to `true`, the node MUST initiate a network listener for messages circulated under `confirmContentTopics` via either [FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md) or [RELAY](https://github.com/vacp2p/rfc-index/blob/0277fd0c4dbd907dfb2f0c28b6cde94a335e1fae/waku/standards/core/11/relay.md) using the `Subscribe API`.
 If set to `true` but `confirmContentTopics` are not provided, the received property on the `MessageRecord` (as defined in the `Message Storage API`) MUST be populated only after the `Subscribe API` is called.
 If set to `false`, the received property MUST NOT be populated, unless `Subscribe API` is called.
 
 ##### `confirmContentTopics`
-An optional property that SHOULD be provided in conjunction with either `confirmStored` or `confirmReceived`.
+An optional property that SHOULD be provided in conjunction with either `storeConfirmation` or `filterConfirmation`.
 It includes an array of `contentTopics` that the node MUST start monitoring in the background upon initialization,
 as defined in the [TOPICS](https://github.com/vacp2p/rfc-index/blob/8ee2a6d6b232838d83374c35e2413f84436ecf64/waku/informational/23/topics.md#content-topic-format) specification.
 
@@ -320,7 +320,7 @@ When the `Subscribe API` is invoked, the following behaviors MUST occur.
 
 A subscription is established via [FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md) or [RELAY](https://github.com/vacp2p/rfc-index/blob/0277fd0c4dbd907dfb2f0c28b6cde94a335e1fae/waku/standards/core/11/relay.md) based on the node’s configuration for ongoing message reception.
 
-If `confirmStored` is set to `true`,
+If `storeConfirmation` is set to `true`,
 a recurring [STORE](../standards/core/store.md) query MUST be initiated for the specified `contentTopics` to continuously update the stored property in the `MessageRecord` (as defined in the `Message Storage API`) for messages circulating in the network after the `Subscribe API` call.
 For details on the recurring query, refer to the `Message Storage API` section.
 
@@ -361,7 +361,7 @@ which MUST be used for managing the subscription (e.g., for later unsubscribing)
 The method MUST throw an error if the `pubsubTopic` provided by the `Decoder` is not supported by the underlying node.
 No specific order is guaranteed for callback invocation;
 subscription callbacks MUST be executed as messages are received from the protocol in use.
-If `confirmStored` is set to `true`, a recurring [STORE](../standards/core/store.md) query MUST be started.
+If `storeConfirmation` is set to `true`, a recurring [STORE](../standards/core/store.md) query MUST be started.
 
 ##### `unsubscribe`
 Removes a previously created subscription identified by its unique `SubscriptionID`.
@@ -478,7 +478,7 @@ Messages can be identified by:
 
 These identifiers SHOULD be passed to the appropriate methods described below to retrieve or manage messages.
 
-Depending on the presence of the `confirmStored` or `confirmReceived` options in the `Initial configuration`, the `Message Storage API` will trigger either the `Subscribe API` or the periodic [STORE](../standards/core/store.md) query as described in the `Acknowledgements` section below.
+Depending on the presence of the `storeConfirmation` or `filterConfirmation` options in the `Initial configuration`, the `Message Storage API` will trigger either the `Subscribe API` or the periodic [STORE](../standards/core/store.md) query as described in the `Acknowledgements` section below.
 
 Once a message is added to the `Message Storage API`, or if any details about it change,
 the appropriate events from the `message:*` event family (as described in the `Event Source API` section) MUST be invoked after the message is added or updated in the underlying storage.
@@ -490,7 +490,7 @@ Message acknowledgement is a background operation that performs the following fu
 - It periodically queries [STORE](../standards/core/store.md) and marks messages as `stored` when available.
 
 This operation MUST be initiated if either of the following conditions is met:
-- Either `confirmStored` or `confirmReceived` is set to `true` and `confirmContentTopics` is provided.
+- Either `storeConfirmation` or `filterConfirmation` is set to `true` and `confirmContentTopics` is provided.
 - The `Subscribe API` has been initiated for one or more `contentTopics`.
 
 The recurring [STORE](../standards/core/store.md) query MUST prioritize the `storeNodes` specified in the initial configuration before using other available nodes.
