@@ -61,8 +61,7 @@ receive, and track messages—whether originating from a node or propagated thro
 
 ### Requirements
 
-This API is designed for generic use and ease of implementation across `nwaku`, `js-waku`,
-and traditional `REST` architectures.
+This API is designed for generic use and ease across all implementations and traditional `REST` architectures.
 From this point forward,
 relevant code blocks will be provided in `JSON` format, `HTTP` format or by using `TypeScript` syntax.
 
