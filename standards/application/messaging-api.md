@@ -94,7 +94,7 @@ If `edge` selected the node MUST use [LIGHTPUSH](../standards/core/lightpush.md)
 and [FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md) for receiving messages.
 
 If `relay` selected the node MUST:
-- Implement [RELAY](https://github.com/vacp2p/rfc-index/blob/0277fd0c4dbd907dfb2f0c28b6cde94a335e1fae/waku/standards/core/11/relay.md) protocol.
+- Mount [RELAY](https://github.com/vacp2p/rfc-index/blob/0277fd0c4dbd907dfb2f0c28b6cde94a335e1fae/waku/standards/core/11/relay.md) protocol.
 - Host endpoint for [LIGHTPUSH](../standards/core/lightpush.md) and [FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md).
 - Serve [PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/f08de108457eed828dadbd36339433c586701267/waku/standards/core/34/peer-exchange.md#abstract) protocol.
 
@@ -110,7 +110,7 @@ This property MUST be provided.
 An array of shard under a specified cluster that node MUST operate at as per [RELAY-SHARDING](https://github.com/waku-org/specs/blob/186ce335667bdfdb6b2ce69ad7b2a3a3791b1ba6/standards/core/relay-sharding.md).
 
 ##### `storeNodes`
-A list of `Multiaddr` addresses to remote peers that SHOULD be used for retrieving past messages or performing infrequent queries using the [STORE](https://github.com/vacp2p/rfc-index/blob/8ee2a6d6b232838d83374c35e2413f84436ecf64/waku/standards/core/13/store.md) protocol.
+A list of `Multiaddr` addresses to remote peers that MUST be used for retrieving past messages or performing infrequent queries using the [STORE](https://github.com/vacp2p/rfc-index/blob/8ee2a6d6b232838d83374c35e2413f84436ecf64/waku/standards/core/13/store.md) protocol.
 If not provided, nodes discovered through the network SHOULD be used.
 
 ##### `preferredServiceNodes`
@@ -126,8 +126,8 @@ If not provided, nodes discovered through the network SHOULD be used.
 ##### `bootstrapNodes`
 This property MUST be provided.
 
-A list of `Multiaddr` addresses to remote peers that SHOULD be used for any applicable method of discovery that MAY include:
-- [EIP-1459](https://eips.ethereum.org/EIPS/eip-1459);
+A list of `Multiaddr` addresses to remote peers that MUST be used for any applicable method of discovery that MAY include:
+- [DNS Discovery](https://eips.ethereum.org/EIPS/eip-1459);
 - [DISCV5](https://github.com/vacp2p/rfc-index/blob/8ee2a6d6b232838d83374c35e2413f84436ecf64/waku/standards/core/33/discv5.md);
 - [PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/8ee2a6d6b232838d83374c35e2413f84436ecf64/waku/standards/core/34/peer-exchange.md).
 
@@ -140,8 +140,8 @@ If set to `false`, the `stored` property on the `MessageRecord` (defined in the 
 ##### `filterConfirmation`
 An optional property that defaults to `true`.
 If set to `true`, the node MUST initiate a network listener for messages circulated under `confirmContentTopics` via either [FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md) or [RELAY](https://github.com/vacp2p/rfc-index/blob/0277fd0c4dbd907dfb2f0c28b6cde94a335e1fae/waku/standards/core/11/relay.md) using the `Subscribe API`.
-If set to `true` but `confirmContentTopics` are not provided, the received property on the `MessageRecord` (as defined in the `Message Storage API`) MUST be populated only after the `Subscribe API` is called.
-If set to `false`, the received property MUST NOT be populated, unless `Subscribe API` is called.
+If set to `true` but `confirmContentTopics` are not provided, the `received` property on the `MessageRecord` (as defined in the `Message Storage API`) MUST be populated only after the `Subscribe API` is called.
+If set to `false`, the `received` property MUST NOT be populated, unless `Subscribe API` is called.
 
 ##### `confirmContentTopics`
 An optional property that SHOULD be provided in conjunction with either `storeConfirmation` or `filterConfirmation`.
