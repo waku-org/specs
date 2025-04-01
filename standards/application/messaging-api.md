@@ -9,6 +9,19 @@ contributors:
 - Prem Chaitanya Prathi <prem@status.im>
 ---
 
+## Table of Contents
+
+- [Abstract](#abstract)
+- [Design Requirements](#design-requirements)
+- [API design](#api-design)
+  - [Requirements](#requirements)
+  - [Initial configuration](#initial-configuration)
+  - [Send](#send)
+  - [Subscribe](#subscribe)
+  - [Message Storage](#message-storage)
+  - [Health Indicator](#health-indicator)
+  - [Event Source](#event-source)
+
 ## Abstract
 
 This document specifies an Application Programming Interface (API) that is RECOMMENDED for developers of the [WAKU2](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/10/waku2.md) clients to implement,
@@ -37,7 +50,7 @@ Each term is detailed in dedicated subsections to ensure clarity and consistency
 ### Motivation
 
 Real-world application development has exposed challenges in achieving comprehensive usability guarantees for core Waku protocols.
-Although recommendations such as [P2P-RELIABILITY](./p2p-reliability.md) have been introduced to enhance protocol robustness,
+Although [P2P-RELIABILITY](./p2p-reliability.md) have been introduced to enhance protocol robustness,
 the fragmented landscape of guidelines and the requirement to re-implement reliability strategies across diverse use cases remain evident.
 
 A significant challenge has been the lack of a unified abstraction for message exchange.
