@@ -66,7 +66,7 @@ focusing exclusively on settings explicitly required by the `Messaging API`.
 
 ```typescript
 {
-  mode: "edge" | "service";
+  mode: "edge" | "relay";
   clusterId: number;
   shards: number[];
   storeNodes?: string[];
@@ -86,11 +86,13 @@ This property defines behavior of the node and MUST be specified.
 If `edge` selected the node MUST use [LIGHTPUSH](../standards/core/lightpush.md) for sending messages,
 and [FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md) for receiving messages.
 
-If `service` selected the node MUST implement [RELAY](https://github.com/vacp2p/rfc-index/blob/0277fd0c4dbd907dfb2f0c28b6cde94a335e1fae/waku/standards/core/11/relay.md),
-[STORE](../standards/core/store.md) as well as host endpoint for [LIGHTPUSH](../standards/core/lightpush.md) and [FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md).
+If `relay` selected the node MUST:
+- Implement [RELAY](https://github.com/vacp2p/rfc-index/blob/0277fd0c4dbd907dfb2f0c28b6cde94a335e1fae/waku/standards/core/11/relay.md) protocol.
+- Host endpoint for [LIGHTPUSH](../standards/core/lightpush.md) and [FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md).
+- Serve [PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/f08de108457eed828dadbd36339433c586701267/waku/standards/core/34/peer-exchange.md#abstract) protocol.
 
 `edge` mode SHOULD be used if node functions in resource restricted environment,
-where as `service` SHOULD be used if node has no hard restrictions.
+where as `relay` SHOULD be used if node has no hard restrictions.
 
 ##### `clusterId`
 This property MUST be provided.
@@ -149,7 +151,7 @@ Instead, the initial configuration MUST be supplied at node creation time accord
 The `Send API` is responsible for broadcasting messages across the network using the configured protocol.
 The node SHOULD select the appropriate protocol based on its configuration and the protocols that are mounted:
 - If the initial configuration specifies mode: "edge", then [LIGHTPUSH](../standards/core/lightpush.md) MUST be used to send messages.
-- If the initial configuration specifies mode: "service", then [RELAY](https://github.com/vacp2p/rfc-index/blob/0277fd0c4dbd907dfb2f0c28b6cde94a335e1fae/waku/standards/core/11/relay.md) MUST be used to send messages.
+- If the initial configuration specifies mode: "relay", then [RELAY](https://github.com/vacp2p/rfc-index/blob/0277fd0c4dbd907dfb2f0c28b6cde94a335e1fae/waku/standards/core/11/relay.md) MUST be used to send messages.
 
 The `Send API` is also responsible for ensuring message delivery and MUST attempt retries as described in the `Retry` section.
 
