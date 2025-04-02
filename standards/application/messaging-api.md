@@ -124,7 +124,8 @@ These resources MAY include:
 - a [LIGHTPUSH](../standards/core/lightpush.md) endpoint for broadcasting data;
 - a [FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md) endpoint for receiving circulating data.
 
-If not provided, nodes discovered through the network SHOULD be used.
+If preferred nodes are not provided or are unreachable (i.e., a connection cannot be established due to errors or timeouts),
+the implementation SHOULD use nodes discovered through the network.
 
 ##### `bootstrapNodes`
 This property MUST be provided.
