@@ -136,7 +136,7 @@ A list of `Multiaddr` addresses to remote peers that MUST be used for any applic
 - [PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/8ee2a6d6b232838d83374c35e2413f84436ecf64/waku/standards/core/34/peer-exchange.md).
 
 ##### `storeConfirmation`
-An optional property that defaults to `false`.
+An optional property that defaults to `true`.
 If set to `true` and `confirmContentTopics` are provided, a recurring background [STORE](../standards/core/store.md) query (as described in the `Message Storage API` section) MUST be initiated.
 If set to `true` without `confirmContentTopics`, the background [STORE](../standards/core/store.md) query (as described in the `Messaging Storage API` section) MUST only be initiated after the `Subscribe API` is called.
 If set to `false`, the `stored` property on the `MessageRecord` (defined in the `Message Storage API`) MUST NOT be populated, unless `History API` is triggered.
