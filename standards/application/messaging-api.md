@@ -114,7 +114,7 @@ An array of shard under a specified cluster that node MUST operate at as per [RE
 
 ##### `storeNodes`
 A list of `Multiaddr` addresses to remote peers that MUST be used for retrieving past messages or performing infrequent queries using the [STORE](https://github.com/vacp2p/rfc-index/blob/8ee2a6d6b232838d83374c35e2413f84436ecf64/waku/standards/core/13/store.md) protocol.
-If not provided, nodes discovered through the network SHOULD be used.
+If not provided, the implementation SHOULD utilize either `preferredServiceNodes` or nodes discovered via the network.
 
 ##### `preferredServiceNodes`
 A list of `Multiaddr` addresses to remote peers that SHOULD be used for obtaining various network resources.
