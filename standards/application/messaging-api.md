@@ -90,13 +90,16 @@ focusing exclusively on settings explicitly required by the `Messaging API`.
 ##### `mode`
 This property defines behavior of the node and MUST be specified.
 
-If `edge` selected the node MUST use [LIGHTPUSH](../standards/core/lightpush.md) for sending messages,
-and [FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md) for receiving messages.
+If the node is operating in `edge` mode, it MUST:
+- Employ [LIGHTPUSH](../standards/core/lightpush.md) for sending messages.
+- Utilize [FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md) for receiving messages.
+- Employ [PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/f08de108457eed828dadbd36339433c586701267/waku/standards/core/34/peer-exchange.md#abstract) to discover peers.
+- Utilize [STORE](../standards/core/store.md) to obtain message acknowledgements, as described in the Message Storage API section.
 
-If `relay` selected the node MUST:
-- Mount [RELAY](https://github.com/vacp2p/rfc-index/blob/0277fd0c4dbd907dfb2f0c28b6cde94a335e1fae/waku/standards/core/11/relay.md) protocol.
-- Host endpoint for [LIGHTPUSH](../standards/core/lightpush.md) and [FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md).
-- Serve [PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/f08de108457eed828dadbd36339433c586701267/waku/standards/core/34/peer-exchange.md#abstract) protocol.
+If the node is configured in `relay` mode, it MUST:
+- Deploy the [RELAY](https://github.com/vacp2p/rfc-index/blob/0277fd0c4dbd907dfb2f0c28b6cde94a335e1fae/waku/standards/core/11/relay.md) protocol.
+- Host endpoints for [LIGHTPUSH](../standards/core/lightpush.md) and [FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md).
+- Serve the [PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/f08de108457eed828dadbd36339433c586701267/waku/standards/core/34/peer-exchange.md#abstract) protocol.
 
 `edge` mode SHOULD be used if node functions in resource restricted environment,
 where as `relay` SHOULD be used if node has no hard restrictions.
