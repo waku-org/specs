@@ -143,10 +143,12 @@ A list of `Multiaddr` addresses to remote peers that MUST be used for any applic
 - [PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/8ee2a6d6b232838d83374c35e2413f84436ecf64/waku/standards/core/34/peer-exchange.md).
 
 ##### `storeConfirmation`
-An optional property that defaults to `true`.
-If set to `true` and `confirmContentTopics` are provided, a recurring background [STORE](../standards/core/store.md) query (as described in the `Message Storage API` section) MUST be initiated.
-If set to `true` without `confirmContentTopics`, the background [STORE](../standards/core/store.md) query (as described in the `Messaging Storage API` section) MUST only be initiated after the `Subscribe API` is called.
-If set to `false`, the `stored` property on the `MessageRecord` (defined in the `Message Storage API`) MUST NOT be populated, unless `History API` is triggered.
+This optional property defaults to `true`.
+- If set to `true` and `confirmContentTopics` are provided, a recurring background [STORE](../standards/core/store.md) query MUST be initiated.
+- If set to `true` without `confirmContentTopics`, the background [STORE](../standards/core/store.md) query SHOULD be initiated after the `Subscribe API` is called.
+- If set to `true` and the `Send API` was used, a background [STORE](../standards/core/store.md) query MUST be executed for sent messages.
+- If set to `false`, the `stored` property on the `MessageRecord` MUST NOT be populated, unless the `History API` is triggered.
+For more information about the [STORE](../standards/core/store.md) query and the `MessageRecord`, refer to the `Message Storage API` section.
 
 ##### `filterConfirmation`
 An optional property that defaults to `true`.
@@ -500,13 +502,20 @@ Message acknowledgement is a background operation that performs the following fu
 - It subscribes to [FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md) or [RELAY](https://github.com/vacp2p/rfc-index/blob/0277fd0c4dbd907dfb2f0c28b6cde94a335e1fae/waku/standards/core/11/relay.md) and marks messages as `received` when detected.
 - It periodically queries [STORE](../standards/core/store.md) and marks messages as `stored` when available.
 
-This operation MUST be initiated if either of the following conditions is met:
+This operation MUST be initiated if any of the following conditions is met:
 - Either `storeConfirmation` or `filterConfirmation` is set to `true` and `confirmContentTopics` is provided.
 - The `Subscribe API` has been initiated for one or more `contentTopics`.
+- The `Send API` has been used for successfully sending messages.
 
-The recurring [STORE](../standards/core/store.md) query MUST prioritize the `storeNodes` specified in the initial configuration over other available nodes.
-These queries SHOULD occur once every 3 seconds for all `confirmContentTopics` provided in the initial configuration,
-or for those topics for which the `Subscribe API` has been triggered.
+The recurring [STORE](../standards/core/store.md) query MUST prioritize nodes in the following order:
+1. `storeNodes` specified in the `Initial Configuration`,
+2. `preferredServiceNodes` if provided, and then
+3. Nodes that are available through network discovery.
+
+These queries SHOULD occur once every 3 seconds.
+The queries apply to all `confirmContentTopics` provided in the `Initial Configuration`,
+as well as those topics for which the `Subscribe API` has been triggered,
+or for the `message hashes` (computed as per the [MESSAGE](https://github.com/vacp2p/rfc-index/blob/8ee2a6d6b232838d83374c35e2413f84436ecf64/waku/standards/core/14/message.md#deterministic-message-hashing) specification) of successfully sent messages via the `Send API`.
 
 Furthermore, if the node’s health status transitions to `unhealthy` (as defined by the `Health API`),
 the periodic [STORE](../standards/core/store.md) query MUST be halted,
