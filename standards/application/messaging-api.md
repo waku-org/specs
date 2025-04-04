@@ -76,6 +76,7 @@ focusing exclusively on settings explicitly required by the `Messaging API`.
   mode: "edge" | "relay";
   clusterId: number;
   shards: number[];
+  shardsUnderCluster?: number;
   storeNodes?: string[];
   preferredServiceNodes?: string[];
   bootstrapNodes: string[];
@@ -111,6 +112,12 @@ It signifies which cluster a node MUST be operating at as per [RELAY-SHARDING](h
 ##### `shards`
 This property MUST be provided.
 An array of shard under a specified cluster that node MUST operate at as per [RELAY-SHARDING](https://github.com/waku-org/specs/blob/186ce335667bdfdb6b2ce69ad7b2a3a3791b1ba6/standards/core/relay-sharding.md).
+
+##### `shardsUnderCluster`
+This is an optional property that MUST be a positive integer.
+If not provided, it defaults to 8.
+This property is used to automatically map a provided `contentTopic` to the appropriate `shards` under the specified `clusterId`.
+For further details, refer to the [RELAY-SHARDING](https://github.com/waku-org/specs/blob/master/standards/core/relay-sharding.md#content-topics-format-for-autosharding) specification.
 
 ##### `storeNodes`
 A list of `Multiaddr` addresses to remote peers that MUST be used for retrieving past messages or performing infrequent queries using the [STORE](https://github.com/vacp2p/rfc-index/blob/8ee2a6d6b232838d83374c35e2413f84436ecf64/waku/standards/core/13/store.md) protocol.
