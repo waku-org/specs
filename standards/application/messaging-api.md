@@ -504,12 +504,14 @@ This operation MUST be initiated if either of the following conditions is met:
 - Either `storeConfirmation` or `filterConfirmation` is set to `true` and `confirmContentTopics` is provided.
 - The `Subscribe API` has been initiated for one or more `contentTopics`.
 
-The recurring [STORE](../standards/core/store.md) query MUST prioritize the `storeNodes` specified in the initial configuration before using other available nodes.
-These queries SHOULD occur once every 60 seconds for all `confirmContentTopics` provided as part of the initial configuration.
+The recurring [STORE](../standards/core/store.md) query MUST prioritize the `storeNodes` specified in the initial configuration over other available nodes.
+These queries SHOULD occur once every 3 seconds for all `confirmContentTopics` provided in the initial configuration,
+or for those topics for which the `Subscribe API` has been triggered.
 
 Furthermore, if the node’s health status transitions to `unhealthy` (as defined by the `Health API`),
 the periodic [STORE](../standards/core/store.md) query MUST be halted,
 and it MUST resume once the health status transitions to either `minimally healthy` or `healthy`.
+Upon resumption, the node MUST query [STORE](../standards/core/store.md) for the time window during which it was offline.
 
 Recurring [STORE](../standards/core/store.md) query and background subscription to `confirmContentTopics` is a subscription defined in the `Subscribe API` and can be handled the same way.
 This background subscription has a reserved `SubscriptionID` of `1692854c-cbde-4afe-901f-1c86ecbd9ea1`.
