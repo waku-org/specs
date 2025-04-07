@@ -786,14 +786,6 @@ Content-Type: application/json
 
 ### Health Indicator
 
-The `Health Indicator API` SHOULD be used to monitor the health of a node operating under the `Messaging API`.
-The specific criteria for determining the health state MAY vary depending on the protocols the node utilizes.
-
-We define three health states:
-- unhealthy;
-- minimally healthy;
-- healthy;
-
 The `Health Indicator API` SHOULD be used to monitor the operational health of a node operating under the `Messaging API`.
 The criteria for determining a node’s health state MAY vary depending on the protocols in use and the node’s configuration.
 Detailed criteria for each health state are provided in the subsequent sections.
