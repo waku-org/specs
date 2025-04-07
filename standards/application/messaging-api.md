@@ -791,7 +791,7 @@ The criteria for determining a node’s health state MAY vary depending on the p
 Detailed criteria for each health state are provided in the subsequent sections.
 
 For the purposes of this specification, three health states are defined:
-- `unhealthy`: Indicates that the node is in a degraded state and may not reliably process or transmit messages.
+- `unhealthy`: Indicates that the node has lost connectivity for message reception, sending, or both, and as a result, it cannot reliably process or transmit messages.
 - `minimally healthy`: Indicates that the node meets the minimum operational requirements, although performance or reliability may be impacted.
 - `healthy`: Indicates that the node is operating optimally, with full support for message processing and transmission.
 
