@@ -36,8 +36,8 @@ At this point lists of message _IDs_ are sent for comparison
 instead of _fingerprints_ over entire ranges of messages.
 
 #### Overview
-The `reconciliation` protocol operates on the following heuristic:
-1. The requestor chooses a sync range including time, cluster id, pubsub and content topics.
+The `reconciliation` protocol operate on the following heuristic:
+1. The requestor chooses a sync range including time, id, pubsub and content topics.
 2. The range is encoded into a payload and sent.
 3. The requestee receives the payload and decodes it.
 4. The range is processed and, if a difference with the local range is detected, a set of subranges are produced.
@@ -122,27 +122,23 @@ All _varints_ MUST be little-endian base 128 variable length integers (LEB128) a
 #### Payload encoding
 The wire level payload MUST be encoded as follow.
 
-> Refer to [RELAY-SHARDING](https://github.com/waku-org/specs/blob/master/standards/core/relay-sharding.md#static-sharding)
-RFC for cluster and shard specification.
-
 > Please note that for each steps, bytes are concatenated.
 
-1. _Varint_ bytes of the node's cluster ID
-2. _Varint_ bytes of the number of pubsub topics
-3. For each pubsub topic, if any
+1. _Varint_ bytes of the number of pubsub topics
+2. For each pubsub topic, if any
 
     a. _varint_ bytes of the pubsub topic length
 
     b. bytes content of the pubsub topic
 
-4. _Varint_ bytes of the number of content topics
-5. For each content topic, if any
+3. _Varint_ bytes of the number of content topics
+4. For each content topic, if any
 
     a. _varint_ bytes of the content topic length
 
     b. bytes content of the content topic
 
-6. For each range
+5. For each range
     
     a. _varint_ bytes of the delta encoded timestamp
     
@@ -187,9 +183,9 @@ The flexibility of the protocol implies that much is left to the implementers.
 What will follow is NOT part of the specification.
 This section was created to inform implementations.
 
-#### Cluster, Pubsub and Content Topics
-To prevent nodes from synchronizing messages from cluster, pubsub and content topics they don't support,
-cluster and topic information is added to each payload.
+#### Pubsub and Content Topics
+To prevent nodes from synchronizing messages from pubsub and content topics they don't support,
+topic information is added to each payload.
 
 #### Parameters 
 Two useful parameters to add to your implementation are partitioning count and the item set threshold.
