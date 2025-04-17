@@ -27,11 +27,8 @@ contributors:
 This document specifies an Application Programming Interface (API) that is RECOMMENDED for developers of the [WAKU2](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/10/waku2.md) clients to implement,
 and for consumers to use as a single entry point to its functionalities.
 
-This API extends the core protocols with additional functionality
-required for peer-to-peer messaging applications, including:
-- Defines a set of events which MAY be used for subscription to track message propagation, node state, and error handling.
-- Defines a set of method calls which MAY be used for invocation of protocol operations.
-- Abstracts new primitives to be accessed in a RESTful manner via [Waku REST API](https://waku-org.github.io/waku-rest-api/).
+This API defines the RECOMMENDED interface for leveraging Waku protocols to send and receive messages. 
+Applications SHOULD use it to access capabilities for peer discovery, message routing, and reliability.
 
 This document defines the specifications and guidelines necessary for implementing the API,
 ensuring interoperability and consistency across the Waku protocol family.
@@ -54,8 +51,8 @@ Although [P2P-RELIABILITY](./p2p-reliability.md) have been introduced to enhance
 the fragmented landscape of guidelines and the requirement to re-implement reliability strategies across diverse use cases remain evident.
 
 A significant challenge has been the lack of a unified abstraction for message exchange.
-Developers require a straightforward mechanism to send,
-receive, and track messages—whether originating from a node or propagated throughout its connected network.
+Developers require a straightforward mechanism to send, receive,
+and track messages—whether originating from a node or propagated throughout its connected network.
 
 ## API design
 
@@ -81,7 +78,7 @@ focusing exclusively on settings explicitly required by the `Messaging API`.
   preferredServiceNodes?: string[];
   bootstrapNodes: string[];
   storeConfirmation?: boolean;
-  filterConfirmation?: boolean;
+  receiveConfirmation?: boolean;
   confirmContentTopics?: string[];
 }
 ```
@@ -144,20 +141,17 @@ A list of `Multiaddr` addresses to remote peers that MUST be used for any applic
 
 ##### `storeConfirmation`
 This optional property defaults to `true`.
-- If set to `true` and `confirmContentTopics` are provided, a recurring background [STORE](../standards/core/store.md) query MUST be initiated.
-- If set to `true` without `confirmContentTopics`, the background [STORE](../standards/core/store.md) query SHOULD be initiated after the `Subscribe API` is called.
-- If set to `true` and the `Send API` was used, a background [STORE](../standards/core/store.md) query MUST be executed for sent messages.
-- If set to `false`, the `stored` property on the `MessageRecord` MUST NOT be populated, unless the `History API` is triggered.
+- If set to `true`, the `stored` field on `MessageRecord` MUST be populated, and implementations MUST employ store‑based reliability as specified in [P2P‑RELIABILITY](./p2p‑reliability.md).
+- If set to `false`, the `stored` field on `MessageRecord` MUST NOT be populated.
 For more information about the [STORE](../standards/core/store.md) query and the `MessageRecord`, refer to the `Message Storage API` section.
 
-##### `filterConfirmation`
-An optional property that defaults to `true`.
-If set to `true`, the node MUST initiate a network listener for messages circulated under `confirmContentTopics` via either [FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md) or [RELAY](https://github.com/vacp2p/rfc-index/blob/0277fd0c4dbd907dfb2f0c28b6cde94a335e1fae/waku/standards/core/11/relay.md) using the `Subscribe API`.
-If set to `true` but `confirmContentTopics` are not provided, the `received` property on the `MessageRecord` (as defined in the `Message Storage API`) MUST be populated only after the `Subscribe API` is called.
-If set to `false`, the `received` property MUST NOT be populated, unless `Subscribe API` is called.
+##### `receiveConfirmation`
+This optional property defaults to `true`.
+- If set to `true`, the node MUST initiate message‑reception detection as specified in [P2P‑RELIABILITY](./p2p‑reliability.md) and populate the `received` field on `MessageRecord`.  
+- If set to `false`, the `received` field MUST NOT be populated, unless the `Subscribe API` is invoked.
 
 ##### `confirmContentTopics`
-An optional property that SHOULD be provided in conjunction with either `storeConfirmation` or `filterConfirmation`.
+An optional property that SHOULD be provided in conjunction with either `storeConfirmation` or `receiveConfirmation`.
 It includes an array of `contentTopics` that the node MUST start monitoring in the background upon initialization,
 as defined in the [TOPICS](https://github.com/vacp2p/rfc-index/blob/8ee2a6d6b232838d83374c35e2413f84436ecf64/waku/informational/23/topics.md#content-topic-format) specification.
 
@@ -170,30 +164,12 @@ Instead, the initial configuration MUST be supplied at node creation time accord
 
 The `Send API` is responsible for broadcasting messages across the network using the configured protocol.
 The node SHOULD select the appropriate protocol based on its configuration and the protocols that are mounted:
-- If the initial configuration specifies mode: "edge", then [LIGHTPUSH](../standards/core/lightpush.md) MUST be used to send messages.
-- If the initial configuration specifies mode: "relay", then [RELAY](https://github.com/vacp2p/rfc-index/blob/0277fd0c4dbd907dfb2f0c28b6cde94a335e1fae/waku/standards/core/11/relay.md) MUST be used to send messages.
+- If the initial configuration specifies mode: `edge`, then [LIGHTPUSH](../standards/core/lightpush.md) MUST be used to send messages.
+- If the initial configuration specifies mode: `relay`, then [RELAY](https://github.com/vacp2p/rfc-index/blob/0277fd0c4dbd907dfb2f0c28b6cde94a335e1fae/waku/standards/core/11/relay.md) MUST be used to send messages.
 
-The `Send API` is also responsible for ensuring message delivery and MUST attempt retries as described in the `Retry` section.
-
-#### Retry
-
-If a message fails to satisfy any of the following conditions, it MUST be automatically resent:
-- The message is not successfully sent using [LIGHTPUSH](../standards/core/lightpush.md) or [RELAY](https://github.com/vacp2p/rfc-index/blob/0277fd0c4dbd907dfb2f0c28b6cde94a335e1fae/waku/standards/core/11/relay.md).
-- The message is not acknowledged by `Message Storage API` described below.
-- Retry attempts MUST NOT continue if the node’s health state changes to unhealthy (as defined in the `Health API` described below).
-- Retry attempts MUST resume when the node’s health state transitions to either `minimally healthy` or `healthy` defined in the `Health API` below.
-
-Retry attempts MUST occur in the background using a fixed retry count and exponential backoff, as follows:
-- A total of 3 retry attempts MUST be made following the initial send attempt.
-- The retry intervals MUST be 1 second, then 2 seconds, and finally 4 seconds, respectively.
-- The decision to retry MUST be based on the underlying protocol’s response from a remote peer.
-
-#### Request prioritization
-
-Send requests MUST be prioritized based on their submission time and retry status.
-Freshly scheduled requests MUST be served before those undergoing retry attempts.
-Among retry attempts, processing MUST occur in descending order of recency—that is,
-from the most recently scheduled or retried request to the oldest.
+The `Send API` is also responsible for ensuring message delivery and MUST attempt retries:
+- Whenever message loss is detected, in accordance with [P2P‑RELIABILITY](./p2p‑reliability.md).  
+- Implementations MAY choose their own backoff timing, maximum number of retry attempts and prioritization of requests.
 
 #### Programmatic API
 
@@ -333,11 +309,7 @@ When the `Subscribe API` is invoked, the following behaviors MUST occur.
 
 A subscription is established via [FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md) or [RELAY](https://github.com/vacp2p/rfc-index/blob/0277fd0c4dbd907dfb2f0c28b6cde94a335e1fae/waku/standards/core/11/relay.md) based on the node’s configuration for ongoing message reception.
 
-If `storeConfirmation` is set to `true`,
-a recurring [STORE](../standards/core/store.md) query MUST be initiated for the specified `contentTopics` to continuously update the stored property in the `MessageRecord` (as defined in the `Message Storage API`) for messages circulating in the network after the `Subscribe API` call.
-For details on the recurring query, refer to the `Message Storage API` section.
-
-Once the `Subscribe API` is called, the received property in the `MessageRecord` (as described in the `Message Storage API`) MUST be populated.
+Once the `Subscribe API` is called, the `received` property in the `MessageRecord` (as described in the `Message Storage API`) MUST be populated.
 
 When the subscription is active, the API MUST trigger the `message:*` event group as described in the `Event Source API` section.
 
@@ -374,7 +346,6 @@ which MUST be used for managing the subscription (e.g., for later unsubscribing)
 The method MUST throw an error if the `pubsubTopic` provided by the `Decoder` is not supported by the underlying node.
 No specific order is guaranteed for callback invocation;
 subscription callbacks MUST be executed as messages are received from the protocol in use.
-If `storeConfirmation` is set to `true`, a recurring [STORE](../standards/core/store.md) query MUST be started.
 
 ##### `unsubscribe`
 Removes a previously created subscription identified by its unique `SubscriptionID`.
@@ -491,41 +462,28 @@ Messages can be identified by:
 
 These identifiers SHOULD be passed to the appropriate methods described below to retrieve or manage messages.
 
-Depending on the presence of the `storeConfirmation` or `filterConfirmation` options in the `Initial configuration`, the `Message Storage API` will trigger either the `Subscribe API` or the periodic [STORE](../standards/core/store.md) query as described in the `Acknowledgements` section below.
+Depending on the presence of the `storeConfirmation` or `receiveConfirmation` options in the `Initial configuration`, the `Message Storage API` will trigger either the `Subscribe API` or `Acknowledgements` routine.
 
 Once a message is added to the `Message Storage API`, or if any details about it change,
 the appropriate events from the `message:*` event family (as described in the `Event Source API` section) MUST be invoked after the message is added or updated in the underlying storage.
 
 #### Acknowledgements
 
-Message acknowledgement is a background operation that performs the following functions:
-- It subscribes to [FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md) or [RELAY](https://github.com/vacp2p/rfc-index/blob/0277fd0c4dbd907dfb2f0c28b6cde94a335e1fae/waku/standards/core/11/relay.md) and marks messages as `received` when detected.
-- It periodically queries [STORE](../standards/core/store.md) and marks messages as `stored` when available.
+Message Acknowledgement mechanism is a background operation that MUST:
+- Perform store‑based reliability checks as specified in [P2P‑RELIABILITY](./p2p‑reliability.md).  
+- Halt when the node’s health status transitions to `unhealthy` (as defined by the `Health API`).  
+- Resume when the node’s health status transitions to either `minimally healthy` or `healthy`.  
+- Set the `stored` or `received` field on `MessageRecord` once the message is acknowledged according to store‑based reliability.
 
-This operation MUST be initiated if any of the following conditions is met:
-- Either `storeConfirmation` or `filterConfirmation` is set to `true` and `confirmContentTopics` is provided.
-- The `Subscribe API` has been initiated for one or more `contentTopics`.
-- The `Send API` has been used for successfully sending messages.
+This operation MUST be initiated when any of the following conditions is met:
+- The `storeConfirmation` or `receiveConfirmation` property is `true` and `confirmContentTopics` is provided.  
+- The `Subscribe API` is invoked for one or more content topics.  
+- The `Send API` has successfully sent one or more messages.
 
-The recurring [STORE](../standards/core/store.md) query MUST prioritize nodes in the following order:
-1. `storeNodes` specified in the `Initial Configuration`,
-2. `preferredServiceNodes` if provided, and then
-3. Nodes that are available through network discovery.
-
-These queries SHOULD occur once every 3 seconds.
-The queries apply to all `confirmContentTopics` provided in the `Initial Configuration`,
-as well as those topics for which the `Subscribe API` has been triggered,
-or for the `message hashes` (computed as per the [MESSAGE](https://github.com/vacp2p/rfc-index/blob/8ee2a6d6b232838d83374c35e2413f84436ecf64/waku/standards/core/14/message.md#deterministic-message-hashing) specification) of successfully sent messages via the `Send API`.
-
-Furthermore, if the node’s health status transitions to `unhealthy` (as defined by the `Health API`),
-the periodic [STORE](../standards/core/store.md) query MUST be halted,
-and it MUST resume once the health status transitions to either `minimally healthy` or `healthy`.
-Upon resumption, the node MUST query [STORE](../standards/core/store.md) for the time window during which it was offline.
-
-Recurring [STORE](../standards/core/store.md) query and background subscription to `confirmContentTopics` is a subscription defined in the `Subscribe API` and can be handled the same way.
-This background subscription has a reserved `SubscriptionID` of `1692854c-cbde-4afe-901f-1c86ecbd9ea1`.
-
-Additionally, the `stored` property MUST be updated for any other messages received via the `History API`.
+For the recurring [STORE](../standards/core/store.md) queries it is RECOMMENDED to prioritize nodes in this order:
+1. `storeNodes` specified in the initial configuration.
+2. `preferredServiceNodes`, if provided.
+3. Nodes discovered via network discovery.
 
 #### Programmatic API
 
@@ -953,7 +911,6 @@ For the `REST API`, long polling over the `Message Store API` SHOULD be used.
 
 ##### `message:received`
 This event MUST be dispatched when a message is successfully received from the network via the `Subscribe API`.
-At that point, the received property in the corresponding `MessageRecord` is updated to `true`.
 The payload is the updated `MessageRecord`.
 
 ```typescript
@@ -966,8 +923,7 @@ node.events.addEventListener("message:received", (event: CustomEvent<MessageReco
 For the `REST API`, long polling over the `Message Store API` SHOULD be used.
 
 ##### `message:stored`
-This event MUST be dispatched when a message is confirmed to be `stored` in the underlying [STORE](../standards/core/store.md) protocol or via the `History API`.
-When the message is stored, the `stored` property in the corresponding `MessageRecord` is updated to `true`.
+This event MUST be dispatched when a message is confirmed to be `stored` in accordance with `Acknowledgements` section.
 The payload is the updated `MessageRecord`.
 
 ```typescript
