@@ -30,7 +30,6 @@ This repository contains specifications for the Waku suite of protocols.
 |[WAKU2-INCENTIVIZATION](standards/core/incentivization.md)| Waku Incentivization |
 |[WAKU2-RLN-CONTRACT](standards/core/rln-contract.md) | Waku RLN Contract Specification |
 |[RELAY-SHARDING](standards/core/relay-sharding.md)| Waku Relay Sharding |
-|[WAKU2-STORE](standards/core/store.md) | Waku Store Query |
 |[WAKU2-SYNC](standards/core/sync.md) | Waku Sync |
 |[WAKU-MIX](standards/core/mix.md) | Waku Mix |
 
