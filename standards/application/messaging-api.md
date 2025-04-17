@@ -305,9 +305,9 @@ Content-Type: application/json
 
 The `Subscribe API` SHOULD be used to initiate a subscription over [FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md) or [RELAY](https://github.com/vacp2p/rfc-index/blob/0277fd0c4dbd907dfb2f0c28b6cde94a335e1fae/waku/standards/core/11/relay.md) for continuous message retrieval.
 
-When the `Subscribe API` is invoked, the following behaviors MUST occur.
-
-A subscription is established via [FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md) or [RELAY](https://github.com/vacp2p/rfc-index/blob/0277fd0c4dbd907dfb2f0c28b6cde94a335e1fae/waku/standards/core/11/relay.md) based on the node’s configuration for ongoing message reception.
+Upon invocation of the Subscribe API, implementations MUST:
+- Establish a subscription via either the [FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md) protocol or the [RELAY](https://github.com/vacp2p/rfc-index/blob/0277fd0c4dbd907dfb2f0c28b6cde94a335e1fae/waku/standards/core/11/relay.md) protocol, based on the node’s configured reception method.  
+- Ensure active subscriptions comply with the recommendations defined in [P2P‑RELIABILITY](./p2p‑reliability.md).
 
 Once the `Subscribe API` is called, the `received` property in the `MessageRecord` (as described in the `Message Storage API`) MUST be populated.
 
