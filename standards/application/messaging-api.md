@@ -74,7 +74,7 @@ focusing exclusively on settings explicitly required by the `Messaging API`.
   clusterId: number;
   shards: number[];
   shardsUnderCluster?: number;
-  storeNodes?: string[];
+  staticStoreNode?: string[];
   preferredServiceNodes?: string[];
   bootstrapNodes: string[];
   storeConfirmation?: boolean;
@@ -116,7 +116,7 @@ If not provided, it defaults to 8.
 This property is used to automatically map a provided `contentTopic` to the appropriate `shards` under the specified `clusterId`.
 For further details, refer to the [RELAY-SHARDING](https://github.com/waku-org/specs/blob/master/standards/core/relay-sharding.md#content-topics-format-for-autosharding) specification.
 
-##### `storeNodes`
+##### `staticStoreNode`
 A list of `Multiaddr` addresses to remote peers that MUST be used for retrieving past messages or performing infrequent queries using the [STORE](https://github.com/vacp2p/rfc-index/blob/8ee2a6d6b232838d83374c35e2413f84436ecf64/waku/standards/core/13/store.md) protocol.
 If not provided, the implementation SHOULD utilize either `preferredServiceNodes` or nodes discovered via the network.
 
@@ -481,7 +481,7 @@ This operation MUST be initiated when any of the following conditions is met:
 - The `Send API` has successfully sent one or more messages.
 
 For the recurring [STORE](../standards/core/store.md) queries it is RECOMMENDED to prioritize nodes in this order:
-1. `storeNodes` specified in the initial configuration.
+1. `staticStoreNode` specified in the initial configuration.
 2. `preferredServiceNodes`, if provided.
 3. Nodes discovered via network discovery.
 
