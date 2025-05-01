@@ -172,34 +172,35 @@ locking the deposit to register a membership.
 
 #### Reusing the rate limit of _Expired_ memberships
 
-Below define the following rate limits:********
+The rate limits are defined as follows:
 
 - `R_{active}` is the total rate limit of all _Active_ memberships;
 - `R_{grace_period}` is the total rate limit of all _GracePeriod_ memberships;
 - `R_{expired}` is the total rate limit of all _Expired_ memberships.
 
-Below define the free rate limit that is available without reusing the rate limit of _Expired_ memberships as follows:*****
+The free rate limit that is available without reusing the rate limit of _Expired_ memberships is defined as follows:
 
 ```
 R_{free} = R_{max} - R_{active} - R_{grace_period} - R_{expired}
 ```
 
 Membership registration is additionally subject to the following requirements:
+
 - If `r <= R_{free}`, the new membership MUST be registered (assuming all other necessary conditions hold).
-	- The new membership MAY erase one or multiple _Expired_ memberships and reuse their rate limit.***
+	- The new membership MAY erase one or multiple _Expired_ memberships and reuse their rate limit.
 - If `r > R_{free}`:
 	- if `r > R_{free} + R_{expired}`, registration MUST fail;
 	- if `r <= R_{free} + R_{expired}`, the new membership SHOULD be registered by reusing some _Expired_ memberships.
 - The sender of the registration transaction MAY specify a list of _Expired_ memberships to be erased and their rate limit reused.
 	- If any of the memberships in the list are not _Expired_, the registration MUST fail.
-	- If the list is not provided, the contract MAY use any criteria to select _Expired_ memberships to reuse (see [Implementation Suggestions](#ImplementationSuggestions)).
+	- If the list is not provided, the contract MAY use any criteria to select _Expired_ memberships to reuse (see [Implementation Suggestions](#implementation-suggestions)).
 	- If the list is not provided, the registration MAY fail even if the membership set contains _Expired_ membership that, if erased, would free up sufficient rate limit.
 - If a new membership A erases an _Expired_ membership B to reuse its rate limit:
 	- membership B MUST become _ErasedAwaitsWithdrawal_;
 	- the current total rate limit MUST be decremented by the rate limit of membership B;
 	- the contract MUST take all necessary steps to ensure that the holder of membership B can withdraw their deposit later.
 
-[^3]: A user-facing application SHOULD suggest default rate limits to the holder (see [Implementation Suggestions](#ImplementationSuggestions)).
+[^3]: A user-facing application SHOULD suggest default rate limits to the holder (see [Implementation Suggestions](#implementation-suggestions)).
 
 ### Extend a membership
 
