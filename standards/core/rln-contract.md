@@ -46,10 +46,15 @@ A membership _holder_ is a role that grants special privileges in the context of
 Each membership MUST have exactly one holder.
 The holder role MUST be assigned at membership registration time to the sender 
 (`msg.sender` in Solidity semantics) of the registration transaction.
+The sender of the registration SHOULD have RLN `identity_commitment` generated.
+For more information see [32/RLN-V1](https://github.com/vacp2p/rfc-index/blob/main/vac/32/rln-v1.md).
+
+Membership registration MAY be initiated by a different entity from the one that controls the RLN `identity_secret`,
+which is associated with the respective RLN `identity_commitment`.
+Therefore, the holder MAY be assigned to an blockchain address that does not control the `identity_secret`.
 When authorizing membership-related requests,
 the contract MUST distinguish between the holder and non-holders,
-and MAY also use additional criteria.
-The holder MAY be a different entity from the one that controls the secret associated with the respective RLN commitment******.
+and MAY also implement additional criteria.
 
 The contract MUST support transactions sent directly from externally-owned accounts (EOA).
 The contract MAY support transactions sent via a chain of contract calls,
@@ -112,7 +117,7 @@ Different line types denote the types of state transitions:
 | Thin (`--`)    | Transaction      | MAY be initiable by any user.                                                        |
 | Dotted (`-.-`) | Time progression | MAY be applied lazily.                                                               |
 
-Transaction-triggered state transitions MUST be applied immediately based on the blockchain tranaction time********.
+Transaction-triggered state transitions MUST be applied immediately based on the blockchain tranaction time.
 
 When handling a membership-specific transaction, the contract MUST:
 - check whether the state of the involved membership is up-to-date;
@@ -129,8 +134,8 @@ Memberships MUST be included in the membership set according to the following ta
 | _ErasedAwaitsWithdrawal_ | No                       |
 | _Erased_                 | No                       |
 
-Memberships MUST NOT be transferable to a different Ethereum address******.
-A user MAY use one Ethereum address to manage multiple memberships.
+The holder assigned blockchian address MUST NOT be transferable to a different blockchain address.
+A user MAY use one blockchain address to manage multiple memberships.
 A user MAY use one Waku node[^1] to manage multiple memberships.
 
 [^1]: No Waku implementation supports managing multiple memberships from one node (as of August 2024).
@@ -145,23 +150,29 @@ Availability of functionalities[^2] MUST be as follows:
 | Erase the membership  | No     | Yes (holder only) | Yes     | No                     | No     |
 | Withdraw the deposit  | No     | No                | No      | Yes (holder only)      | No     |
 
-[^2]: Sending a message is not present in this table because it is part of the RLN Relay protocol and not the contract. For completeness, we note that the membership holder MUST be able to send a message if their membership is _Active_, in _GracePeriod_, or _Expired_. Sending messages with _Expired_ memberships is allowed, because the inclusion (Merkle) proof that the holder provides to RLN Relay only proves that the membership belongs to the membership set, and not that membership's state.
+[^2] Note: Sending a message is not present in this table because it is part of the RLN Relay protocol and not the contract.
+For completeness, we note that the membership holder MUST be able to send a message if their membership is _Active_,
+in _GracePeriod_, or _Expired_. 
+Sending messages with _Expired_ memberships is allowed,
+because the inclusion (Merkle) proof that the holder provides to RLN Relay only proves that the membership belongs to the membership set, and not that membership's state.
 
 ### Register a membership
 
 Membership registration is subject to the following requirements:
 - The holder MUST specify the requested rate limit  `r` of a new membership at registration time[^3].
 - Registration MUST fail if `r < r_{min}` or `r > r_{max}`.
-- The holder MUST lock up a deposit to register a membership********.
-- The size of the deposit MUST depend on the specified rate limit.
+- The holder MUST make an tranasction to the contract,
+locking the deposit to register a membership.
+- The amount of the deposit MUST depend on the specified rate limit.
 - In case of a successful registration:
 	- the new membership MUST become _Active_;
-	- the new membership MUST have an active state duration `A > 0` and a grace period duration `G >= 0`;
+	- the new membership MUST have an active state duration `A > 0` and
+   	a grace period duration `G >= 0`;
 	- the current total rate limit MUST be incremented by the rate limit of the new membership.
 
 #### Reusing the rate limit of _Expired_ memberships
 
-Below are define the following rate limits:********
+Below define the following rate limits:********
 
 - `R_{active}` is the total rate limit of all _Active_ memberships;
 - `R_{grace_period}` is the total rate limit of all _GracePeriod_ memberships;
@@ -175,20 +186,20 @@ R_{free} = R_{max} - R_{active} - R_{grace_period} - R_{expired}
 
 Membership registration is additionally subject to the following requirements:
 - If `r <= R_{free}`, the new membership MUST be registered (assuming all other necessary conditions hold).
-	- The new membership MAY erase one or multiple _Expired_ memberships and reuse their rate limit.
+	- The new membership MAY erase one or multiple _Expired_ memberships and reuse their rate limit.***
 - If `r > R_{free}`:
 	- if `r > R_{free} + R_{expired}`, registration MUST fail;
 	- if `r <= R_{free} + R_{expired}`, the new membership SHOULD be registered by reusing some _Expired_ memberships.
 - The sender of the registration transaction MAY specify a list of _Expired_ memberships to be erased and their rate limit reused.
 	- If any of the memberships in the list are not _Expired_, the registration MUST fail.
-	- If the list is not provided, the contract MAY use any criteria to select _Expired_ memberships to reuse (see Implementation Suggestions).
+	- If the list is not provided, the contract MAY use any criteria to select _Expired_ memberships to reuse (see [Implementation Suggestions](#ImplementationSuggestions)).
 	- If the list is not provided, the registration MAY fail even if the membership set contains _Expired_ membership that, if erased, would free up sufficient rate limit.
 - If a new membership A erases an _Expired_ membership B to reuse its rate limit:
 	- membership B MUST become _ErasedAwaitsWithdrawal_;
 	- the current total rate limit MUST be decremented by the rate limit of membership B;
 	- the contract MUST take all necessary steps to ensure that the holder of membership B can withdraw their deposit later.
 
-[^3]: A user-facing application SHOULD suggest default rate limits to the holder (see Implementation Suggestions).
+[^3]: A user-facing application SHOULD suggest default rate limits to the holder (see [Implementation Suggestions](#ImplementationSuggestions)).
 
 ### Extend a membership
 
