@@ -46,12 +46,14 @@ A membership _holder_ is a role that grants special privileges in the context of
 Each membership MUST have exactly one holder.
 The holder role MUST be assigned at membership registration time to the sender 
 (`msg.sender` in Solidity semantics) of the registration transaction.
-The sender of the registration SHOULD have RLN `identity_commitment` generated.
-For more information see [32/RLN-V1](https://github.com/vacp2p/rfc-index/blob/main/vac/32/rln-v1.md).
+The sender of the registration SHOULD have an RLN `identity_commitment` created.
+For more information on `identity_commitment` creation,
+see [32/RLN-V1](https://github.com/vacp2p/rfc-index/blob/main/vac/32/rln-v1.md).
 
 Membership registration MAY be initiated by a different entity from the one that controls the RLN `identity_secret`,
 which is associated with the respective RLN `identity_commitment`.
 Therefore, the holder MAY be assigned to an blockchain address that does not control the `identity_secret`.
+The contract SHOULD verify that the `identity_commitment` is valid.
 When authorizing membership-related requests,
 the contract MUST distinguish between the holder and non-holders,
 and MAY also implement additional criteria.
