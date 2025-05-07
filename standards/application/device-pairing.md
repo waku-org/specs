@@ -24,7 +24,7 @@ and then securely completed over the Waku network.
 
 The protocol we propose consists of two main subprotocols or _phases_:
 
-- [Device Pairing](#Device-Pairing): two phisically close devices initialize the _pairing_ by exchanging a QR code out-of-band. The devices then exchange and authenticate their respective long-term device ID static key by exchanging handshake messages over the Waku network;
+- [Device Pairing](#Device-Pairing): two physically close devices initialize the _pairing_ by exchanging a QR code out-of-band. The devices then exchange and authenticate their respective long-term device ID static key by exchanging handshake messages over the Waku network;
 - [Secure Transfer](#Secure-Transfer): the devices securely exchange information in encrypted form using key material obtained during a successful pairing phase. The communication will happen over the Waku network, hence the devices do not need to be phisically close in this phase.
 
 ## Theory / Semantics
@@ -82,16 +82,17 @@ d.   -> sA, sAeB, sAsB  {s}
    - The content topic parameters `contentTopicParams = {application-name}, {application-version}, {shard-id}`.
    - A (randomly generated) 16-bytes long `messageNametag`.
    - A commitment `H(sB||r)` for its static key `sB` where `r` is a random fixed-lenght value.
-
+   - *** (Generate qr code?)***
 2. The device `A`:
 
+   - *** (obtain qr code?)***
    - scans the QR code;
    - obtains `eB`, `contentTopicParams`, `messageNametag`, `Hash(sB||r)`;
    - checks if `{application-name}` and `{application-version}` from `contentTopicParams` match the local application name and version: if not, aborts the pairing. Sets `contentTopic = /{application-name}/{application-version}/wakunoise/1/sessions_shard-{shard-id}/proto`;
    - initializes the Noise handshake by passing `contentTopicParams`, `messageNametag` and `Hash(sB||r)` to the handshake prologue;
    - executes the pre-handshake message, i.e. processes the key `eB`;
-   - executes the first handshake message over `contentTopic`, i.e.
-     - processes and sends a Waku message containing an ephemeral key `eA`;
+   - executes the first handshake message over `contentTopic`, i.e.****
+     - processes and sends a Waku message containing an ephemeral key `eA`;***
      - performs `DH(eA,eB)` (which computes a symmetric encryption key);
      - attaches as payload to the handshake message the (encrypted) commitment `H(sA||s)` for `A`'s static key `sA`, where `s` is a random fixed-length value;
    - an 8-digits authorization code `authcode` obtained as `HKDF(h) mod 10^8` is displayed on the device, where `h` is the [handshake hash value](https://noiseprotocol.org/noise.html#overview-of-handshake-state-machine) obtained once the first handshake message is processed.
@@ -101,14 +102,14 @@ d.   -> sA, sAeB, sAsB  {s}
    - sets `contentTopic = /{application-name}/{application-version}/wakunoise/1/sessions_shard-{shard-id}/proto`;
    - listens to messages sent to `contentTopic` and locally filters only those with [Waku payload](./noise.md/#abnf) starting with `messageNametag`. If any, continues.
    - initializes the Noise handshake by passing `contentTopicParams`, `messageNametag` and `Hash(sB||r)` to the handshake prologue;
-   - executes the pre-handshake message, i.e. processes its ephemeral key `eB`;
-   - executes the first handshake message, i.e.
+   - executes the pre-handshake message, i.e. processes its ephemeral key `eB`;****
+   - executes the first handshake message, i.e.*****
      - obtains from the received message a public key `eA`. If `eA` is not a valid public key, the protocol is aborted.
      - performs `DH(eA,eB)` (which computes a symmetric encryption key);
      - decrypts the commitment `H(sA||s)` for `A`'s static key `sA`.
    - an 8 decimal digits authorization code `authcode` obtained as `HKDF(h) mod 10^8` is displayed on the device, where `h`is the [handshake hash value](https://noiseprotocol.org/noise.html#overview-of-handshake-state-machine) obtained once the first handshake message is processed.
 
-4. Device `A` and `B` wait for the user to confirm with an interaction (button press)
+4. Device `A` and `B` wait for the user to confirm with an interaction (button press)*******
    that the authorization code displayed on both devices are the same.
    If not, the protocol is aborted.
 
@@ -121,12 +122,13 @@ d.   -> sA, sAeB, sAsB  {s}
 
 6. The device `A`:
 
-   - listens to messages sent to `contentTopic` and locally filters only those with Waku payload starting with `messageNametag`. If any, continues.
+   - listens to messages sent to `contentTopic` and locally filters only those with [Waku](/)**** payload starting with `messageNametag`.
+     If any, continues.
    - decrypts the received message and obtains the public key `sB`. If `sB` is not a valid public key, the protocol is aborted.
    - performs `DH(eA,sB)` (which updates a symmetric encryption key);
    - decrypts the payload to obtain the randomness `r`.
    - computes `H(sB||r)` and checks if this value corresponds to the commitment obtained in step 2. If not, the protocol is aborted.
-   - executes the third handshake message, i.e.
+   - executes the third handshake message, i.e.*****
      - processes and sends his (encrypted) device static key `sA` over `contentTopic`;
      - performs `DH(sA,eB)` (which updates the symmetric encryption key);
      - performs `DH(sA,sB)` (which updates the symmetric encryption key);
@@ -135,7 +137,7 @@ d.   -> sA, sAeB, sAsB  {s}
 
 7. The device `B`:
 
-   - listens to messages sent to `contentTopic` and locally filters only those with Waku payload starting with `messageNametag`. If any, continues.
+   - listens to messages sent to `contentTopic` and locally filters only those with [**Waku](/) payload starting with `messageNametag`. If any, continues.
    - obtains from decrypting the received message a public key `sA`. If `sA` is not a valid public key, the protocol is aborted.
    - performs `DH(sA,eB)` (which updates a symmetric encryption key);
    - performs `DH(sA,sB)` (which updates a symmetric encryption key);
