@@ -157,9 +157,12 @@ A publisher MAY consider a message publication as having failed irremediably aft
 - A receiving node using this strategy MUST have a local cache of the [deterministic message hashes](https://rfc.vac.dev/waku/standards/core/14/message#deterministic-message-hashing) of all received messages
 spanning _at least_ the time period for which reliability is required.
 - The node MUST periodically perform a [content filtered query](https://rfc.vac.dev/waku/standards/core/13/store#content-filtered-queries) to the [13/WAKU2-STORE](https://rfc.vac.dev/waku/standards/core/13/store) service,
-spanning the time period for which reliability is required
+spanning the time period for which reliability is required ("reliability window")
 and including all content topics over which it is interested to receive messages.
 The `include_data` field SHOULD be set to `false` to retrieve only the matching message hashes from the [13/WAKU2-STORE](https://rfc.vac.dev/waku/standards/core/13/store) service.
+If a connection loss is detected (e.g. if a query fails due to disconnection),
+the next query MAY span at least the time period since the last successful query
+if this is longer than the reliability window.
 - The node MUST compare the received message hashes to those in the local cache.
 Any message hashes in the response that are not in the local cache MUST be considered "missing".
 - The node SHOULD perform a [message hash lookup query](https://rfc.vac.dev/waku/standards/core/13/store#message-hash-lookup-queries) for all missing message hashes
@@ -186,7 +189,7 @@ the publisher SHOULD consider the corresponding message as "acknowledged" and re
 the publisher MUST consider the corresponding messages as still "unacknowledged".
 - In addition, the node MUST compare the message hashes in the content filtered query response to the message hashes in the local cache.
 Any message hashes in the response that are not in the local cache MUST be considered "missing".
-- The node SHOULD retransmit all unacknowledged messages in the ougoing buffer,
+- The node SHOULD retransmit all unacknowledged messages in the outgoing buffer,
 either periodically or upon reception of the query response,
 until a positive inclusion in a follow-up query response for the corresponding message hashes.
 The node MAY consider a message publication as having failed irremediably after a set number of query attempts without inclusion.
@@ -234,7 +237,7 @@ The interval between each retransmission attempt is up to the implementation,
 but we RECOMMEND starting with `1 second` and increasing it after each failure.
 - The client MAY consider a message publication as having failed irremediably after a set number of failed lightpush requests.
 
-#### 4. Retransmit on loss detection
+#### 4. Retransmit on possible message loss detection
 
 > *_Note:_* Lightpush clients participating in [Store-based reliability](#store-based-reliability) already performs this strategy and can ignore this section.
 
@@ -290,7 +293,7 @@ or after a single `SUBSCRIBE` failure.
 by submitting the same filter criteria as before in a new [`SUBSCRIBE`](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md#subscribe) request to the same service node.
 This helps ensure that local and remote views of filter criteria remains synchronised.
 
-#### 4. Store query on loss detection
+#### 4. Store query on possible message loss detection
 
 > *_Note:_* Filter clients participating in [Store-based reliability](#store-based-reliability) already performs this strategy and can ignore this section.
 
