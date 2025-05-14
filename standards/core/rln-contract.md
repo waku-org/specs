@@ -52,7 +52,7 @@ see [32/RLN-V1](https://github.com/vacp2p/rfc-index/blob/main/vac/32/rln-v1.md).
 
 Membership registration MAY be initiated by a different entity from the one that controls the RLN `identity_secret`,
 which is associated with the respective RLN `identity_commitment`.
-Therefore, the holder MAY be assigned to an blockchain address that does not control the `identity_secret`.
+Therefore, the holder role MAY be assigned to a blockchain address that does not control the `identity_secret`.
 The contract SHOULD verify that the `identity_commitment` is valid.
 When authorizing membership-related requests,
 the contract MUST distinguish between the holder and non-holders,
@@ -136,7 +136,7 @@ Memberships MUST be included in the membership set according to the following ta
 | _ErasedAwaitsWithdrawal_ | No                       |
 | _Erased_                 | No                       |
 
-The holder assigned blockchian address MUST NOT be transferable to a different blockchain address.
+The holder role MUST NOT be transferable to a different blockchain address.
 A user MAY use one blockchain address to manage multiple memberships.
 A user MAY use one Waku node[^1] to manage multiple memberships.
 
@@ -163,8 +163,7 @@ because the inclusion (Merkle) proof that the holder provides to RLN Relay only 
 Membership registration is subject to the following requirements:
 - The holder MUST specify the requested rate limit  `r` of a new membership at registration time[^3].
 - Registration MUST fail if `r < r_{min}` or `r > r_{max}`.
-- The holder MUST make an tranasction to the contract,
-locking the deposit to register a membership.
+- To register a membership, the holder MUST make a tranasction that locks up a deposit in the contract.
 - The amount of the deposit MUST depend on the specified rate limit.
 - In case of a successful registration:
 	- the new membership MUST become _Active_;
@@ -239,7 +238,7 @@ If further upgrades are necessary,
 a new contract SHOULD be deployed,
 and the membership set SHOULD be migrated.
 
-## Implementation Suggestions
+## [Implementation Suggestions](#implementation-suggestions)
 
 ### Membership Set Implementation
 
