@@ -119,7 +119,7 @@ Different line types denote the types of state transitions:
 | Thin (`--`)    | Transaction      | MAY be initiable by any user.                                                        |
 | Dotted (`-.-`) | Time progression | MAY be applied lazily.                                                               |
 
-Transaction-triggered state transitions MUST be applied immediately based on the blockchain tranaction time.
+Transaction-triggered state transitions MUST be applied immediately based on the blockchain transaction time.
 
 When handling a membership-specific transaction, the contract MUST:
 - check whether the state of the involved membership is up-to-date;
