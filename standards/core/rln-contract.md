@@ -52,7 +52,7 @@ see [32/RLN-V1](https://github.com/vacp2p/rfc-index/blob/main/vac/32/rln-v1.md).
 
 Membership registration MAY be initiated by a different entity from the one that controls the RLN `identity_secret`,
 which is associated with the respective RLN `identity_commitment`.
-Therefore, the holder role MAY be assigned to a blockchain address that does not control the `identity_secret`.
+Therefore, the holder role MAY be assigned to a blockchain address that is not derived from the `identity_secret`.
 The contract SHOULD verify that the `identity_commitment` is valid.
 When authorizing membership-related requests,
 the contract MUST distinguish between the holder and non-holders,
@@ -119,7 +119,7 @@ Different line types denote the types of state transitions:
 | Thin (`--`)    | Transaction      | MAY be initiable by any user.                                                        |
 | Dotted (`-.-`) | Time progression | MAY be applied lazily.                                                               |
 
-Transaction-triggered state transitions MUST be applied immediately based on the blockchain transaction time.
+Transaction-triggered state transitions MUST be applied immediately.
 
 When handling a membership-specific transaction, the contract MUST:
 - check whether the state of the involved membership is up-to-date;
