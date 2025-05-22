@@ -91,7 +91,7 @@ d.   -> sA, sAeB, sAsB  {s}
    - initializes the Noise handshake by passing `contentTopicParams`, `messageNametag` and `Hash(sB||r)` to the handshake prologue;
    - performs the pre-handshake process, i.e. processes the key `eB`;
    - executes the first handshake message over `contentTopic`, i.e.
-     - processes and sends a [14/WAKU2-MESSAGE]() containing an ephemeral key `eA`;
+     - processes and sends a [14/WAKU2-MESSAGE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/14/message.md) containing an ephemeral key `eA`;
      - performs `DH(eA,eB)` (which computes a symmetric encryption key);
      - attaches, as payload to the handshake message,
 the (encrypted) commitment `H(sA||s)` for `A`'s static key `sA`, where `s` is a random fixed-length value;
@@ -378,3 +378,4 @@ Copyright and related rights waived via [CC0](https://creativecommons.org/public
 - [The Double-Ratchet Algorithm](https://signal.org/docs/specifications/doubleratchet/)
 - [The Noise Protocol Framework specifications](http://www.noiseprotocol.org/noise.html)
 - [IETF RFC 4648 - The Base16, Base32, and Base64 Data Encodings](https://datatracker.ietf.org/doc/html/rfc4648)
+- [14/WAKU2-MESSAGE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/14/message.md)
