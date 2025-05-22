@@ -37,7 +37,7 @@ and will share a Noise session within which they can securely exchange informati
 
 The request is made by exposing a QR code that, by default, has to be scanned by device `A`.
 If device `A` doesn't have a camera while device `B` does,
-[it is possible](#Rationale) to execute a slightly different pairing (with same security guarantees),
+[it is possible](#rationale) to execute a slightly different pairing (with same security guarantees),
 where `A` is exposing a QR code instead.
 
 This protocol is designed in order to achieve two main security objectives:
@@ -82,19 +82,19 @@ d.   -> sA, sAeB, sAsB  {s}
    - The content topic parameters `contentTopicParams = {application-name}, {application-version}, {shard-id}`.
    - A (randomly generated) 16-bytes long `messageNametag`.
    - A commitment `H(sB||r)` for its static key `sB` where `r` is a random fixed-lenght value.
-   - *** (Generate qr code?)***
+   
 2. The device `A`:
 
-   - *** (obtain qr code?)***
    - scans the QR code;
    - obtains `eB`, `contentTopicParams`, `messageNametag`, `Hash(sB||r)`;
    - checks if `{application-name}` and `{application-version}` from `contentTopicParams` match the local application name and version: if not, aborts the pairing. Sets `contentTopic = /{application-name}/{application-version}/wakunoise/1/sessions_shard-{shard-id}/proto`;
    - initializes the Noise handshake by passing `contentTopicParams`, `messageNametag` and `Hash(sB||r)` to the handshake prologue;
-   - executes the pre-handshake message, i.e. processes the key `eB`;
-   - executes the first handshake message over `contentTopic`, i.e.****
-     - processes and sends a Waku message containing an ephemeral key `eA`;***
+   - performs the pre-handshake process, i.e. processes the key `eB`;
+   - executes the first handshake message over `contentTopic`, i.e.
+     - processes and sends a [14/WAKU2-MESSAGE]() containing an ephemeral key `eA`;
      - performs `DH(eA,eB)` (which computes a symmetric encryption key);
-     - attaches as payload to the handshake message the (encrypted) commitment `H(sA||s)` for `A`'s static key `sA`, where `s` is a random fixed-length value;
+     - attaches, as payload to the handshake message,
+the (encrypted) commitment `H(sA||s)` for `A`'s static key `sA`, where `s` is a random fixed-length value;
    - an 8-digits authorization code `authcode` obtained as `HKDF(h) mod 10^8` is displayed on the device, where `h` is the [handshake hash value](https://noiseprotocol.org/noise.html#overview-of-handshake-state-machine) obtained once the first handshake message is processed.
 
 3. The device `B`:
@@ -102,14 +102,14 @@ d.   -> sA, sAeB, sAsB  {s}
    - sets `contentTopic = /{application-name}/{application-version}/wakunoise/1/sessions_shard-{shard-id}/proto`;
    - listens to messages sent to `contentTopic` and locally filters only those with [Waku payload](./noise.md/#abnf) starting with `messageNametag`. If any, continues.
    - initializes the Noise handshake by passing `contentTopicParams`, `messageNametag` and `Hash(sB||r)` to the handshake prologue;
-   - executes the pre-handshake message, i.e. processes its ephemeral key `eB`;****
-   - executes the first handshake message, i.e.*****
+   - performs the pre-handshake process, i.e. processes its ephemeral key `eB`;
+   - processes the received first handshake message, i.e.
      - obtains from the received message a public key `eA`. If `eA` is not a valid public key, the protocol is aborted.
      - performs `DH(eA,eB)` (which computes a symmetric encryption key);
      - decrypts the commitment `H(sA||s)` for `A`'s static key `sA`.
    - an 8 decimal digits authorization code `authcode` obtained as `HKDF(h) mod 10^8` is displayed on the device, where `h`is the [handshake hash value](https://noiseprotocol.org/noise.html#overview-of-handshake-state-machine) obtained once the first handshake message is processed.
 
-4. Device `A` and `B` wait for the user to confirm with an interaction (button press)*******
+4. Device `A` and `B` wait for user confirmations, through a user interface,
    that the authorization code displayed on both devices are the same.
    If not, the protocol is aborted.
 
@@ -122,13 +122,13 @@ d.   -> sA, sAeB, sAsB  {s}
 
 6. The device `A`:
 
-   - listens to messages sent to `contentTopic` and locally filters only those with [Waku](/)**** payload starting with `messageNametag`.
+   - listens to messages sent to `contentTopic` and locally filters only those with [26/WAKU2-PAYLOAD](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/application/26/payload.md) starting with `messageNametag`.
      If any, continues.
    - decrypts the received message and obtains the public key `sB`. If `sB` is not a valid public key, the protocol is aborted.
    - performs `DH(eA,sB)` (which updates a symmetric encryption key);
    - decrypts the payload to obtain the randomness `r`.
    - computes `H(sB||r)` and checks if this value corresponds to the commitment obtained in step 2. If not, the protocol is aborted.
-   - executes the third handshake message, i.e.*****
+   - executes the third handshake message, i.e.
      - processes and sends his (encrypted) device static key `sA` over `contentTopic`;
      - performs `DH(sA,eB)` (which updates the symmetric encryption key);
      - performs `DH(sA,sB)` (which updates the symmetric encryption key);
@@ -137,12 +137,14 @@ d.   -> sA, sAeB, sAsB  {s}
 
 7. The device `B`:
 
-   - listens to messages sent to `contentTopic` and locally filters only those with [**Waku](/) payload starting with `messageNametag`. If any, continues.
-   - obtains from decrypting the received message a public key `sA`. If `sA` is not a valid public key, the protocol is aborted.
-   - performs `DH(sA,eB)` (which updates a symmetric encryption key);
-   - performs `DH(sA,sB)` (which updates a symmetric encryption key);
-   - decrypts the payload to obtain the randomness `s`.
-   - Computes `H(sA||s)` and checks if this value corresponds to the commitment obtained in step 3. If not, the protocol is aborted.
+   - listens to messages sent to `contentTopic` and locally filters only those with [26/WAKU2-PAYLOAD](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/application/26/payload.md) starting with `messageNametag`. If any, continues.
+   - processess the third handshake message, i.e.
+        - obtains from decrypting the received message a public key `sA`. If `sA` is not a valid public key, the protocol is aborted.
+        - performs `DH(sA,eB)` (which updates a symmetric encryption key);
+        - performs `DH(sA,sB)` (which updates a symmetric encryption key);
+        - decrypts the payload to obtain the randomness `s`.
+        - Computes `H(sA||s)` and checks if this value corresponds to the commitment obtained in step 3.
+          If not, the protocol is aborted.
    - Calls [Split()](http://www.noiseprotocol.org/noise.html#the-symmetricstate-object) and obtains two cipher states to encrypt inbound and outbound messages.
 
 #### The `WakuPairing` for Devices without a Camera
@@ -154,9 +156,9 @@ exchanging a single message (e.g., Noise sessions, cryptographic keys, signature
 However, since the user(s) confirm(s) at the end of message `b.` that the authorization code is the same on both devices,
 the role of the handhsake initiator and responder can be safely swapped in message `a.` and `b.`.
 
-Indeed, if the pairing phase successfully completes on both devices,
-the authentication code, the committed static keys and the Noise processing rules will ensure that no Man-in-the-Middle attack took place
-and that messages can be securely exchanged bi-directionally in the transfer phase.
+Indeed, if the pairing phase successfully completes on both devices, the authentication code, 
+the committed static keys and the Noise processing rules will ensure that no Man-in-the-Middle attack took place.
+Messages can then be securely exchanged bi-directionally in the transfer phase.
 
 This allows pairing in case device `A` does not have a camera to scan a QR (e.g. a desktop client) while device `B` has.
 
@@ -259,7 +261,7 @@ in order to frequently and deterministically change the `messageNametag` of mess
 ideally, at each message exchanged.
 
 Given the proposed construction,
-the `mntsInbound` and `mntsOutbound` secrets can be used to iteratively generate the `messageNametag` field of Waku payloads
+the `mntsInbound` and `mntsOutbound` secrets can be used to iteratively generate the `messageNametag` field of [26/WAKU2-PAYLOAD](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/application/26/payload.md)s
 for inbound and outbound messages, respectively.
 
 The derivation of `messageNametag` should be deterministic only for communicating devices
