@@ -23,8 +23,7 @@ Users interact with the contract to manage their memberships
 and obtain the necessary data for proof generation and verification.
 
 Message transmission is handled by Waku RLN Relay nodes.
-The sender of a message must prove its validity according to RLN requirements.
-RLN Relay nodes must not relay invalid messages.
+RLN Relay nodes verify the validity of messages according to RLN requirements and do not relay invalid messages.
 For the full specification of RLN Relay, see [17/WAKU2-RLN-RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/17/rln-relay.md).
 
 Currently, this document focuses solely on membership-related functionality.
@@ -383,8 +382,4 @@ Copyright and related rights waived via [CC0](https://creativecommons.org/public
 - [Rate-Limiting Nullifier](https://rate-limiting-nullifier.github.io/rln-docs/)
 - [11/WAKU2-RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md)
 - [17/WAKU2-RLN-RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/17/rln-relay.md)
-
-
-
-
-
+- [32/RLN-V1](https://github.com/vacp2p/rfc-index/blob/main/vac/32/rln-v1.md)
