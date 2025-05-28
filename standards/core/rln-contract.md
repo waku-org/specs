@@ -53,6 +53,8 @@ Membership registration MAY be initiated by a different entity from the one that
 which is associated with the respective RLN `identity_commitment`.
 Therefore, the holder role MAY be assigned to a blockchain address that is not derived from the `identity_secret`.
 The contract SHOULD verify that the `identity_commitment` is valid.
+If the `identity_commitment` is not checked or validated,
+the contract MAY be exploited using malicious or malformed inputs.
 When authorizing membership-related requests,
 the contract MUST distinguish between the holder and non-holders,
 and MAY also implement additional criteria.
