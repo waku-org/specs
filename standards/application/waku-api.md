@@ -1,0 +1,174 @@
+---
+title: MESSAGING-API
+name: Messaging API definition
+category: Standards Track
+tags: [reliability, application, api, protocol composition]
+editor: Oleksandr Kozlov <oleksandr@status.im>
+contributors:
+- Oleksandr Kozlov <oleksandr@status.im>
+- Prem Chaitanya Prathi <prem@status.im>
+- Franck Royer <franck@status.im>
+---
+
+## Table of contents
+
+- [Abstract](#abstract)
+- [Design Requirements](#design-requirements)
+- [API design](#api-design)
+  - [Requirements](#requirements)
+  - [Initial configuration](#initial-configuration)
+  - [Send](#send)
+  - [Subscribe](#subscribe)
+  - [Message Storage](#message-storage)
+  - [Health Indicator](#health-indicator)
+  - [Event Source](#event-source)
+
+## Abstract
+
+This document specifies an Application Programming Interface (API) that is RECOMMENDED for developers of the [WAKU2](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/10/waku2.md) clients to implement,
+and for consumers to use as a single entry point to its functionalities.
+
+This API defines the RECOMMENDED interface for leveraging Waku protocols to send and receive messages. 
+Application developers SHOULD use it to access capabilities for peer discovery, message routing, and peer-to-peer reliability.
+
+## Motivation
+
+The accessibility of Waku protocols is capped by the accessibility of their implementations, and hence API.
+This RFC enables a concerted effort to draft an API that is simple and accessible, and opiniate on sane defaults.
+
+This effort is best done in an RFC, allowing all current implementors to review and agree on it. 
+
+The API defined in this document is an opiniated-by-purpose method to use the more agnostic [WAKU2]() protocols.
+
+## Syntax
+
+The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, 
+“RECOMMENDED”, “MAY”, and “OPTIONAL” in this document are to be interpreted as described in [RFC2119](https://www.ietf.org/rfc/rfc2119.txt).
+
+### Definitions
+
+This section defines key terms and concepts used throughout this document.
+Each term is detailed in dedicated subsections to ensure clarity and consistency in interpretation.
+
+`Multiaddr` - a self-describing format for encoding network address of a remote peer as per [libp2p addressing](https://github.com/libp2p/specs/blob/6d38f88f7b2d16b0e4489298bcd0737a6d704f7e/addressing/README.md) specification.
+
+## API design
+
+### IDL
+
+A custom Interface Definition Language (IDL) in YAML is used to define the Waku API.
+Existing IDL Such as OpenAPI, AsyncAPI or WIT do not exactly fit the requirements for this API.
+Hence, instead of having the reader learn a new IDL, we propose to use a simple IDL with self-describing syntax.
+
+An alternative would be to choose a programming language. However, such choice may express unintended opinions on the API.
+
+#### Guidelines
+
+- No `default` means that the value is mandatory
+- Primitive types are `string`, `int`, `bool` and `uint`
+- Complex pre-define types are `struct`, `option` and `array`
+- Primitive types are preferred to describe the API for simplicity, the implementator may prefer a native type (e.g. `string` vs `Multiaddr` object/struct)
+
+### Application
+
+This API is designed for generic use and ease across all programming languages and traditional `REST` architectures.
+
+## The Waku API
+
+```yaml
+api_version: "0.0.1"
+library_name: "waku"
+description: "Waku: a private and censorship-resistant message routing library."
+```
+
+### Type definitions
+
+```yaml
+types:
+  Config:
+    type: struct
+    fields:
+      operating_mode: 
+        type: string
+        constraints: ["edge", "relay"]
+        description: "The mode of operation of the Waku node. Core protocols used by the node are inferred from this mode."
+      network_config:
+        type: struct
+        default: TheWakuNetworkPreset
+        fields:
+          boostrap_nodes:
+            type: array<string>
+            default: ""
+            description: "Bootstrap nodes, entree and multiaddr formats are accepted."
+          static_store_nodes:
+            type: array<string>
+            default: []
+            description: "Only the passed nodes are used for store queries, discovered store nodes are discarded."
+          clusterId:
+            type: uint
+            default: 1
+          sharding_mode:
+            constraints: ["auto", "static"]
+          auto_sharding_config:
+            type: optionAutoShardingConfig
+            default: none
+            description: "The auto-sharding config, if sharding mode is `auto`"
+          active_relay_shards:
+            type: array<uint>
+            constraints: operating_mode == "relay"
+            default: []
+            description: "The shards for relay to subscribe to and participate in." 
+      store_confirmation:
+        type: bool
+        default: false
+        description: "No-payload store hash queries are made to confirm whether outbound messages where received by remote store node."
+          
+  AutoShardingConfig:
+    type: struct
+    fields:
+      numShardsInCluster:
+        type: uint
+        description: "The number of shards in the configured cluster; this is a globally agreed value for each cluster."
+```
+
+### Initialise Waku Node
+
+TODO: define WakuNode?
+
+```yaml
+functions:
+  init:
+    description: "Initialise the waku node"
+    parameters:
+        - name: config
+          type: Config
+          description: "The Waku node configuration."
+    returns:
+        type: result<void, string>
+```
+
+#### Functionality / Additional Information / Specific Behaviours
+
+If the node is operating in `edge` mode, it MUST:
+
+- Use [LIGHTPUSH](../standards/core/lightpush.md) to send messages
+- Use [FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md) to receive messages
+- Use [PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/f08de108457eed828dadbd36339433c586701267/waku/standards/core/34/peer-exchange.md#abstract) to discover peers
+- Use [STORE](../standards/core/store.md) as per [WAKU-P2P-RELIABILITY]()
+
+If the node is configured in `relay` mode, it MUST:
+
+- Use [RELAY](https://github.com/vacp2p/rfc-index/blob/0277fd0c4dbd907dfb2f0c28b6cde94a335e1fae/waku/standards/core/11/relay.md) protocol.
+- Host endpoints for [LIGHTPUSH](../standards/core/lightpush.md) and [FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md).
+- Serve the [PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/f08de108457eed828dadbd36339433c586701267/waku/standards/core/34/peer-exchange.md#abstract) protocol.
+
+`edge` mode SHOULD be used if node functions in resource restricted environment,
+whereas `relay` SHOULD be used if node has no hard restrictions.
+
+## Security/Privacy Considerations
+
+See [WAKU2-ADVERSARIAL-MODELS](https://github.com/waku-org/specs/blob/master/informational/adversarial-models.md).
+
+## Copyright
+
+Copyright and related rights waived via [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
