@@ -74,7 +74,7 @@ We define a `multiaddrs` key.
 
 #### Many connection types
 
-Alice is a node operator, she runs a node that supports inbound connection for the following protocols:
+Alice is a Waku node operator, she runs a node that supports inbound connection for the following protocols:
 
 - TCP 10101 on `1.2.3.4`
 - UDP 20202 on `1.2.3.4`
@@ -84,7 +84,7 @@ Alice is a node operator, she runs a node that supports inbound connection for t
 - QUIC on `quic://quic.example.com:443/`
 - A circuit relay address `/ip4/1.2.3.4/tcp/55555/p2p/QmRelay/p2p-circuit/p2p/QmAlice`
 
-Alice SHOULD structure the ENR for her node as follows:
+Alice SHOULD structure the ENR for her node as follows: *** signs? ***
 
 | key          | value                                                                                                                                                               |
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -97,7 +97,7 @@ Alice SHOULD structure the ENR for her node as follows:
 | `secp256k1`  | Alice's compressed secp256k1 public key, 33 bytes                                                                                                                   |
 | `multiaddrs` | <code>len1 &#124; /dns4/example.com/tcp/443/wss &#124; len2 &#124; /dns4/quic.examle.com/tcp/443/quic &#124; len3 &#124; /ip4/1.2.3.4/tcp/55555/p2p/QmRelay </code> |
 
-Where:
+Where `multiaddrs`:
 
 - `|` is the concatenation operator,
 - `len1` is the length of `/dns4/example.com/tcp/443/wss` byte representation,
@@ -125,7 +125,7 @@ then it is not needed to use the `multiaddrs` key.
 
 Supported key type is `secp256k1` only.
 
-In the future, an extension of this specification could be made to support other elliptic curve cryptography such as `ed25519`.
+Support for other elliptic curve cryptography such as `ed25519` MAY be used.
 
 ### `waku2` ENR key
 
