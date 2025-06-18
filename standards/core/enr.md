@@ -84,7 +84,7 @@ Alice is a Waku node operator, she runs a node that supports inbound connection 
 - QUIC on `quic://quic.example.com:443/`
 - A circuit relay address `/ip4/1.2.3.4/tcp/55555/p2p/QmRelay/p2p-circuit/p2p/QmAlice`
 
-Alice SHOULD structure the ENR for her node as follows: *** signs? ***
+Alice SHOULD structure the ENR for her node as follows:
 
 | key          | value                                                                                                                                                               |
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -106,11 +106,11 @@ Where `multiaddrs`:
 
 #### Raw TCP only
 
-Bob is a node operator, he runs a node that supports inbound connection for the following protocols:
+Bob is a node operator that runs a node that supports inbound connection for the following protocols:
 
 - TCP 10101 on `1.2.3.4`
 
-Bob SHOULD structure the ENR for her node as follows:
+Bob SHOULD structure the ENR for his node as follows:
 
 | key         | value                                           |
 | ----------- | ----------------------------------------------- |
@@ -118,8 +118,8 @@ Bob SHOULD structure the ENR for her node as follows:
 | `ip`        | `1.2.3.4`                                       |
 | `secp256k1` | Bob's compressed secp256k1 public key, 33 bytes |
 
-Indeed, as Bob's node's connection details can be represented with EIP-778's pre-defined keys only
-then it is not needed to use the `multiaddrs` key.
+As Bob's node's connection details can be represented with EIP-778's pre-defined keys only,
+it is not needed to use the `multiaddrs` key.
 
 ### Limitations
 
