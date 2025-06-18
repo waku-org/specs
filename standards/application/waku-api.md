@@ -12,16 +12,7 @@ contributors:
 
 ## Table of contents
 
-- [Abstract](#abstract)
-- [Design Requirements](#design-requirements)
-- [API design](#api-design)
-  - [Requirements](#requirements)
-  - [Initial configuration](#initial-configuration)
-  - [Send](#send)
-  - [Subscribe](#subscribe)
-  - [Message Storage](#message-storage)
-  - [Health Indicator](#health-indicator)
-  - [Event Source](#event-source)
+TODO
 
 ## Abstract
 
@@ -80,6 +71,42 @@ api_version: "0.0.1"
 library_name: "waku"
 description: "Waku: a private and censorship-resistant message routing library."
 ```
+### Language Mappings
+
+How the API definition should be translated to specific languages.
+
+```yaml
+language_mappings:
+  rust:
+    naming_convention:
+      - functions: "snake_case"
+      - variables: "snake_case"
+      - types: "PascalCase"
+    error_handling: "Result<T, E>"
+    async_pattern: "tokio"
+    
+  golang: 
+    naming_convention:
+       - functions: "snake_case"
+       - variables: "snake_case"
+       - types: "PascalCase"
+    error_handling: "error_return"
+    package_name: "waku"
+    
+  c:
+    naming_convention: "snake_case"
+    prefix: "waku_"
+    error_handling: "error_codes"
+    
+  typescript:
+    naming_convention:
+      - functions: "camelCase"
+      - variables: "camelCase"
+      - types: "PascalCase"
+    error_handling: "Promise<T>"
+    module_type: "esm"
+```
+
 
 ### Type definitions
 
@@ -151,7 +178,7 @@ functions:
 
 If the node is operating in `edge` mode, it MUST:
 
-- Use [LIGHTPUSH](../standards/core/lightpush.md) to send messages
+- Use [LIGHTPUSH](/standards/core/lightpush.md) to send messages
 - Use [FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md) to receive messages
 - Use [PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/f08de108457eed828dadbd36339433c586701267/waku/standards/core/34/peer-exchange.md#abstract) to discover peers
 - Use [STORE](../standards/core/store.md) as per [WAKU-P2P-RELIABILITY]()
