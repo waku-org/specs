@@ -144,7 +144,7 @@ We define a `waku2` field key:
   If a protocol is not supported, the corresponding field MUST be set to `false`.
   Indicating positive support for any specific protocol is OPTIONAL,
   though it MAY be required by the relevant application or discovery process.
-- Flags marked as `undef` is not yet defined.****
+- Flags marked as `undef` is not yet defined.
   These SHOULD be set to `false` by default.
 
 ### Usage
