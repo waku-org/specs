@@ -56,7 +56,7 @@ An alternative would be to choose a programming language. However, such choice m
 #### Guidelines
 
 - No `default` means that the value is mandatory
-- Primitive types are `string`, `int`, `bool` and `uint`
+- Primitive types are `string`, `int`, `bool`, `uint`, and `pointer`
 - Complex pre-define types are `struct`, `option` and `array`
 - Primitive types are preferred to describe the API for simplicity, the implementator may prefer a native type (e.g. `string` vs `Multiaddr` object/struct)
 
@@ -107,7 +107,6 @@ language_mappings:
     module_type: "esm"
 ```
 
-
 ### Type definitions
 
 ```yaml
@@ -115,82 +114,145 @@ types:
   Config:
     type: struct
     fields:
-      operating_mode: 
+      mode:
         type: string
-        constraints: ["edge", "relay"]
-        description: "The mode of operation of the Waku node. Core protocols used by the node are inferred from this mode."
+        constraints: ["client", "server"]
+        description: "The mode of operation of the Waku node.
+                      Waku core protocols used by the node are inferred from this mode."
       network_config:
         type: struct
-        default: TheWakuNetworkPreset
         fields:
-          boostrap_nodes:
+          boostrap_servers:
             type: array<string>
-            default: ""
-            description: "Bootstrap nodes, entree and multiaddr formats are accepted."
-          static_store_nodes:
+            default: "enrtree://AIRVQ5DDA4FFWLRBCHJWUWOO6X6S4ZTZ5B667LQ6AJU6PEYDLRD5O@sandbox.waku.nodes.status.im"
+            description: "Bootstrap nodes. entree, ENRs list formats are accepted.
+                          This allows the node to discover server nodes."
+            examples:
+              ex1: "enrtree://AIRVQ5DDA4FFWLRBCHJWUWOO6X6S4ZTZ5B667LQ6AJU6PEYDLRD5O@sandbox.waku.nodes.status.im"
+              ex2: ["enr:-QESuED0qW1BCmF-oH_ARGPr97Nv767bl_43uoy70vrbah3EaCAdK3Q0iRQ6wkSTTpdrg_dU_NC2ydO8leSlRpBX4pxiAYJpZIJ2NIJpcIRA4VDAim11bHRpYWRkcnO4XAArNiZub2RlLTAxLmRvLWFtczMud2FrdS5zYW5kYm94LnN0YXR1cy5pbQZ2XwAtNiZub2RlLTAxLmRvLWFtczMud2FrdS5zYW5kYm94LnN0YXR1cy5pbQYfQN4DgnJzkwABCAAAAAEAAgADAAQABQAGAAeJc2VjcDI1NmsxoQOTd-h5owwj-cx7xrmbvQKU8CV3Fomfdvcv1MBc-67T5oN0Y3CCdl-DdWRwgiMohXdha3UyDw","enr:-QEkuED9X80QF_jcN9gA2ZRhhmwVEeJnsg_Hyg7IFCTYnZD0BDI7a8HArE61NhJZFwygpHCWkgwSt2vqiABXkBxzIqZBAYJpZIJ2NIJpcIQiQlleim11bHRpYWRkcnO4bgA0Ni9ub2RlLTAxLmdjLXVzLWNlbnRyYWwxLWEud2FrdS5zYW5kYm94LnN0YXR1cy5pbQZ2XwA2Ni9ub2RlLTAxLmdjLXVzLWNlbnRyYWwxLWEud2FrdS5zYW5kYm94LnN0YXR1cy5pbQYfQN4DgnJzkwABCAAAAAEAAgADAAQABQAGAAeJc2VjcDI1NmsxoQPFAS8zz2cg1QQhxMaK8CzkGQ5wdHvPJcrgLzJGOiHpwYN0Y3CCdl-DdWRwgiMohXdha3UyDw"]
+          static_servers:
             type: array<string>
             default: []
-            description: "Only the passed nodes are used for store queries, discovered store nodes are discarded."
+            description: "Array of server nodes' multiaddresses. Discovered nodes may also be considered."
+            examples:
+              ex1: ["/dns4/node-01.do-ams3.waku.sandbox.status.im/tcp/30303/p2p/16Uiu2HAmNaeL4p3WEYzC9mgXBmBWSgWjPHRvatZTXnp8Jgv3iKsb"]
+              ex2: ["/dns4/node-01.do-ams3.waku.sandbox.status.im/tcp/8000/wss/p2p/16Uiu2HAmNaeL4p3WEYzC9mgXBmBWSgWjPHRvatZTXnp8Jgv3iKsb"]
           clusterId:
             type: uint
+            constraints: mode == "server"
             default: 1
-          sharding_mode:
-            constraints: ["auto", "static"]
-          auto_sharding_config:
-            type: optionAutoShardingConfig
-            default: none
-            description: "The auto-sharding config, if sharding mode is `auto`"
-          active_relay_shards:
+            description: "The cluster subscribed to and participating in. A cluster is composed by multiple shards."
+          shards:
             type: array<uint>
-            constraints: operating_mode == "relay"
-            default: []
-            description: "The shards for relay to subscribe to and participate in." 
-      store_confirmation:
-        type: bool
-        default: false
-        description: "No-payload store hash queries are made to confirm whether outbound messages where received by remote store node."
-          
-  AutoShardingConfig:
-    type: struct
+            constraints: mode == "server"
+            default: [0, 1, 2, 3, 4, 5, 6, 7]
+            description: "The shards subscribed to and participating in."
+  ErrorCode:
+    type: uint
+    constraints: [0 (Ok), 1 (Error), 2 (MissingCallback), 3 (WakuNotResponding)]
+    description:
+      - 0: The function call was successful and finished on time.
+      - 1: Generic error when invoking a particular function. The error detail will be given in the msg callback field.
+      - 2: If, when invoking a certain function, a callback is not set properly.
+      - 3: When the waku node is blocked in a certain callback, or due to other reason, for too long.
+
+  WakuCallback:
+    type: pointer
+    description: Generic callback used across the Waku API.
+                 Notice that this callback is invoked within the Waku thread and should not be blocked for more than 20 seconds.
+                 In case of the Waku thread is blocked for too long,
+                 a WakuNotResponding error will be dispatched through the
+                 waku_state_event_handler (see the init function definition.)
     fields:
-      numShardsInCluster:
-        type: uint
-        description: "The number of shards in the configured cluster; this is a globally agreed value for each cluster."
+      callerRet:
+        type: ErrorCode
+      msg:
+        type: string
+        default: ""
+        description: "Information provided to the Waku API integrator"
+
 ```
 
-### Initialise Waku Node
-
-TODO: define WakuNode?
+### Initialise Waku
 
 ```yaml
 functions:
   init:
-    description: "Initialise the waku node"
+    description: "Initialise the waku instance"
     parameters:
         - name: config
           type: Config
-          description: "The Waku node configuration."
+          description: "The Waku configuration."
+        - name: callback
+          type: WakuCallback
+          description: Gives feedback in case of failure when invoking the function.
+        - name: waku_state_event_handler
+          type: WakuCallback
+          description: Callback that is invoked when there is a Waku state change.
+                       For example:\
+                       - waku goes online/offline.
+                       - waku is not responding for too long.
     returns:
-        type: result<void, string>
+        type: pointer
+        description: On success, returns a reference to the Waku context, that will be needed in
+                     the subsequent Waku API calls.
+                     On error, returns a NULL, and the detail will be given in the `init_callback`.
+
+  subscribe:
+    description: Subscribes the waku instance to a content topic. On success, the waku instance
+                 will start receiving messages containing the given content topic.
+    parameters:
+       - name: ctx
+         type: pointer
+         description: Reference to the Waku context, created by the init function.
+       - name: contentTopic
+         type: string
+         description: Represents the topic of interest.
+       - name: callback
+         type: WakuCallback
+         description: Gives feedback in case of success/failure when invoking the function.
+       - name: msgEventCallback
+         type: WakuCallback
+         description: Invoked whenever a message containing the content topic of interest
+                      is received.
+
+  unsubscribe:
+    description: Unsubscribes the waku instance from a certain content topic. On success, the waku
+                 instance will stop receiving messages containing the given content topic.
+    parameters:
+       - name: ctx
+         type: pointer
+         description: Reference to the Waku context, created by the init function.
+       - name: contentTopic
+         type: string
+         description: Represents the topic of interest.
+       - name: callback
+         type: WakuCallback
+         description: Gives feedback in case of success/failure when invoking the function.
+       - name: msgEventCallback
+         type: WakuCallback
+         description: Invoked whenever a message containing the content topic of interest
+                      is received.
+  
 ```
 
 #### Functionality / Additional Information / Specific Behaviours
 
-If the node is operating in `edge` mode, it MUST:
+If the waku is operating in `client` mode, it MUST:
 
 - Use [LIGHTPUSH](/standards/core/lightpush.md) to send messages
 - Use [FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md) to receive messages
 - Use [PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/f08de108457eed828dadbd36339433c586701267/waku/standards/core/34/peer-exchange.md#abstract) to discover peers
 - Use [STORE](../standards/core/store.md) as per [WAKU-P2P-RELIABILITY]()
 
-If the node is configured in `relay` mode, it MUST:
+If the waku is configured in `server` mode, it MUST:
 
 - Use [RELAY](https://github.com/vacp2p/rfc-index/blob/0277fd0c4dbd907dfb2f0c28b6cde94a335e1fae/waku/standards/core/11/relay.md) protocol.
 - Host endpoints for [LIGHTPUSH](../standards/core/lightpush.md) and [FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md).
 - Serve the [PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/f08de108457eed828dadbd36339433c586701267/waku/standards/core/34/peer-exchange.md#abstract) protocol.
 
-`edge` mode SHOULD be used if node functions in resource restricted environment,
-whereas `relay` SHOULD be used if node has no hard restrictions.
+`client` SHOULD be used if in resource restricted environment,
+whereas `server` SHOULD be used if node has no hardware and bandwidth restrictions.
 
 ## Security/Privacy Considerations
 
