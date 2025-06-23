@@ -28,13 +28,16 @@ The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL 
 
 The protocol finds differences between two peers by
 comparing _fingerprints_ of _ranges_ of message _IDs_.
-_Ranges_ are encoded into payloads, exchanged between the peers and when the range _fingerprints_ are different, split into smaller (sub)ranges.
+_Ranges_ are encoded into payloads,
+exchanged between the peers and when
+the range _fingerprints_ are different, split into smaller (sub)ranges.
 This process repeats until _ranges_ include a small number of messages.
-At this point lists of message _IDs_ are sent for comparison instead of _fingerprints_ over entire ranges of messages.
+At this point lists of message _IDs_ are sent for comparison
+instead of _fingerprints_ over entire ranges of messages.
 
 #### Overview
-The `reconciliation` protocol follows the following heuristic:
-1. The requestor chooses a time range to sync.
+The `reconciliation` protocol operate on the following heuristic:
+1. The requestor chooses a sync range including time, id, pubsub and content topics.
 2. The range is encoded into a payload and sent.
 3. The requestee receives the payload and decodes it.
 4. The range is processed and, if a difference with the local range is detected, a set of subranges are produced.
@@ -71,6 +74,12 @@ Every _range_ MUST have one of the following types; _fingerprint_, _skip_ or _it
 - _Item set_ type contains message _IDs_ and a _resolved_ boolean.
 > _Item sets_ are an optimization, sending multiple _IDs_ instead of
 recursing further reduce the number of round-trips.
+
+#### Sync Scope
+On payload reception, the intersection of the two peers pubsub and content topic sets is used as the sync scope.
+If the intersection is empty the sync is aborted.
+If a peer does not specify a set of supported pubsub or content topics,
+the protocol assumes all pubsub or content topics are supported for that peer.
 
 #### Range Processing
 _Ranges_ have to be processed differently according to their types.
@@ -112,23 +121,37 @@ All _varints_ MUST be little-endian base 128 variable length integers (LEB128) a
 
 #### Payload encoding
 The wire level payload MUST be encoded as follow.
-> The & denote concatenation.
 
-> Refer to [RELAY-SHARDING](https://github.com/waku-org/specs/blob/master/standards/core/relay-sharding.md#static-sharding)
-RFC for cluster and shard specification.
+> Please note that for each steps, bytes are concatenated.
 
-1. _varint_ bytes of the node's cluster ID &
-2. _varint_ bytes of the node's number of shard supported &
-3. _varint_ bytes for each shard index supported &
-4. _varint_ bytes of the delta encoded timestamp &
-5. if timestamp is zero, 1 byte for the hash bytes length & the hash bytes &
-6. 1 byte, the _range_ type &
-7. either
-    - 32 bytes _fingerprint_ or
-    - _varint_ bytes of the item set length & bytes of every items or
-    - if _skip range_, do nothing
+1. _Varint_ bytes of the number of pubsub topics
+2. For each pubsub topic, if any
 
-8. repeat steps 4 to 7 for all ranges.
+    a. _varint_ bytes of the pubsub topic length
+
+    b. bytes content of the pubsub topic
+
+3. _Varint_ bytes of the number of content topics
+4. For each content topic, if any
+
+    a. _varint_ bytes of the content topic length
+
+    b. bytes content of the content topic
+
+5. For each range
+    
+    a. _varint_ bytes of the delta encoded timestamp
+    
+    b. if timestamp is zero
+      - 1 byte for the partial hash length
+      - the hash bytes content
+    
+    c. 1 byte, the _range_ type
+
+    d. either
+      - 32 bytes _fingerprint_ or
+      - _varint_ bytes of the item set length and the bytes of every items or
+      - if _skip range_, nothing
 
 ## Transfer Protocol
 
@@ -160,10 +183,9 @@ The flexibility of the protocol implies that much is left to the implementers.
 What will follow is NOT part of the specification.
 This section was created to inform implementations.
 
-#### Cluster & Shards
-To prevent nodes from synchronizing messages from shard they don't support,
-cluster and shards information has been added to each payload.
-On reception, if two peers don't share the same set of shards the sync is aborted.
+#### Pubsub and Content Topics
+To prevent nodes from synchronizing messages from pubsub and content topics they don't support,
+topic information is added to each payload.
 
 #### Parameters 
 Two useful parameters to add to your implementation are partitioning count and the item set threshold.
