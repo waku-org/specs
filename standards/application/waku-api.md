@@ -25,11 +25,11 @@ Application developers SHOULD use it to access capabilities for peer discovery, 
 ## Motivation
 
 The accessibility of Waku protocols is capped by the accessibility of their implementations, and hence API.
-This RFC enables a concerted effort to draft an API that is simple and accessible, and opiniate on sane defaults.
+This RFC enables a concerted effort to draft an API that is simple and accessible, and provides an opinion on sane defaults.
 
 This effort is best done in an RFC, allowing all current implementors to review and agree on it. 
 
-The API defined in this document is an opiniated-by-purpose method to use the more agnostic [WAKU2]() protocols.
+The API defined in this document is an opinionated-by-purpose method to use the more agnostic [WAKU2]() protocols.
 
 ## Syntax
 
@@ -56,9 +56,12 @@ An alternative would be to choose a programming language. However, such choice m
 #### Guidelines
 
 - No `default` means that the value is mandatory
-- Primitive types are `string`, `int`, `bool` and `uint`
-- Complex pre-define types are `struct`, `option` and `array`
-- Primitive types are preferred to describe the API for simplicity, the implementator may prefer a native type (e.g. `string` vs `Multiaddr` object/struct)
+- Primitive types are `string`, `int`, `bool`, `enum` and `uint`
+- Complex pre-defined types are:
+  - `struct`: object and other nested types
+  - `option`: a value that can be set or left null
+  - `array`: iterable object containing values of all the same type
+  - `Multiaddr`: a libp2p multiaddress; may be an object or a string, most idiomatic approach depending on the language
 
 ### Application
 
@@ -178,16 +181,16 @@ functions:
 
 If the node is operating in `edge` mode, it MUST:
 
-- Use [LIGHTPUSH](/standards/core/lightpush.md) to send messages
-- Use [FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md) to receive messages
-- Use [PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/f08de108457eed828dadbd36339433c586701267/waku/standards/core/34/peer-exchange.md#abstract) to discover peers
-- Use [STORE](../standards/core/store.md) as per [WAKU-P2P-RELIABILITY]()
+- Use [LIGHTPUSH](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/19/lightpush.md) to send messages
+- Use [FILTER](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/12/filter.md) to receive messages
+- Use [PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/34/peer-exchange.md#abstract) to discover peers
+- Use [STORE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/13/store.md) as per [WAKU-P2P-RELIABILITY](/standards/application/p2p-reliability.md)
 
 If the node is configured in `relay` mode, it MUST:
 
 - Use [RELAY](https://github.com/vacp2p/rfc-index/blob/0277fd0c4dbd907dfb2f0c28b6cde94a335e1fae/waku/standards/core/11/relay.md) protocol.
-- Host endpoints for [LIGHTPUSH](../standards/core/lightpush.md) and [FILTER](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/12/filter.md).
-- Serve the [PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/f08de108457eed828dadbd36339433c586701267/waku/standards/core/34/peer-exchange.md#abstract) protocol.
+- Host endpoints for [LIGHTPUSH](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/19/lightpush.md) and [FILTER](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/12/filter.md).
+- Serve the [PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/34/peer-exchange.md) protocol.
 
 `edge` mode SHOULD be used if node functions in resource restricted environment,
 whereas `relay` SHOULD be used if node has no hard restrictions.
