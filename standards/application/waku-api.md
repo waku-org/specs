@@ -118,41 +118,44 @@ types:
   Config:
     type: struct
     fields:
-      operating_mode: 
+      mode: 
         type: string
         constraints: ["edge", "relay"]
         description: "The mode of operation of the Waku node. Core protocols used by the node are inferred from this mode."
       network_config:
-        type: struct
+        type: NetworkConfig
         default: TheWakuNetworkPreset
-        fields:
-          boostrap_nodes:
-            type: array<string>
-            default: ""
-            description: "Bootstrap nodes, entree and multiaddr formats are accepted."
-          static_store_nodes:
-            type: array<string>
-            default: []
-            description: "Only the passed nodes are used for store queries, discovered store nodes are discarded."
-          clusterId:
-            type: uint
-            default: 1
-          sharding_mode:
-            constraints: ["auto", "static"]
-          auto_sharding_config:
-            type: optionAutoShardingConfig
-            default: none
-            description: "The auto-sharding config, if sharding mode is `auto`"
-          active_relay_shards:
-            type: array<uint>
-            constraints: operating_mode == "relay"
-            default: []
-            description: "The shards for relay to subscribe to and participate in." 
+      active_relay_shards:
+        type: array<uint>
+        constraints: mode == "relay"
+        default: []
+        description: "The shards for relay to subscribe to and participate in."
       store_confirmation:
         type: bool
         default: false
         description: "No-payload store hash queries are made to confirm whether outbound messages where received by remote store node."
-          
+
+  NetworkConfig:
+    type: struct
+    fields:
+      boostrap_nodes:
+        type: array<string>
+        default: ""
+        description: "Bootstrap nodes, entree and multiaddr formats are accepted."
+      static_store_nodes:
+        type: array<string>
+        default: []
+        description: "Only the passed nodes are used for store queries, discovered store nodes are discarded."
+      cluster_id:
+        type: uint
+        default: 1
+      sharding_mode:
+        constraints: ["auto", "static"]
+      auto_sharding_config:
+        type: option<AutoShardingConfig>
+        default: none
+        description: "The auto-sharding config, if sharding mode is `auto`"
+
   AutoShardingConfig:
     type: struct
     fields:
@@ -194,6 +197,24 @@ If the node is configured in `relay` mode, it MUST:
 
 `edge` mode SHOULD be used if node functions in resource restricted environment,
 whereas `relay` SHOULD be used if node has no hard restrictions.
+
+#### Default Values
+
+```yaml
+values:
+  TheWakuNetworkPreset:
+    type: NetworkConfig 
+    fields:
+      bootstrap_nodes: ["enrtree://AIRVQ5DDA4FFWLRBCHJWUWOO6X6S4ZTZ5B667LQ6AJU6PEYDLRD5O@sandbox.waku.nodes.status.im"]
+      static_store_nodes: #TODO: enter sandbox store nodes multiaddr
+      cluster_id: 1
+      sharding_mode: "auto"
+      auto_sharding_config: TheWakuNetworkAutoShardingConfig
+  TheWakuNetworkAutoShardingConfig:
+    type: AutoShardingConfig
+    fields:
+      numShardsInCluster: 8
+```
 
 ## Security/Privacy Considerations
 
