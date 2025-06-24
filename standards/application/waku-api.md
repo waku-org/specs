@@ -61,7 +61,10 @@ An alternative would be to choose a programming language. However, such choice m
   - `struct`: object and other nested types
   - `option`: a value that can be set or left null
   - `array`: iterable object containing values of all the same type
-  - `Multiaddr`: a libp2p multiaddress; may be an object or a string, most idiomatic approach depending on the language
+  - `multiaddr`: a libp2p multiaddress; may be an object or a string, most idiomatic approach depending on the language
+  - `result`: an enum type that either contain a return value (success), or an error (failure). The error is left to the implementor
+  - `error`: Left to the implementor on whether `error` types are `string` or `object` in the given language.
+- The first parameter of a function MAY be considered as the object on which a method is called. It is left to the implementor on whether an objective programming approach is idiomatic to the language.
 
 ### Application
 
@@ -85,28 +88,22 @@ language_mappings:
       - functions: "snake_case"
       - variables: "snake_case"
       - types: "PascalCase"
-    error_handling: "Result<T, E>"
-    async_pattern: "tokio"
     
   golang: 
     naming_convention:
        - functions: "snake_case"
        - variables: "snake_case"
        - types: "PascalCase"
-    error_handling: "error_return"
-    package_name: "waku"
     
   c:
     naming_convention: "snake_case"
     prefix: "waku_"
-    error_handling: "error_codes"
     
   typescript:
     naming_convention:
       - functions: "camelCase"
       - variables: "camelCase"
       - types: "PascalCase"
-    error_handling: "Promise<T>"
     module_type: "esm"
 ```
 
@@ -115,6 +112,10 @@ language_mappings:
 
 ```yaml
 types:
+  WakuNode:
+    type: struct
+    description: "A Waku node instance."
+  
   Config:
     type: struct
     fields:
@@ -166,18 +167,16 @@ types:
 
 ### Initialise Waku Node
 
-TODO: define WakuNode?
-
 ```yaml
 functions:
   init:
-    description: "Initialise the waku node"
+    description: "Initialise a Waku node instance"
     parameters:
-        - name: config
-          type: Config
-          description: "The Waku node configuration."
+      - name: config
+        type: Config
+        description: "The Waku node configuration."
     returns:
-        type: result<void, string>
+        type: result<WakuNode, error>
 ```
 
 #### Functionality / Additional Information / Specific Behaviours
@@ -196,7 +195,7 @@ If the node is configured in `relay` mode, it MUST:
 - Serve the [PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/34/peer-exchange.md) protocol.
 
 `edge` mode SHOULD be used if node functions in resource restricted environment,
-whereas `relay` SHOULD be used if node has no hard restrictions.
+whereas `relay` SHOULD be used if node has no strong hardware or bandwidth restrictions.
 
 #### Default Values
 
