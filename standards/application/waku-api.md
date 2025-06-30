@@ -83,28 +83,16 @@ How the API definition should be translated to specific languages.
 
 ```yaml
 language_mappings:
-  rust:
-    naming_convention:
-      - functions: "snake_case"
-      - variables: "snake_case"
-      - types: "PascalCase"
-    
-  golang: 
-    naming_convention:
-       - functions: "snake_case"
-       - variables: "snake_case"
-       - types: "PascalCase"
-    
-  c:
-    naming_convention: "snake_case"
-    prefix: "waku_"
-    
   typescript:
     naming_convention:
       - functions: "camelCase"
       - variables: "camelCase"
       - types: "PascalCase"
-    module_type: "esm"
+  nim:
+    naming_convention:
+      - functions: "camelCase"
+      - variables: "camelCase"
+      - types: "PascalCase"
 ```
 
 
