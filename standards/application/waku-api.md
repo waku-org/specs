@@ -1,6 +1,6 @@
 ---
-title: MESSAGING-API
-name: Messaging API definition
+title: WAKU-API
+name: Waku API definition
 category: Standards Track
 tags: [reliability, application, api, protocol composition]
 editor: Oleksandr Kozlov <oleksandr@status.im>
