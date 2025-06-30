@@ -34,13 +34,6 @@ The API defined in this document is an opinionated-by-purpose method to use the 
 The keywords “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, 
 “RECOMMENDED”, “MAY”, and “OPTIONAL” in this document are to be interpreted as described in [RFC2119](https://www.ietf.org/rfc/rfc2119.txt).
 
-### Definitions
-
-This section defines key terms and concepts used throughout this document.
-Each term is detailed in dedicated subsections to ensure clarity and consistency in interpretation.
-
-`Multiaddr` - a self-describing format for encoding network address of a remote peer as per [libp2p addressing](https://github.com/libp2p/specs/blob/6d38f88f7b2d16b0e4489298bcd0737a6d704f7e/addressing/README.md) specification.
-
 ## API design
 
 ### IDL
@@ -51,31 +44,20 @@ Hence, instead of having the reader learn a new IDL, we propose to use a simple 
 
 An alternative would be to choose a programming language. However, such choice may express unintended opinions on the API.
 
-#### Guidelines
+### Primitive types and general guidelines
 
 - No `default` means that the value is mandatory
 - Primitive types are `string`, `int`, `bool`, `enum` and `uint`
 - Complex pre-defined types are:
-  - `struct`: object and other nested types
-  - `option`: a value that can be set or left null
-  - `array`: iterable object containing values of all the same type
-  - `multiaddr`: a libp2p multiaddress; may be an object or a string, most idiomatic approach depending on the language
-  - `result`: an enum type that either contain a return value (success), or an error (failure). The error is left to the implementor
+  - `struct`: object and other nested types.
+  - `option`: a value that can be set or left null.
+  - `array`: iterable object containing values of all the same type.
+  - `multiaddr`: a libp2p multiaddress; may be an object or a string, most idiomatic approach depending on the language.
+  - `result`: an enum type that either contain a return value (success), or an error (failure); The error is left to the implementor.
   - `error`: Left to the implementor on whether `error` types are `string` or `object` in the given language.
-- The first parameter of a function MAY be considered as the object on which a method is called. It is left to the implementor on whether an objective programming approach is idiomatic to the language.
+- Usage of `result` is RECOMMENDED, usage of exceptions is NOT RECOMMENDED, no matter the language.
 
-### Application
-
-This API is designed for generic use and ease across all programming languages and traditional `REST` architectures.
-
-## The Waku API
-
-```yaml
-api_version: "0.0.1"
-library_name: "waku"
-description: "Waku: a private and censorship-resistant message routing library."
-```
-### Language Mappings
+### Language mappings
 
 How the API definition should be translated to specific languages.
 
@@ -93,8 +75,21 @@ language_mappings:
       - types: "PascalCase"
 ```
 
+### Application
 
-### Type definitions
+This API is designed for generic use and ease across all programming languages, for `edge` and `relay` type nodes.
+
+## The Waku API
+
+```yaml
+api_version: "0.0.1"
+library_name: "waku"
+description: "Waku: a private and censorship-resistant message routing library."
+```
+
+### Initialise Waku node
+
+#### Type definitions
 
 ```yaml
 types:
@@ -146,7 +141,7 @@ types:
         description: "The number of shards in the configured cluster; this is a globally agreed value for each cluster."
 ```
 
-### Initialise Waku Node
+#### Function definitions
 
 ```yaml
 functions:
@@ -160,28 +155,11 @@ functions:
         type: result<WakuNode, error>
 ```
 
-#### Functionality / Additional Information / Specific Behaviours
-
-If the node is operating in `edge` mode, it MUST:
-
-- Use [LIGHTPUSH](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/19/lightpush.md) to send messages
-- Use [FILTER](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/12/filter.md) to receive messages
-- Use [PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/34/peer-exchange.md#abstract) to discover peers
-- Use [STORE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/13/store.md) as per [WAKU-P2P-RELIABILITY](/standards/application/p2p-reliability.md)
-
-If the node is configured in `relay` mode, it MUST:
-
-- Use [RELAY](https://github.com/vacp2p/rfc-index/blob/0277fd0c4dbd907dfb2f0c28b6cde94a335e1fae/waku/standards/core/11/relay.md) protocol.
-- Host endpoints for [LIGHTPUSH](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/19/lightpush.md) and [FILTER](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/12/filter.md).
-- Serve the [PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/34/peer-exchange.md) protocol.
-
-`edge` mode SHOULD be used if node functions in resource restricted environment,
-whereas `relay` SHOULD be used if node has no strong hardware or bandwidth restrictions.
-
-#### Default Values
+#### Predefined values
 
 ```yaml
 values:
+
   TheWakuNetworkPreset:
     type: NetworkConfig 
     fields:
@@ -190,11 +168,43 @@ values:
       cluster_id: 1
       sharding_mode: "auto"
       auto_sharding_config: TheWakuNetworkAutoShardingConfig
+
   TheWakuNetworkAutoShardingConfig:
     type: AutoShardingConfig
     fields:
       numShardsInCluster: 8
 ```
+
+#### Extended definitions
+
+If the `mode` set is `edge`, the initialised `WakuNode` MUST mount:
+
+- [LIGHTPUSH](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/19/lightpush.md) as client 
+- [FILTER](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/12/filter.md) as client
+- [STORE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/13/store.md) as client
+
+And must use mount and use the following protocols to discover peers:
+
+- [PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/34/peer-exchange.md)
+
+If the `mode` set is `relay`, the initialised `WakuNode` MUST mount:
+
+- [RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md)
+- [LIGHTPUSH](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/19/lightpush.md) as service node
+- [FILTER](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/12/filter.md) as service node
+- [PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/34/peer-exchange.md) as service node
+- [STORE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/13/store.md) as client
+
+And must use mount and use the following protocols to discover peers:
+
+- [DISCV5](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/33/discv5.md)
+- [PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/34/peer-exchange.md)
+- [RENDEZVOUS](https://github.com/waku-org/specs/blob/master/standards/core/rendezvous.md)
+
+`edge` mode SHOULD be used if node functions in resource restricted environment,
+whereas `relay` SHOULD be used if node has no strong hardware or bandwidth restrictions.
+
+
 
 ## Security/Privacy Considerations
 
