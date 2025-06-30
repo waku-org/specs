@@ -27,8 +27,6 @@ Application developers SHOULD use it to access capabilities for peer discovery, 
 The accessibility of Waku protocols is capped by the accessibility of their implementations, and hence API.
 This RFC enables a concerted effort to draft an API that is simple and accessible, and provides an opinion on sane defaults.
 
-This effort is best done in an RFC, allowing all current implementors to review and agree on it. 
-
 The API defined in this document is an opinionated-by-purpose method to use the more agnostic [WAKU2]() protocols.
 
 ## Syntax
