@@ -126,11 +126,6 @@ types:
       network_config:
         type: NetworkConfig
         default: TheWakuNetworkPreset
-      active_relay_shards:
-        type: array<uint>
-        constraints: mode == "relay"
-        default: []
-        description: "The shards for relay to subscribe to and participate in."
       store_confirmation:
         type: bool
         default: false
