@@ -9,20 +9,10 @@ contributors:
 
 ## Abstract
 
-This document describes membership management within the RLN smart contract, specifically addressing:
+This document describes membership management within the Rate-Limiting Nullifer (RLN) smart contract, specifically addressing:
 - membership-related contract functionality;
 - suggested parameter values for the initial mainnet deployment;
 - contract governance and upgradability.
-
-Currently, this document focuses solely on membership-related functionality.
-It might later evolve into a comprehensive contract specification.
-
-As of August 2024, RLN is deployed only on Sepolia testnet ([source code](https://github.com/waku-org/waku-rlnv2-contract/blob/main/src/WakuRlnV2.sol)).
-This document aims to outline the path to its mainnet deployment.
-
-## Syntax
-
-The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “NOT RECOMMENDED”, “MAY”, and “OPTIONAL” in this document are to be interpreted as described in [RFC 2119](https://www.ietf.org/rfc/rfc2119.txt).
 
 ## Background
 
@@ -33,27 +23,41 @@ Users interact with the contract to manage their memberships
 and obtain the necessary data for proof generation and verification.
 
 Message transmission is handled by Waku RLN Relay nodes.
-The sender of a message MUST prove its validity according to RLN requirements.
-RLN Relay nodes MUST NOT relay invalid messages.
-For the full specification of RLN Relay, see See [17/WAKU2-RLN-RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/17/rln-relay.md).
+RLN Relay nodes verify the validity of messages according to RLN requirements and do not relay invalid messages.
+For the full specification of RLN Relay, see [17/WAKU2-RLN-RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/17/rln-relay.md).
+
+Currently, this document focuses solely on membership-related functionality.
+It might later evolve into a comprehensive contract specification.
+As of August 2024, RLN is deployed only on Sepolia testnet ([source code](https://github.com/waku-org/waku-rlnv2-contract/blob/main/src/WakuRlnV2.sol)).
+This document aims to outline the path to its mainnet deployment.
 
 ## Contract overview
 
-Let us define membership-related functionalities (hereinafter, functionalities) as follows:
+The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “NOT RECOMMENDED”, “MAY”, and “OPTIONAL” in this document are to be interpreted as described in [RFC 2119](https://www.ietf.org/rfc/rfc2119.txt).
+
+The contract MUST provide the following membership-related functionalities (hereinafter, functionalities):
 - register a membership;
 - extend a membership;
 - erase a membership;
 - withdraw a deposit.
 
-The contract MUST provide the functionalities.
-
 A membership _holder_ is a role that grants special privileges in the context of membership management.
 Each membership MUST have exactly one holder.
-The holder role MUST be assigned at membership registration time to the sender (`msg.sender` in Solidity semantics) of the registration transaction.
+The holder role MUST be assigned at membership registration time to the sender 
+(`msg.sender` in Solidity semantics) of the registration transaction.
+The sender of the registration SHOULD have an RLN `identity_commitment` created.
+For more information on `identity_commitment` creation,
+see [32/RLN-V1](https://github.com/vacp2p/rfc-index/blob/main/vac/32/rln-v1.md).
+
+Membership registration MAY be initiated by a different entity from the one that controls the RLN `identity_secret`,
+which is associated with the respective RLN `identity_commitment`.
+Therefore, the holder role MAY be assigned to a blockchain address that is not derived from the `identity_secret`.
+The contract SHOULD verify that the `identity_commitment` is valid.
+If the `identity_commitment` is not checked or validated,
+the contract MAY be exploited using malicious or malformed inputs.
 When authorizing membership-related requests,
 the contract MUST distinguish between the holder and non-holders,
-and MAY also use additional criteria.
-The holder MAY be a different entity from the one that controls the secret associated with the respective RLN commitment.
+and MAY also implement additional criteria.
 
 The contract MUST support transactions sent directly from externally-owned accounts (EOA).
 The contract MAY support transactions sent via a chain of contract calls,
@@ -133,12 +137,11 @@ Memberships MUST be included in the membership set according to the following ta
 | _ErasedAwaitsWithdrawal_ | No                       |
 | _Erased_                 | No                       |
 
-Memberships MUST NOT be transferable.
-A user MAY use one Ethereum address to manage multiple memberships.
+The holder role MUST NOT be transferable to a different blockchain address.
+A user MAY use one blockchain address to manage multiple memberships.
 A user MAY use one Waku node[^1] to manage multiple memberships.
 
 [^1]: No Waku implementation supports managing multiple memberships from one node (as of August 2024).
-
 
 ## Contract functionalities
 
@@ -150,33 +153,41 @@ Availability of functionalities[^2] MUST be as follows:
 | Erase the membership  | No     | Yes (holder only) | Yes     | No                     | No     |
 | Withdraw the deposit  | No     | No                | No      | Yes (holder only)      | No     |
 
-[^2]: Sending a message is not present in this table because it is part of the RLN Relay protocol and not the contract. For completeness, we note that the membership holder MUST be able to send a message if their membership is _Active_, in _GracePeriod_, or _Expired_. Sending messages with _Expired_ memberships is allowed, because the inclusion (Merkle) proof that the holder provides to RLN Relay only proves that the membership belongs to the membership set, and not that membership's state.
+[^2] Note: Sending a message is not present in this table because it is part of the RLN Relay protocol and not the contract.
+For completeness, we note that the membership holder MUST be able to send a message if their membership is _Active_,
+in _GracePeriod_, or _Expired_. 
+Sending messages with _Expired_ memberships is allowed,
+because the inclusion (Merkle) proof that the holder provides to RLN Relay only proves that the membership belongs to the membership set, and not that membership's state.
 
 ### Register a membership
 
 Membership registration is subject to the following requirements:
 - The holder MUST specify the requested rate limit  `r` of a new membership at registration time[^3].
 - Registration MUST fail if `r < r_{min}` or `r > r_{max}`.
-- The holder MUST lock up a deposit to register a membership.
-- The size of the deposit MUST depend on the specified rate limit.
+- To register a membership, the holder MUST make a tranasction that locks up a deposit in the contract.
+- The amount of the deposit MUST depend on the specified rate limit.
 - In case of a successful registration:
 	- the new membership MUST become _Active_;
-	- the new membership MUST have an active state duration `A > 0` and a grace period duration `G >= 0`;
+	- the new membership MUST have an active state duration `A > 0` and
+   	a grace period duration `G >= 0`;
 	- the current total rate limit MUST be incremented by the rate limit of the new membership.
+
 #### Reusing the rate limit of _Expired_ memberships
 
-Let us define the following rate limits:
+The rate limits are defined as follows:
+
 - `R_{active}` is the total rate limit of all _Active_ memberships;
 - `R_{grace_period}` is the total rate limit of all _GracePeriod_ memberships;
 - `R_{expired}` is the total rate limit of all _Expired_ memberships.
 
-Let us define the free rate limit that is available without reusing the rate limit of _Expired_ memberships as follows:
+The free rate limit that is available without reusing the rate limit of _Expired_ memberships is defined as follows:
 
 ```
 R_{free} = R_{max} - R_{active} - R_{grace_period} - R_{expired}
 ```
 
 Membership registration is additionally subject to the following requirements:
+
 - If `r <= R_{free}`, the new membership MUST be registered (assuming all other necessary conditions hold).
 	- The new membership MAY erase one or multiple _Expired_ memberships and reuse their rate limit.
 - If `r > R_{free}`:
@@ -184,14 +195,14 @@ Membership registration is additionally subject to the following requirements:
 	- if `r <= R_{free} + R_{expired}`, the new membership SHOULD be registered by reusing some _Expired_ memberships.
 - The sender of the registration transaction MAY specify a list of _Expired_ memberships to be erased and their rate limit reused.
 	- If any of the memberships in the list are not _Expired_, the registration MUST fail.
-	- If the list is not provided, the contract MAY use any criteria to select _Expired_ memberships to reuse (see Implementation Suggestions).
+	- If the list is not provided, the contract MAY use any criteria to select _Expired_ memberships to reuse (see [Implementation Suggestions](#implementation-suggestions)).
 	- If the list is not provided, the registration MAY fail even if the membership set contains _Expired_ membership that, if erased, would free up sufficient rate limit.
 - If a new membership A erases an _Expired_ membership B to reuse its rate limit:
 	- membership B MUST become _ErasedAwaitsWithdrawal_;
 	- the current total rate limit MUST be decremented by the rate limit of membership B;
 	- the contract MUST take all necessary steps to ensure that the holder of membership B can withdraw their deposit later.
 
-[^3]: A user-facing application SHOULD suggest default rate limits to the holder (see Implementation Suggestions).
+[^3]: A user-facing application SHOULD suggest default rate limits to the holder (see [Implementation Suggestions](#implementation-suggestions)).
 
 ### Extend a membership
 
@@ -223,12 +234,12 @@ The contract MAY restrict extensions for memberships created before the latest p
 The _Owner_ MUST be able to pause any of the functionalities (see definition above).
 
 At some point, the _Owner_ SHOULD renounce their privileges,
-and the contract MUST become immutable.
+and the contract becomes immutable.
 If further upgrades are necessary,
 a new contract SHOULD be deployed,
 and the membership set SHOULD be migrated.
 
-## Implementation Suggestions
+## [Implementation Suggestions](#implementation-suggestions)
 
 ### Membership Set Implementation
 
@@ -373,8 +384,4 @@ Copyright and related rights waived via [CC0](https://creativecommons.org/public
 - [Rate-Limiting Nullifier](https://rate-limiting-nullifier.github.io/rln-docs/)
 - [11/WAKU2-RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md)
 - [17/WAKU2-RLN-RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/17/rln-relay.md)
-
-
-
-
-
+- [32/RLN-V1](https://github.com/vacp2p/rfc-index/blob/main/vac/32/rln-v1.md)
