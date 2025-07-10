@@ -106,8 +106,8 @@ This protocol opts for 32bit variants to optimize for mobile and resource constr
 ## Framing 
 ```mermaid 
 flowchart TD
-    UmbraEnvelopeV1 <--> EncryptedPayload
-    EncryptedPayload <--> D{En/Decrypt}
+    WapEnvelopeV1 --> EncryptedPayload
+    EncryptedPayload --> D{Decrypt}
     D --> InboxV1Frame
 ```
 
