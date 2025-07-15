@@ -134,7 +134,7 @@ message InboxV1Frame {
 message EncryptedPayload {
 
     oneof encryption {
-		NoiseKN noise_KN = 3;
+		NoiseKN noise_KN = 1;
     }
    
     message NoiseKN {
