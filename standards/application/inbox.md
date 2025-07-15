@@ -111,9 +111,9 @@ flowchart TD
     D --> InboxV1Frame
 ```
 
-### EncryptedBytes
+### EncryptedPayload
 
-The EncryptedBytes message is a self-describing wrapper for all encrypted payloads. 
+The EncryptedPayload message is a self-describing wrapper for all encrypted payloads. 
 This message type makes no assumptions about the encryption used and allows new conversation types to use the same messaging framework.
 
 As this protocol uses the KN noise handshake, the encoding wrapper uses the corresponding type. 
