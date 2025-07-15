@@ -97,7 +97,7 @@ The noise handshake is implemented with the following functions:
 
 The noise protocol name would then be `Noise_KNfallback_25519_ChaChaPoly_BLAKE2s`
 
-This protocol opts for 32bit variants to optimize for mobile and resource constrained environments.
+This protocol opts for 32bit platform optimized variants(where possible) to reduce overhead in mobile and resource constrained environments.
 
 ### Endianness
 
