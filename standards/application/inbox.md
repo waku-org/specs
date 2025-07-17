@@ -79,7 +79,7 @@ KNfallback:
   -> e, ee, es	
  ```
 
-In this case the responder provides both `s` and `e` out of band. 
+In this case the recipient provides both `s` and `e` out of band. 
 
 The handshake’s primary purpose is to provide sender confidentiality, with some forward secrecy. 
 The handshake is similar to a one way N handshake with a recipient side ephemeral key.   
