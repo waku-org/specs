@@ -204,7 +204,15 @@ And must use mount and use the following protocols to discover peers:
 `edge` mode SHOULD be used if node functions in resource restricted environment,
 whereas `relay` SHOULD be used if node has no strong hardware or bandwidth restrictions.
 
+## The Validation API
 
+[RLN Relay]() is currently the primary message validation mechanism in place.
+
+Work is scheduled to specify a validate API to enable plug-in validation.
+As part of this API, it will be expected that an validation object can be passed,
+that would contain all validation parameters including RLN.
+
+In the time being, we 
 
 ## Security/Privacy Considerations
 
