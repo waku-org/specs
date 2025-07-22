@@ -47,8 +47,10 @@ Parts that are not specified here are considered implementation details.
 Implementors are free to decide on how to implement these details.
 
 
-## Implementation Suggestions (optional)
-An optional *implementation suggestions* section may provide suggestions on how to approach implementation details, and, 
+## Implementation Suggestions
+An *implementation suggestions* section may provide suggestions on how to approach implementation details,
+as well as more context an implementer may need to be aware off when proceeding with the implementation.
+
 if available, point to existing implementations for reference.
 
 
