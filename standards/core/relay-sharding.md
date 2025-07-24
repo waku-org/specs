@@ -223,9 +223,21 @@ Generation default value is `0`.
 - Full length `/0/myapp/1/mytopic/cbor`
 - Short length `/myapp/1/mytopic/cbor`
 
-#### Generation
+#### Generation and scaling
 
-The generation number monotonously increases and indirectly refers to the total number of shards of the Waku Network.
+The generation number monotonously increases and indirectly refers to the total number of shards of a defined network.
+In order to scale,
+each subsequent generation of a defined network can define a larger `number_of_shards_in_network`,
+with the content topics only sharded to the number of shards defined for the corresponding generation of the network.
+Generational autosharding MUST be clearly defined for each generation of a network.
+
+For example, consider a specific network defined as the 2 shards `0` and `1` in cluster `32`.
+This will automatically be assumed to be generation `0` of this network.
+All content topics in the format `/myapp/1/mytopic/cbor` defined for apps on this network will be autosharded to 1 of these 2 shards.
+If in future the specifiers of this network want to scale the network to 4 shards (i.e. shards `0` to `3` on cluster `32`),
+they MUST define a generation `1` version of the network with `number_of_shards_in_network = 4`.
+New content topics for apps on generation `1` of this network MUST be prefixed in the format `/1/myapp/1/mytopic/cbor` to be autosharded into all 4 shards.
+Legacy generation `0` content topics will still only be autosharded into the original 2 shards.
 
 <!-- Create a new RFC for each generation spec. -->
 
