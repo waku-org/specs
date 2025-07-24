@@ -34,9 +34,13 @@ This document also covers discovery of topic shards.
 
 ## Named Sharding
 
+> **_Note:_** As of 2025-07-24 named sharding has been deprecated from all Waku implementations.
+It is still described here as background for static and automatic sharding.
+
 _Named sharding_ offers apps to freely choose pubsub topic names.
 It is RECOMMENDED for App protocols to follow the naming structure detailed in [23/WAKU2-TOPICS](https://github.com/vacp2p/rfc-index/blob/main/waku/informational/23/topics.md).
 With named sharding, managing discovery falls into the responsibility of apps.
+For this reason it is NOT RECOMMENDED that app protocols and Waku implementations make use of named sharding.
 
 From an app protocol point of view, a subscription to a content topic `waku2/xxx` on a shard named /mesh/v1.1.1/xxx would look like:
 
@@ -44,9 +48,14 @@ From an app protocol point of view, a subscription to a content topic `waku2/xxx
 
 ## Static Sharding
 
-_Static sharding_ offers a set of shards with fixed names.
+_Static sharding_ is an extension of named sharding that offers a set of shards with _fixed_ names.
 Assigning content topics to specific shards is up to app protocols,
 but the discovery of these shards is managed by Waku.
+This is the RECOMMENDED default format for shards chosen by an app protocol.
+It is RECOMMENDED that, for simplification of configuration and various APIs,
+all app-level protocols only interact with `cluster` and `shard`
+and never the fully-formed pubsub topic,
+which is a concern internal to the Waku core.
 
 Static shards are managed in shard clusters of 1024 shards per cluster.
 Waku static sharding can manage $2^{16}$ shard clusters.
@@ -74,6 +83,9 @@ The global shard with index 0 and the "all app protocols" range are treated in t
 but choosing shards in the global cluster has a higher probability of sharing the shard with other apps.
 This offers k-anonymity and better connectivity, but comes at a higher bandwidth cost.
 
+Since the introduction of [the Waku Network](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/64/network.md),
+it is RECOMMENDED that apps choose a shard within the defined range for that network.
+
 The name of the pubsub topic corresponding to a given static shard is specified as
 
 `/waku/2/rs/<cluster_id>/<shard_number>`,
@@ -88,12 +100,9 @@ an example for the 2nd shard in the global shard cluster:
 
 From an app point of view, a subscription to a content topic `waku2/xxx` on a static shard would look like:
 
-`subscribe("/waku2/xxx", 43)`
-
-for global shard 43.
-And for shard 43 of the Status app (which has allocated index 16):
-
 `subscribe("/waku2/xxx", 16, 43)`
+
+for shard 43 of the Status app (which has allocated index 16).
 
 ### Discovery
 
@@ -166,9 +175,19 @@ This example node is part of shards `13`, `14`, and `45` in the Status main-net 
 
 ## Automatic Sharding
 
-Autosharding selects shards automatically and is the default behavior for shard choice.
-The other choices being static and named sharding as seen in previous sections.
-Shards (pubsub topics) SHOULD be computed from content topics with the procedure below.
+Autosharding is an extension of static sharding, 
+where shards can automatically be selected based on content topic.
+This is only possible in cases where there exists a clear definition of a "network" combining multiple shards
+with a predefined cluster ID and number of shards in the network (`number_of_shards_in_network`).
+An example is [the Waku Network](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/64/network.md).
+To use autosharding,
+the shards corresponding to the network definition MUST be numbered from `0` and monotonously increase to `number_of_shards_in_network - 1`.
+The Waku Network SHOULD be considered the default destination for all app-level protocols.
+In cases where the Waku Network is not used but autosharding is desired,
+the default number of shards in a network SHOULD be considered `1`.
+
+When using autosharding,
+shards (pubsub topics) MUST be computed from content topics with the procedure below.
 
 #### Algorithm
 
@@ -282,3 +301,4 @@ Copyright and related rights waived via [CC0](https://creativecommons.org/public
 - [Research log: Waku Discovery](https://vac.dev/wakuv2-apd)
 - [WAKU2-RELAY-STATIC-SHARD-ALLOC](../../informational/relay-static-shard-alloc.md)
 - [14/WAKU2-MESSAGE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/14/message.md)
+- [64/WAKU2-NETWORK](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/64/network.md)
