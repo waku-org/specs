@@ -34,7 +34,7 @@ This document also covers discovery of topic shards.
 
 ## Named Sharding
 
-> **_Note:_** As of 2025-07-24 named sharding has been deprecated from all Waku implementations.
+> **_Note:_** As of 2025-07-24 freely named sharding has been deprecated from all Waku implementations.
 It is still described here as background for static and automatic sharding.
 
 _Named sharding_ offers apps to freely choose pubsub topic names.
@@ -52,14 +52,15 @@ _Static sharding_ is an extension of named sharding that offers a set of shards 
 Assigning content topics to specific shards is up to app protocols,
 but the discovery of these shards is managed by Waku.
 This is the RECOMMENDED default format for shards chosen by an app protocol.
-It is RECOMMENDED that, for simplification of configuration and various APIs,
-all app-level protocols only interact with `cluster` and `shard`
-and never the fully-formed pubsub topic,
-which is a concern internal to the Waku core.
 
 Static shards are managed in shard clusters of 1024 shards per cluster.
 Waku static sharding can manage $2^{16}$ shard clusters.
 Each shard cluster is identified by its index (between $0$ and $2^{16}-1$).
+
+It is RECOMMENDED that, for simplification of configuration and various APIs,
+all app-level protocols only interact with `cluster` and `shard`
+and never the fully-formed pubsub topic,
+which is a concern internal to the Waku implementation.
 
 A specific shard cluster is either globally available to all apps,
 specific for an app protocol,
@@ -84,7 +85,7 @@ but choosing shards in the global cluster has a higher probability of sharing th
 This offers k-anonymity and better connectivity, but comes at a higher bandwidth cost.
 
 Since the introduction of [the Waku Network](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/64/network.md),
-it is RECOMMENDED that apps choose a shard within the defined range for that network.
+it is RECOMMENDED that apps choose a cluster + shard within the defined range for that network.
 
 The name of the pubsub topic corresponding to a given static shard is specified as
 
