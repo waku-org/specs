@@ -96,14 +96,14 @@ types:
   WakuNode:
     type: struct
     description: "A Waku node instance."
-  
+
   Config:
     type: struct
     fields:
-      mode: 
+      mode:
         type: string
         # For now, a mode **must** be passed by the developer
-        constraints: ["edge", "relay"]
+        constraints: [ "edge", "relay" ]
         description: "The mode of operation of the Waku node. Core protocols used by the node are inferred from this mode."
       network_config:
         type: NetworkConfig
@@ -125,23 +125,23 @@ types:
         description: "Bootstrap nodes, entree and multiaddr formats are accepted."
       static_store_nodes:
         type: array<string>
-        default: []
+        default: [ ]
         description: "Only the passed nodes are used for store queries, discovered store nodes are discarded."
       cluster_id:
         type: uint
       sharding_mode:
-        constraints: ["auto", "static"]
+        constraints: [ "auto", "static" ]
         # The default network config is TheWakuNetwork, but if a dev override it, then we still provide a sharding default
         default: "auto"
       auto_sharding_config:
         type: option<AutoShardingConfig>
         default: DefaultAutoShardingConfig
-        description: "The auto-sharding config, if sharding mode is `auto`" 
+        description: "The auto-sharding config, if sharding mode is `auto`"
 
   AutoShardingConfig:
     type: struct
     fields:
-      numShardsInCluster:
+      num_shards_in_cluster:
         type: uint
         description: "The number of shards in the configured cluster; this is a globally agreed value for each cluster."
 ```
@@ -166,9 +166,9 @@ functions:
 values:
 
   TheWakuNetworkPreset:
-    type: NetworkConfig 
+    type: NetworkConfig
     fields:
-      bootstrap_nodes: ["enrtree://AIRVQ5DDA4FFWLRBCHJWUWOO6X6S4ZTZ5B667LQ6AJU6PEYDLRD5O@sandbox.waku.nodes.status.im"]
+      bootstrap_nodes: [ "enrtree://AIRVQ5DDA4FFWLRBCHJWUWOO6X6S4ZTZ5B667LQ6AJU6PEYDLRD5O@sandbox.waku.nodes.status.im" ]
       static_store_nodes: #TODO: enter sandbox store nodes multiaddr
       cluster_id: 1
       sharding_mode: "auto"
@@ -178,13 +178,13 @@ values:
     type: AutoShardingConfig
     fields:
       numShardsInCluster: 8
-  
+
   # If TheWakuNetworkPreset is not used, autosharding is one cluster is applied by default
   # This is a safe default that abstract shards (content topic shard derivation), and enables scaling at a later stage
   DefaultAutoShardingConfig:
     type: AutoShardingConfig
     fields:
-      numShardsInCluster: 1
+      num_shards_in_cluster: 1
 ```
 
 #### Extended definitions
