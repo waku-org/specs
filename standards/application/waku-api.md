@@ -145,7 +145,7 @@ types:
 
 ```yaml
 functions:
-  init:
+  create:
     description: "Initialise a Waku node instance"
     parameters:
       - name: config
