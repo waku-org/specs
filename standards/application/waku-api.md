@@ -102,6 +102,7 @@ types:
     fields:
       mode: 
         type: string
+        # For now, a mode **must** be passed by the developer
         constraints: ["edge", "relay"]
         description: "The mode of operation of the Waku node. Core protocols used by the node are inferred from this mode."
       network_config:
@@ -109,6 +110,7 @@ types:
         default: TheWakuNetworkPreset
       store_confirmation:
         type: bool
+        # Until further dogfooding, assuming default false, usage of SDS should be preferred
         default: false
         description: "No-payload store hash queries are made to confirm whether outbound messages where received by remote store node."
 
@@ -117,6 +119,8 @@ types:
     fields:
       boostrap_nodes:
         type: array<string>
+        # Default means the node does not bootstrap, it is not ideal but practical for local development
+        # TODO: get feedback
         default: ""
         description: "Bootstrap nodes, entree and multiaddr formats are accepted."
       static_store_nodes:
@@ -125,13 +129,14 @@ types:
         description: "Only the passed nodes are used for store queries, discovered store nodes are discarded."
       cluster_id:
         type: uint
-        default: 1
       sharding_mode:
         constraints: ["auto", "static"]
+        # The default network config is TheWakuNetwork, but if a dev override it, then we still provide a sharding default
+        default: "auto"
       auto_sharding_config:
         type: option<AutoShardingConfig>
-        default: none
-        description: "The auto-sharding config, if sharding mode is `auto`"
+        default: DefaultAutoShardingConfig
+        description: "The auto-sharding config, if sharding mode is `auto`" 
 
   AutoShardingConfig:
     type: struct
@@ -173,6 +178,13 @@ values:
     type: AutoShardingConfig
     fields:
       numShardsInCluster: 8
+  
+  # If TheWakuNetworkPreset is not used, autosharding is one cluster is applied by default
+  # This is a safe default that abstract shards (content topic shard derivation), and enables scaling at a later stage
+  DefaultAutoShardingConfig:
+    type: AutoShardingConfig
+    fields:
+      numShardsInCluster: 1
 ```
 
 #### Extended definitions
