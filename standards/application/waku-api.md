@@ -131,12 +131,16 @@ types:
         type: uint
       sharding_mode:
         constraints: [ "auto", "static" ]
-        # The default network config is TheWakuNetwork, but if a dev override it, then we still provide a sharding default
+        # If the default config for TWN is not used, then we still provide a sharding default
         default: "auto"
       auto_sharding_config:
         type: option<AutoShardingConfig>
         default: DefaultAutoShardingConfig
         description: "The auto-sharding config, if sharding mode is `auto`"
+      message_validation:
+        type: MessageValidation
+        # If the default config for TWN is not used, then we still provide a message validation default 
+        default: DefaultMessageValidation
 
   AutoShardingConfig:
     type: struct
@@ -144,6 +148,33 @@ types:
       num_shards_in_cluster:
         type: uint
         description: "The number of shards in the configured cluster; this is a globally agreed value for each cluster."
+
+  MessageValidation:
+    type: struct
+    fields:
+      max_message_size_bytes:
+        type: uint
+        default: 153600 # 150 KiB
+        description: "The maximum accepted message size in Bytes"
+      # For now, RLN is the only message validation available
+      rln_config:
+        type: option<RlnConfig>
+        # If the default config for TWN is not used, then we do not apply RLN
+        default: none
+
+  RlnConfig:
+    type: struct
+    fields:
+      contract_address:
+        type: string
+        description: "The address of the RLN contract exposes `root` and `getMerkleRoot` ABIs"
+      chain_id:
+        type: uint
+        description: "The chain id on which the RLN contract is deployed"
+      epoch_size_sec:
+        type: uint
+        description: "The epoch size to use for RLN, in seconds"
+      # Note that the limit for 
 ```
 
 #### Function definitions
@@ -172,19 +203,34 @@ values:
       static_store_nodes: #TODO: enter sandbox store nodes multiaddr
       cluster_id: 1
       sharding_mode: "auto"
-      auto_sharding_config: TheWakuNetworkAutoShardingConfig
+      auto_sharding_config:
+        fields:
+          numShardsInCluster: 8
+      message_validation:
 
-  TheWakuNetworkAutoShardingConfig:
-    type: AutoShardingConfig
+  TheWakuNetworkMessageValidation:
+    type: MessageValidation
     fields:
-      numShardsInCluster: 8
+      max_message_bytes_uint: 153600 # 150 KiB
+      rln_config:
+        fields:
+          contract_address: "0xB9cd878C90E49F797B4431fBF4fb333108CB90e6"
+          chain_id: 59141
+          epoch_size_sec: 600 # 10 minutes
 
-  # If TheWakuNetworkPreset is not used, autosharding is one cluster is applied by default
-  # This is a safe default that abstract shards (content topic shard derivation), and enables scaling at a later stage
+  # If not preset is used, autosharding on one cluster is applied by default
+  # This is a safe default that abstract shards (content topic shard derivation), and it enables scaling at a later stage
   DefaultAutoShardingConfig:
     type: AutoShardingConfig
     fields:
       num_shards_in_cluster: 1
+
+  # If no preset is used, we only apply a max size limit to messages
+  DefaultMessageValidation:
+    type: MessageValidation
+    fields:
+      max_message_bytes_uint: 153600 # 150 KiB
+      rln_config: none
 ```
 
 #### Extended definitions
