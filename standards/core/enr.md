@@ -8,26 +8,27 @@ contributors:
 
 ## Abstract
 
-This RFC describes the usage of the ENR (Ethereum Node Records) format for [10/WAKU2](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/10/waku2.md) purposes.
+This specification describes the usage of the ENR (Ethereum Node Records)
+format for [10/WAKU2](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/10/waku2.md) purposes.
 The ENR format is defined in [EIP-778](https://eips.ethereum.org/EIPS/eip-778) [[3]](#references).
 
-This RFC is an extension of EIP-778, ENR used in Waku v2 MUST adhere to both EIP-778 and 31/WAKU2-ENR.
+This specification is an extension of EIP-778, ENR used in Waku MUST adhere to both EIP-778 and 31/WAKU2-ENR.
 
 ## Motivation
 
-EIP-1459 with the usage of ENR has been implemented [[1]](#references) [[2]](#references) as a discovery protocol for Waku v2.
+EIP-1459 with the usage of ENR has been implemented [[1]](#references) [[2]](#references) as a discovery protocol for Waku.
 
 EIP-778 specifies a number of pre-defined keys.
 However, the usage of these keys alone does not allow for certain transport capabilities to be encoded,
 such as Websocket.
-Currently, Waku v2 nodes running in a Browser only support websocket transport protocol.
+Currently, Waku nodes running in a browser only support websocket transport protocol.
 Hence, new ENR keys need to be defined to allow for the encoding of transport protocol other than raw TCP.
 
 ### Usage of Multiaddr Format Rationale
 
 One solution would be to define new keys such as `ws` to encode the websocket port of a node.
 However, we expect new transport protocols to be added overtime such as quic.
-Hence, this would only provide a short term solution until another RFC would need to be added.
+Hence, this would only provide a short term solution until another specification would need to be added.
 
 Moreover, secure websocket involves SSL certificates.
 SSL certificates are only valid for a given domain and ip, so an ENR containing the following information:
@@ -47,10 +48,12 @@ Hence, it uses [multiaddr](https://github.com/multiformats/multiaddr) to format 
 Directly storing one or several multiaddresses in the ENR would fix the issues listed above:
 
 - multiaddr is self-describing and support addresses for any network protocol:
-  No new RFC would be needed to support encoding other transport protocols in an ENR.
+  No new specification would be needed to support encoding other transport protocols in an ENR.
 - multiaddr contains both the host and port information, allowing the ambiguity previously described to be resolved.
 
-## `multiaddrs` ENR key
+## Wire Format
+
+### `multiaddrs` ENR key
 
 We define a `multiaddrs` key.
 
@@ -71,7 +74,7 @@ We define a `multiaddrs` key.
 
 #### Many connection types
 
-Alice is a node operator, she runs a node that supports inbound connection for the following protocols:
+Alice is a Waku node operator, she runs a node that supports inbound connection for the following protocols:
 
 - TCP 10101 on `1.2.3.4`
 - UDP 20202 on `1.2.3.4`
@@ -94,7 +97,7 @@ Alice SHOULD structure the ENR for her node as follows:
 | `secp256k1`  | Alice's compressed secp256k1 public key, 33 bytes                                                                                                                   |
 | `multiaddrs` | <code>len1 &#124; /dns4/example.com/tcp/443/wss &#124; len2 &#124; /dns4/quic.examle.com/tcp/443/quic &#124; len3 &#124; /ip4/1.2.3.4/tcp/55555/p2p/QmRelay </code> |
 
-Where:
+Where `multiaddrs`:
 
 - `|` is the concatenation operator,
 - `len1` is the length of `/dns4/example.com/tcp/443/wss` byte representation,
@@ -103,11 +106,11 @@ Where:
 
 #### Raw TCP only
 
-Bob is a node operator, he runs a node that supports inbound connection for the following protocols:
+Bob is a node operator that runs a node that supports inbound connection for the following protocols:
 
 - TCP 10101 on `1.2.3.4`
 
-Bob SHOULD structure the ENR for her node as follows:
+Bob SHOULD structure the ENR for his node as follows:
 
 | key         | value                                           |
 | ----------- | ----------------------------------------------- |
@@ -115,16 +118,16 @@ Bob SHOULD structure the ENR for her node as follows:
 | `ip`        | `1.2.3.4`                                       |
 | `secp256k1` | Bob's compressed secp256k1 public key, 33 bytes |
 
-Indeed, as Bob's node's connection details can be represented with EIP-778's pre-defined keys only
-then it is not needed to use the `multiaddrs` key.
+As Bob's node's connection details can be represented with EIP-778's pre-defined keys only,
+it is not needed to use the `multiaddrs` key.
 
 ### Limitations
 
 Supported key type is `secp256k1` only.
 
-In the future, an extension of this RFC could be made to support other elliptic curve cryptography such as `ed25519`.
+Support for other elliptic curve cryptography such as `ed25519` MAY be used.
 
-## `waku2` ENR key
+### `waku2` ENR key
 
 We define a `waku2` field key:
 
@@ -146,12 +149,12 @@ We define a `waku2` field key:
 
 ### Usage
 
-- A Waku v2 node MAY choose to populate the `waku2` field for enhanced discovery capabilities,
+- A Waku node MAY choose to populate the `waku2` field for enhanced discovery capabilities,
   such as indicating supported protocols.
   Such a node MAY indicate support for any specific protocol by setting the corresponding flag to `true`.
-- Waku v2 nodes that want to participate in [Node Discovery Protocol v5](https://github.com/ethereum/devp2p/blob/master/discv5/discv5.md) [[4]](#references), however,
+- Waku nodes that want to participate in [Node Discovery Protocol v5](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/33/discv5.md) [[4]](#references), however,
   MUST implement the `waku2` key with at least one flag set to `true`.
-- Waku v2 nodes that discovered other participants using Discovery v5,
+- Waku nodes that discovered other participants using Discovery v5,
   MUST filter out participant records that do not implement this field or do not have at least one flag set to `true`.
 - In addition, such nodes MAY choose to filter participants on specific flags (such as supported protocols),
   or further interpret the `waku2` field as required by the application.
