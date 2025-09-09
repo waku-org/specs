@@ -174,7 +174,9 @@ types:
       epoch_size_sec:
         type: uint
         description: "The epoch size to use for RLN, in seconds"
-      # Note that the limit for 
+      rpc_api_urls:
+        type: array<string>
+        description: "Web3 RPC API URLs"
 ```
 
 #### Function definitions
