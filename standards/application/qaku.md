@@ -10,21 +10,23 @@ contributors:
 
 ## Abstract
 
-The document describes the different components of the Qaku web application.
-Qaku is a Waku web applications that utilizes some Waku protocols to provide a private and
+This document describes the different components of the Qaku web application.
+Qaku is a Waku web applications that utilizes Waku protocols to provide a private and
 censorship-resistent question and answer service.
 
 ## Background
 
-Waku is a family of robust,
+The Qaku web application Waku is a family of robust,
 censorship-resistant communication protocols designed to enable privacy-focused messaging for the decentralized web.
+Using Wak
 Current Q&A platforms are controlled by centralized organizations who have the ability to remove, 
 block and censor content published by any user.
 This could cause a user to not express their ideas or ask reall questions with fear of prosecution by a thrid party. 
 
-Qaku aims to solve this by utilizing a few [10/WAKU](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/10/waku2.md) protocols to create a Q&A forum.
-The user can create a Q&A board with a wallet address, 
-send questions or answers directly to other peers without the need of storing and/or retrieving the content from a centralized server/domain.
+Qaku uses some [10/WAKU](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/10/waku2.md) protocols to create a decentralized,
+censorship-resistant Q&A forum.
+The user can create a Q&A board with a identity address which publicly shared with other peers.
+Questions and answers are sent directly to other peers without the need of storing and/or retrieving the content from a centralized provider.
 Familiar features like upvoting, sharable links, and board moderation are also capable.
 
 ## Specification
