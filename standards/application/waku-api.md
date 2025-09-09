@@ -112,7 +112,7 @@ types:
         type: bool
         # Until further dogfooding, assuming default false, usage of SDS should be preferred
         default: false
-        description: "No-payload store hash queries are made to confirm whether outbound messages where received by remote store node."
+        description: "No-payload store hash queries are made to confirm whether outbound messages were received by remote store node."
 
   NetworkConfig:
     type: struct
