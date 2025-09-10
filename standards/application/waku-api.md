@@ -112,6 +112,9 @@ types:
         # Until further dogfooding, assuming default false, usage of SDS should be preferred
         default: false
         description: "No-payload store hash queries are made to confirm whether outbound messages were received by remote store node."
+      eth_rpc_endpoints:
+        type: array<string>
+        description: "Eth/Web3 RPC endpoint URLs"
 
   NetworkConfig:
     type: struct
@@ -173,9 +176,6 @@ types:
       epoch_size_sec:
         type: uint
         description: "The epoch size to use for RLN, in seconds"
-      rpc_api_urls:
-        type: array<string>
-        description: "Web3 RPC API URLs"
 ```
 
 #### Function definitions
