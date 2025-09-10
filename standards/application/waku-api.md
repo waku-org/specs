@@ -52,7 +52,6 @@ An alternative would be to choose a programming language. However, such choice m
   - `struct`: object and other nested types.
   - `option`: a value that can be set or left null.
   - `array`: iterable object containing values of all the same type.
-  - `multiaddr`: a libp2p multiaddress; may be an object or a string, most idiomatic approach depending on the language.
   - `result`: an enum type that either contain a return value (success), or an error (failure); The error is left to the implementor.
   - `error`: Left to the implementor on whether `error` types are `string` or `object` in the given language.
 - Usage of `result` is RECOMMENDED, usage of exceptions is NOT RECOMMENDED, no matter the language.
