@@ -108,7 +108,7 @@ types:
         type: option<NetworkConfig>
         default: TheWakuNetworkPreset
       store_confirmation:
-        type: bool
+        type: option<bool>
         # Until further dogfooding, assuming default false, usage of SDS should be preferred
         default: false
         description: "No-payload store hash queries are made to confirm whether outbound messages were received by remote store node."
