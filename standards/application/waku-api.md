@@ -105,7 +105,7 @@ types:
         constraints: [ "edge", "relay" ]
         description: "The mode of operation of the Waku node. Core protocols used by the node are inferred from this mode."
       network_config:
-        type: NetworkConfig
+        type: option<NetworkConfig>
         default: TheWakuNetworkPreset
       store_confirmation:
         type: bool
