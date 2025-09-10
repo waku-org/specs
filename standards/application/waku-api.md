@@ -207,7 +207,7 @@ values:
       auto_sharding_config:
         fields:
           numShardsInCluster: 8
-      message_validation:
+      message_validation: TheWakuNetworkMessageValidation
 
   TheWakuNetworkMessageValidation:
     type: MessageValidation
