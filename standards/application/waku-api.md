@@ -46,11 +46,10 @@ An alternative would be to choose a programming language. However, such choice m
 
 ### Primitive types and general guidelines
 
-- No `default` means that the value is mandatory
+- No `default` means that the value is mandatory, meaning a `default` value implies an optional parameter.
 - Primitive types are `string`, `int`, `bool`, `enum` and `uint`
 - Complex pre-defined types are:
   - `struct`: object and other nested types.
-  - `option`: a value that can be set or left null.
   - `array`: iterable object containing values of all the same type.
   - `result`: an enum type that either contain a return value (success), or an error (failure); The error is left to the implementor.
   - `error`: Left to the implementor on whether `error` types are `string` or `object` in the given language.
@@ -101,14 +100,14 @@ types:
     fields:
       mode:
         type: string
-        # For now, a mode **must** be passed by the developer
         constraints: [ "edge", "relay" ]
+        default: *platform dependent*
         description: "The mode of operation of the Waku node. Core protocols used by the node are inferred from this mode."
       network_config:
-        type: option<NetworkConfig>
+        type: NetworkConfig
         default: TheWakuNetworkPreset
       store_confirmation:
-        type: option<bool>
+        type: bool
         # Until further dogfooding, assuming default false, usage of SDS should be preferred
         default: false
         description: "No-payload store hash queries are made to confirm whether outbound messages were received by remote store node."
@@ -123,20 +122,14 @@ types:
         type: array<string>
         # Default means the node does not bootstrap, it is not ideal but practical for local development
         # TODO: get feedback
-        default: ""
         description: "Bootstrap nodes, entree and multiaddr formats are accepted."
       static_store_nodes:
         type: array<string>
-        default: [ ]
         description: "Only the passed nodes are used for store queries, discovered store nodes are discarded."
       cluster_id:
         type: uint
-      sharding_mode:
-        constraints: [ "auto", "static" ]
-        # If the default config for TWN is not used, then we still provide a sharding default
-        default: "auto"
       auto_sharding_config:
-        type: option<AutoShardingConfig>
+        type: AutoShardingConfig
         default: DefaultAutoShardingConfig
         description: "The auto-sharding config, if sharding mode is `auto`"
       message_validation:
@@ -160,7 +153,7 @@ types:
         description: "The maximum accepted message size in Bytes"
       # For now, RLN is the only message validation available
       rln_config:
-        type: option<RlnConfig>
+        type: RlnConfig
         # If the default config for TWN is not used, then we do not apply RLN
         default: none
 
@@ -203,7 +196,6 @@ values:
       bootstrap_nodes: [ "enrtree://AIRVQ5DDA4FFWLRBCHJWUWOO6X6S4ZTZ5B667LQ6AJU6PEYDLRD5O@sandbox.waku.nodes.status.im" ]
       static_store_nodes: #TODO: enter sandbox store nodes multiaddr
       cluster_id: 1
-      sharding_mode: "auto"
       auto_sharding_config:
         fields:
           numShardsInCluster: 8
