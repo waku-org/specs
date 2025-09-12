@@ -91,11 +91,12 @@ description: "Waku: a private and censorship-resistant message routing library."
 
 ```yaml
 types:
-  WakuNode:
+  WakuNodeHandle:
     type: struct
-    description: "A Waku node instance."
+    description: "A representation of Waku node instance. This is built by createNode function and
+                  should be passed to any other API call."
 
-  NodeConfig:
+  WakuConfig:
     type: struct
     fields:
       mode:
@@ -103,8 +104,8 @@ types:
         constraints: [ "edge", "relay" ]
         default: *platform dependent*
         description: "The mode of operation of the Waku node. Core protocols used by the node are inferred from this mode."
-      waku_config:
-        type: WakuConfig
+      topology:
+        type: TopologyConfig
         default: TheWakuNetworkPreset
       store_confirmation:
         type: bool
@@ -114,15 +115,21 @@ types:
       eth_rpc_endpoints:
         type: array<string>
         description: "Eth/Web3 RPC endpoint URLs"
+      message_validation:
+        type: MessageValidation
+        # If the default config for TWN is not used, then we still provide a message validation default
+        default: DefaultMessageValidation
 
-  WakuConfig:
+  TopologyConfig:
     type: struct
     fields:
-      boostrap_nodes:
+      boostraps:
         type: array<string>
         # Default means the node does not bootstrap, it is not ideal but practical for local development
         # TODO: get feedback
-        description: "Bootstrap nodes, entree and multiaddr formats are accepted."
+        description: "ENRs ([EIP-778](https://eips.ethereum.org/EIPS/eip-778)),
+        enrtree ([EIP-1459](https://eips.ethereum.org/EIPS/eip-1459)) and
+        [multiaddr](https://docs.libp2p.io/concepts/fundamentals/addressing/) formats are accepted."
       static_store_nodes:
         type: array<string>
         default: []
@@ -133,10 +140,6 @@ types:
         type: AutoShardingConfig
         default: DefaultAutoShardingConfig
         description: "The auto-sharding config, if sharding mode is `auto`"
-      message_validation:
-        type: MessageValidation
-        # If the default config for TWN is not used, then we still provide a message validation default 
-        default: DefaultMessageValidation
 
   AutoShardingConfig:
     type: struct
@@ -183,7 +186,7 @@ functions:
         type: Config
         description: "The Waku node configuration."
     returns:
-        type: result<WakuNode, error>
+        type: result<WakuNodeHandle, error>
 ```
 
 #### Predefined values
@@ -229,7 +232,7 @@ values:
 
 #### Extended definitions
 
-If the `mode` set is `edge`, the initialised `WakuNode` MUST mount:
+If the `mode` set is `edge`, the initialised `WakuNodeHandle` MUST mount:
 
 - [LIGHTPUSH](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/19/lightpush.md) as client 
 - [FILTER](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/12/filter.md) as client
@@ -239,7 +242,7 @@ And must use mount and use the following protocols to discover peers:
 
 - [PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/34/peer-exchange.md)
 
-If the `mode` set is `relay`, the initialised `WakuNode` MUST mount:
+If the `mode` set is `relay`, the initialised `WakuNodeHandle` MUST mount:
 
 - [RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md)
 - [LIGHTPUSH](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/19/lightpush.md) as service node
