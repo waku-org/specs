@@ -125,6 +125,7 @@ types:
         description: "Bootstrap nodes, entree and multiaddr formats are accepted."
       static_store_nodes:
         type: array<string>
+        default: []
         description: "Only the passed nodes are used for store queries, discovered store nodes are discarded."
       cluster_id:
         type: uint
