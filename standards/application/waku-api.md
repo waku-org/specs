@@ -95,7 +95,7 @@ types:
     type: struct
     description: "A Waku node instance."
 
-  Config:
+  NodeConfig:
     type: struct
     fields:
       mode:
@@ -103,8 +103,8 @@ types:
         constraints: [ "edge", "relay" ]
         default: *platform dependent*
         description: "The mode of operation of the Waku node. Core protocols used by the node are inferred from this mode."
-      network_config:
-        type: NetworkConfig
+      waku_config:
+        type: WakuConfig
         default: TheWakuNetworkPreset
       store_confirmation:
         type: bool
@@ -115,7 +115,7 @@ types:
         type: array<string>
         description: "Eth/Web3 RPC endpoint URLs"
 
-  NetworkConfig:
+  WakuConfig:
     type: struct
     fields:
       boostrap_nodes:
@@ -191,7 +191,7 @@ functions:
 values:
 
   TheWakuNetworkPreset:
-    type: NetworkConfig
+    type: WakuConfig
     fields:
       bootstrap_nodes: [ "enrtree://AIRVQ5DDA4FFWLRBCHJWUWOO6X6S4ZTZ5B667LQ6AJU6PEYDLRD5O@sandbox.waku.nodes.status.im" ]
       static_store_nodes: #TODO: enter sandbox store nodes multiaddr
