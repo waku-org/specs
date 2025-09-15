@@ -101,7 +101,7 @@ types:
       mode:
         type: string
         constraints: [ "edge", "relay" ]
-        default: *platform dependent*
+        default: "_platform dependent_"
         description: "The mode of operation of the Waku node. Core protocols used by the node are inferred from this mode."
       waku_config:
         type: WakuConfig
@@ -111,6 +111,9 @@ types:
         # Until further dogfooding, assuming default false, usage of SDS should be preferred
         default: false
         description: "No-payload store hash queries are made to confirm whether outbound messages were received by remote store node."
+      networking_config:
+        type: NetworkConfig
+        default: DefaultNetworkingConfig
       eth_rpc_endpoints:
         type: array<string>
         description: "Eth/Web3 RPC endpoint URLs"
@@ -118,11 +121,11 @@ types:
   WakuConfig:
     type: struct
     fields:
-      boostrap_nodes:
+      remote_nodes:
         type: array<string>
-        # Default means the node does not bootstrap, it is not ideal but practical for local development
-        # TODO: get feedback
-        description: "Bootstrap nodes, entree and multiaddr formats are accepted."
+        # Default means the node does not bootstrap, e.g. for local development
+        default: []
+        description: "Nodes to connect to; used for discovery bootstrapping and quick connectivity. entree and multiaddr formats are accepted."
       static_store_nodes:
         type: array<string>
         default: []
@@ -137,6 +140,25 @@ types:
         type: MessageValidation
         # If the default config for TWN is not used, then we still provide a message validation default 
         default: DefaultMessageValidation
+
+  NetworkingConfig:
+    type: string
+    fields:
+      listen_address:
+        # Is not applicable in some environments such as browser.
+        type: string
+        default: "0.0.0.0"
+        description: "The network IP address on which libp2p and discv5 listen for inbound connections" 
+      p2p_tcp_port:
+        # Is not applicable in non-TCP environments such as browser
+        type: uint
+        default: 60000
+        description: "The TCP port used for libp2p, relay, aka, general p2p message routing."
+      discv5_udp_port:
+        # Is not applicable in non-UDP environments such as browser
+        type: uint
+        default: 9000
+        description: "The UDP port used for discv5."
 
   AutoShardingConfig:
     type: struct
@@ -191,10 +213,17 @@ functions:
 ```yaml
 values:
 
+  DefaultNetworkingConfig:
+    type: NetworkConfig
+    fields:
+      listen_address: "0.0.0.0"
+      p2p_tcp_port: 60000
+      discv5_udp_port: 9000
+
   TheWakuNetworkPreset:
     type: WakuConfig
     fields:
-      bootstrap_nodes: [ "enrtree://AIRVQ5DDA4FFWLRBCHJWUWOO6X6S4ZTZ5B667LQ6AJU6PEYDLRD5O@sandbox.waku.nodes.status.im" ]
+      remote_nodes: [ "enrtree://AIRVQ5DDA4FFWLRBCHJWUWOO6X6S4ZTZ5B667LQ6AJU6PEYDLRD5O@sandbox.waku.nodes.status.im" ]
       static_store_nodes: #TODO: enter sandbox store nodes multiaddr
       cluster_id: 1
       auto_sharding_config:
