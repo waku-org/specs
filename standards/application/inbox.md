@@ -17,10 +17,6 @@ Communication protocols often face a fundamental bootstrapping problem: how can 
 In a decentralized context, this problem is more pronounced as participants cannot rely on an external service to help navigate version mismatches and client routing. Senders must know where participants are listening for messages and how to encode messages. Clients running older versions of the protocol are not able to interoperate with newer protocol versions which can fragment the network during upgrades.
 
 
-
-## Design goals
-
-
 # Theory / Semantics
 
 ## Definitions
@@ -91,7 +87,7 @@ Each participant has two keys:
 
 As a prerequiste to establishing a secure channel, the `sender` must know the `recipients` InstallationKey and EphemeralKey
 
-How these are transfer is out of scope for this protocol.
+How these are transfered is out of scope for this protocol.
 
 
 ## Key Exchange
@@ -130,14 +126,19 @@ DH: X25519 cipher: AEAD_CHACHA20_POLY1305 hash: BLAKE2b
 ## Recipient Key Identifer 
 Recipients need to know which ephemeral public key was used in the senders noise handshake. To communicate this, senders include a short identifier for the key. 
 
-Calculated as: `blake2b('WAP|{K})`[0..4]
+Calculated as: `blake2b(utf8ToBytes('WAP') || K)`[0..4]
 
 Where 
-- `K` is the publicKey encoded acccording to [section 5](https://datatracker.ietf.org/doc/html/rfc7748#section-5) of rfc7748
+- `K` is the publicKey encoded according to [section 5](https://datatracker.ietf.org/doc/html/rfc7748#section-5) of rfc7748.
+- `||` is byte concatenation
+
+Example:
+  [TODO]
 
 [TODO] The key Identifier is sent unencrypted and thus can be used to link sent payloads to an existing set of participants if the channel used to distribute the pre-messages was compromised. At the moment it needs to be transmitted it is possible to compute `es` which would mean the information could be encrypted prior to transport with modification to the handshake.
 
-## Validation
+## Key Management
+
 
 - Clients MUST ensure that ephemeral keys are used at most once.
 - Once a ephemeral key has been used recipients must discard all future messages attempting to use that key.
@@ -172,12 +173,6 @@ message InboxV1Frame {
     }
 }
 ```
-This message 
-
-
-
-
-
 
 ## Implementation Suggestions (optional)
 
@@ -191,8 +186,6 @@ Implementors should be mindful when choosing a scheme for assigning delivery add
 ## Security/Privacy Considerations
 
 Ephemeral key signing
-
-
 - Weak forward secrecy attack - Ephemeral keys can be chosen by a malicious actor
 - Privacy Concern - Ephemeral key binding
 
