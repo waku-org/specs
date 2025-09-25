@@ -42,6 +42,14 @@ They provide :
  - Mutual Authentication: All participants are confident of who the participants are
  - Forward Secrecy: A compromise in the future does not allow previous messages to be decrypted by a third party.
 
+
+### Message Routing
+
+This protocol assumes that a delivery service is used to transport messages as described by [CHAT-FRAMEWORK](https://github.com/waku-org/specs/blob/jazzz/chat_framework/standards/application/chat-framework.md#delivery-service)
+
+`Senders` must know in advance the `delivery_address` which a client is subscribed to. How this occurs is out-of-scope of this specification.
+
+
 ### Message Flow
 
 - Recipient subscribes to a `delivery_address`.
@@ -66,18 +74,6 @@ sequenceDiagram
 
 ```
 
-
-### Message Routing
-
-This protocol assumes that a delivery service is used to transport messages. To facilitate the delivery of messages this protocol introduces the concept of a `delivery address`. The `delivery address` is an abstraction of the identifier used to route messages in the delivery service of choice. Clients subscribe to a delivery address, in order to receive message the set of messages sent to that address. While messages are not
-
-- Messages sent to a `delivery address` MAY not be delivered to a subscribed client.
-- Messages sent to a `delivery address` MAY arrive out of order
-- All clients subscribed to the same `delivery address` MUST receive the same set of messages under normal operation.
-- Clients subscribed to a `delivery address` MAY receive message 
-- A subscription to a  `delivery address` MAY include messages intended for other subscribers.
-
-`Senders` must know in advance the `delivery_address` which a client is subscribed to. How this occurs is out-of-scope of this specification.
 
 # Encryption
 
