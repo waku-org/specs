@@ -1,6 +1,6 @@
 ---
 title: WakuChat
-name: A private decentralized messaging protocol for multiple usecases.
+name: A private decentralized messaging protocol over Waku.
 category: Standards Track
 status: raw
 tags: chat
@@ -9,130 +9,103 @@ contributors:
 ---
 # Abstract
 
-This specification defines a modular communication protocol designed to provide a privacy focused approach to common messaging patterns. The protocol employs a lean root layer that defers to independent sub-protocols for defining communication behavior, with versioning as a first-class concept for handling protocol evolution.
 
 # Background / Rationale / Motivation
 
-Traditionally communication protocols face several critical challenges as they grow. 
+Waku is a decentralized P2P protocol, which _______. 
 
-Different communication scenarios have vastly different requirements. A protocol optimized for high-volume public broadcasts performs poorly for intimate encrypted conversations, and vice versa. Monolithic protocols cannot optimize for these diverse use cases simultaneously. 
 
-Once widely deployed, communication protocols become difficult to modify. Even minor changes can break compatibility across clients. As a result versioning becomes a complex negotiation problem, which makes deploying protocol updates difficult. At each stage protocols become increasingly difficult to modify, which slows down forward progress and eventually leads to ossification. 
+## Definitions
 
-What is desired is integral protocol resiliency by embedding a versioning strategy from the beginning.
+This document makes use of the shared terminology defined in the [CHAT-DEFINITIONS](https://github.com/waku-org/specs/blob/jazzz/chatdefs/informational/chatdefs.md) specification.
+
+The terms include:
+- Invite
+- OutOfBand
+- Recipient
+- Sender
+
 
 # Theory / Semantics
 
-This protocol is a lean orchestration framework which provides the backbone for smaller independent "Conversation" sub-protocols. Conversation protocols completely define a communication channel. This root protocol provides common functionality to support a wide array of communication use cases, and the remaining functionality is deferred to Conversation protocols to define.
+This specification defines an implementation based on the Chat Protocol framework outlined [here](https://github.com/waku-org/specs/blob/jazzz/chat_framework/standards/application/chat-framework.md)
 
-This specification outlines how clients can initiate messages with one another, determine how to decode/decrypt incoming messages and support a wide range of communication patterns. 
-
- ```mermaid
-sequenceDiagram
-    actor S as Saro 
-    participant SI as Saro DefaultInbox 
-    participant C as Convo 
-    participant RI as Raya DefaultInbox 
-    actor R as Raya 
+- **Discovery Protocol:** OOB Invite Links [TODO: Link to spec]()
+- **Initialization Protocol:** [InboxV1](https://github.com/waku-org/specs/blob/jazzz/inbox_xk0/standards/application/inbox.md)
+- **Conversation Protocols:** [PrivateV1](TODO)
+- **Delivery Service:** Waku
+- **Framing Strategy:** WapEnvelopes with protocol tagging
 
 
-    Note over SI,RI: All clients subscribe to their default Inbox
+# Protocol Definitions
 
-    SI ->> S: Subscribe
-    RI ->> R: Subscribe
+## Discovery Protocol
+Clients are expected to find one another over existing established channels. 
 
-    Note over R: Key Information is exchanged OOB 
-    
-    Note over S: Conversation is created
-    C ->> S : Subscribe
-    S ->> RI : Send Invite `I1`
-    S ->> C : Send Message `M1`
+Data Exchange is specified by using [Invite links](TODO).
 
-    RI --) R : Recv `I1`
-    Note over R: Conversation is joined
-    C ->> R : Subscribe
-    C --) R: Recv `M1`
+Senders require the following data in order to proceed with initialization:
+- Recipient IK
+- Recipient EK
+- 
 
-    R ->> C: Send M2
-    C --) S: Recv M2
- ```
+## Initialization Protocol
+
+## Conversation Protocols
 
 
-## Conversations 
-ConversationTypes are standalone methods to send and receive messages. While a full service "chat" protocol needs to provide additional features such as identity management, message history, backups and versioning, conversations are more narrowly scoped.
+# Transport Definitions
 
-They can be created permissionlessly within the WakuChat Protocol, as there is no required registration. Developers are free to use any given conversation type as long as all intended participants support it.
+## Delivery Service
 
+Waku is used as the Delivery service for all in band payloads. 
 
+Clients MUST connect with with following parameters:
+- ClusterId: 19
+- ShardId: 0
 
-ConversationTypes MUST implement the [Conversations](./conversations.md) specification in order to maintain compatibility. 
+Waku encryption is not used. Instead protocols rely on the application level encryption for confidentiality. 
 
+### ContentTopics
 
-## Versioning Strategy
+The content topic of a payload is defined using [23/WAKU2-TOPICS](https://rfc.vac.dev/waku/informational/23/topics#content-topics) where:
 
-Versioning is one of the hardest problems in decentralized messaging. Keeping a network of decentralized applications and clients up-to-date and version compatible requires careful planning and orchestration. WakuChat's approach to versioning is avoid these problems by removing the issue.
+- **application-name:** `wap`
+- **version-of-the-application:** `0`
+- **content-topic-name:** `chat-{rhex(blake2b(delivery_address, 8))}` #TODO: Decide on client load factor
+- **encoding:** `proto`
 
-In WakuChat incompatible versions of a conversation protocol result in distinct conversationTypes (E.g. PrivateV1 vs PrivateV3). That is; breaking changes are not distinguished by client version, but by ConversationType. This opinionated approach has some interesting outcomes:
+This `content-topic-name` scheme is possible because all protocols used rely on inbox-based-addressing.
 
-- Compatibility is not determined by the version of a client, but rather by which types the participants supported.
-This removes the requirement for all clients to be running the same version, which allows faster roll out of features. Fine grained negotiation of supported types embraces the decentralized nature of the clients and avoids headaches of keeping clients in lockstep.
+## Framing Strategy
 
-- Upgrading to a new ConversationType is equivalent to negotiating a new Conversation and cleaning up the old one.
-This reuses the existing conversation initiation mechanism, which reduces complexity.
-
-- Forces a decoupling between User-level-conversations and the conversationTypes which provide transport. This makes it easier to roll out changes.
-
-Individual conversationTypes can implement functionality to migrate participants to a conversation, but that is deferred to contributors. Individual conversationType are free to choose an upgrade plan that makes sense for their usecases.
-
-
-## Default Inbox
-There exists a circular dependency in initializing a Conversation. Conversations require an established conversation to send an invitation, yet at the beginning no channel exists between contacts. 
-
-To resolve this all clients MUST implement a default [Inbox](./inbox.md) to receive initial messages. The default inbox allows clients to discover new conversations asynchronously without prior coordination. By listening in a static location know to senders, clients can always receive new invitations.
-
-The default inbox MUST be configured with the parameters:
-- **inbox_addr:** `client_address`
-
-One important property of the Inbox is that it can receive different payload types in a single location, by decoupling payload type from the associated contact_topic. New Conversation types will invariably create new payload types. Multiplexing payload types into a single inbox means the default inbox can be reused for undefined future conversationTypes.  
-
-The Default Inbox having public visibility does not preclude Clients having other Inboxes with different levels of visibility. 
-
-As the clients address is directly linked to Default Inbox, this pathway SHOULD only be used as a last resort.  
+All payloads are wrapped in a common envelope type and an encryption wrapper. This provides consistent parsing for clients across all protocols.
 
 
-## Envelopes
-As clients can support multiple sub-protocols simultaneously, a mechanism is required to determine how decode payloads.
+### Envelopes
 
-To process a  payload, a client must know how a payload was encoded/encrypted and what encryption state to use to decrypt it.
+Envelopes attach a reference to the state machine required to process the containing payload.
 
-**Encoding**
-One approach to tracking payload types is to encode it in the content topic. 
-Clients can then infer how to decode the payload, based on where it was received. 
-The downside is that only one type of payload can be received in a content topic. 
-Deploying new types requires a new content topic, which may go unnoticed to clients if they are running an older version or do not support the protocol. 
-Even if the client cannot read the payload, knowing it exists can signal to developers a need to update their applications to support the new types; reducing interaction failure and catching errors.
-
-**Encryption State**
-To determine which encryption state to use in decryption, applications must attach identifying information. One method to achieve this and ensure privacy, is  shield the required identifying information from public view using asymmetric encryption. However double encryption is expensive, and more opportunity for security faults.  
-
+To process a payload, a client must know how a payload was encoded/encrypted and what encryption state to use to decrypt it.
+As clients can support multiple sub-protocols simultaneously, its not always determinable how a message needs to be decrypted/handled. To resolve this a conversation_hint is included with every payload. 
 
 ### Conversation Hinting
 
-Conversation hinting is a mechanism to provide recipients with the necessary information, without exposing conversational metadata.  
+Conversation_ids are sufficient to allow clients to determine how to decrypt a payload. However this would leak Conversation metadata, as observers could determine which payloads belonged together into a group. Instead a hint is used which allows clients to check if this payload is of interest without exposing the identifier.
 
-Naively, conversation_ids are sufficient to allow clients to determine how to decrypt a payload. As the conversation_id corresponds to the ConversationType which defines how payloads are encdoded, and the encryption state is linked to the specific identifier. However this would leak Conversation metadata, as observers could determine which payloads belonged together into a group. Instead a hint is used which allows clients to check if this payload is of interest. A ConversationHint does not contain identifying information. 
-
-ConversationHints are computed by using a salted hash of the `conversationId`. specifically defined as `lowercase_hex(blake2s(salt || conversation_id))`.
+ConversationHints are computed by using a salted hash of the `conversationId`. specifically defined as `rhex(blake2s(salt || conversation_id))`.
 
 Clients can check if a conversation_hint is of interest to them, then retrieve the associated encryption state. Payloads with an unknown hint can be safely disregarded.
+
+TODO: Can this be removed with ratcheting identifiers? Salting requires clients to check every conversation id.
 
 
 ## Wire Format Specification / Syntax
 
 The wire format is specified using protocol buffers v3.
 
-```protobuf
-
+### Envelope
+```
 message WapEnvelopeV1 {
     
     // Indicates which conversation this message belongs to without revealing metadata 
@@ -142,14 +115,15 @@ message WapEnvelopeV1 {
     // Data encoded according to the corresponding ConversationType
     bytes payload = 3;
 }
-
 ```
+This message is the root message of all payloads in the protocol.
+
+- **conversation_hint:** This field contains a utf8 string representing the `conversation_hint`.
+- **salt:** This field contains a 4byte salt used to compute the `conversation_hint`.
+- **payload:** This field contains a protobuf encoded payload.
+
 
 ## Implementation Suggestions (optional)
-
-### Application Interop
-
-Developers wishing to interop with other projects will need to ensure they have overlapping support of ConversationTypes.
 
 ### User level Conversations
 
@@ -160,8 +134,11 @@ Application developers should maintain standalone identifiers for user-level con
 
 Payloads inherit the privacy and security properties of the ConversationType used to send them. Please refer to the corresponding specifications when analyzing properties. 
 
-### Default Inbox Privacy
-Payloads sent to the default inbox are linkable to an client (as it is derived from the clients address). This means that if a target client address is known to an observer, they can determine if any payloads were sent to the target using the default inbox.  In this case the Envelopes contain no sender information, so this does not leak social graph information.
+### Inbox Privacy
+
+Initial messages sent using this protocol do not benefit from recipient privacy. If an attacker learns of a clients inbox conversation_id, they can guess and check all messages for a matching conversation_hint. While not trivial, it must be assumed that attackers can determine if a client has receive a message.
+
+In this case the Envelopes contain no sender information, so this does not leak social graph information.
 
 ## Copyright
 
