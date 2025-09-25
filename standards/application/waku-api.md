@@ -51,7 +51,7 @@ An alternative would be to choose a programming language. However, such choice m
 - Complex pre-defined types are:
   - `struct`: object and other nested types.
   - `array`: iterable object containing values of all the same type.
-  - `result`: an enum type that either contain a return value (success), or an error (failure); The error is left to the implementor.
+  - `result`: an enum type that either contains a value or void (success), or an error (failure); The error is left to the implementor.
   - `error`: Left to the implementor on whether `error` types are `string` or `object` in the given language.
 - Usage of `result` is RECOMMENDED, usage of exceptions is NOT RECOMMENDED, no matter the language.
 
