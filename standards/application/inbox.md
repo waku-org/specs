@@ -126,7 +126,10 @@ The noise handshake is implemented with the following functions:
 DH: X25519 cipher: AEAD_CHACHA20_POLY1305 hash: BLAKE2b
 
 ## Recipient Key Identifer 
-Recipients need to know which ephemeral public key was used in the senders noise handshake. To communicate this, senders include a short identifier for the key. 
+When receiving a payload it is initially unclear which Recipients ephemeral key was used by the sender in the noise handshake. 
+The Recipient sends their ephemeral key out of band, and there may exist many such keys. The recipient could exhaustively attempt decryption with it's available keys however this is potentially inefficient. Additionally in the case of decryption failure, its ambiguious whether the ephemeral keys was never valid or has expired/consumed.
+
+To make this efficient, the Sender includes a short identifier for the key.
 
 Calculated as: `blake2b(utf8ToBytes('WAP') || K)`[0..4]
 
