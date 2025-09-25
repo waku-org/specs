@@ -122,7 +122,7 @@ types:
   WakuConfig:
     type: struct
     fields:
-      remote_nodes:
+      seed_nodes:
         type: array<string>
         # Default means the node does not bootstrap, e.g. for local development
         default: []
