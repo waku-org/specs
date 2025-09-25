@@ -1,5 +1,5 @@
 ---
-title: CHAT
+title: CHAT-FRAMEWORK
 name: A modular framework for defining chat protocols
 category: Information
 status: raw
