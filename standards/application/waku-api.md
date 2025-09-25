@@ -106,11 +106,12 @@ types:
       waku_config:
         type: WakuConfig
         default: TheWakuNetworkPreset
-      store_confirmation:
-        type: bool
+      message_confirmation:
+        type: array<string>
+        constraints: [ "store", "filter" ]
         # Until further dogfooding, assuming default false, usage of SDS should be preferred
-        default: false
-        description: "No-payload store hash queries are made to confirm whether outbound messages were received by remote store node."
+        default: [ "none" ]
+        description: "Whether to apply peer-to-peer reliability strategies to confirm that outgoing message have been received by other peers."
       networking_config:
         type: NetworkConfig
         default: DefaultNetworkingConfig
