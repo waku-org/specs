@@ -1,5 +1,5 @@
 ---
-title: CHAT_DEF
+title: CHAT-DEFINITIONS
 name: Shared definitions for Chat Protocols
 category: Informational
 tags: definitions, terminology, reference
