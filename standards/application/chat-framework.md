@@ -40,13 +40,15 @@ Defining these 5 parameters allows for chat protocol implementations to be fully
 
 ### Delivery service
 
-The service or method that distributes payloads to clients is called abstractly called a `Delivery Service` or `DS`.
+A Delivery Service (DS) is the service or method that distributes payloads to clients. A DS accepts payloads with a delivery_address and delivers them to all subscribers of that delivery_address. Protocols use delivery_addresses to establish delivery contracts between senders and recipients. The mapping of delivery_addresses to DS-level concepts is implementation-specific.
 
-- a DS MUST have a method for clients to subscribe to messages.
-- a DS MAY NOT guarantee delivery of messages.
-- a DS MAY NOT guarantee order of messages.
+#### Requirements
 
-How protocols are mapped to DS level concepts is to be defined by implementors. 
+- -A DS MUST provide a method for clients to subscribe to messages from a delivery_address
+- Payloads sent to a delivery_address are delivered by a DS to all subscribers of that delivery_address
+- A DS MAY NOT guarantee message delivery
+- A DS MAY NOT guarantee message ordering
+
 
 ### Framing Strategy
 
