@@ -12,7 +12,26 @@ contributors:
 
 ## Table of contents
 
-TODO
+<!-- TOC -->
+  * [Table of contents](#table-of-contents)
+  * [Abstract](#abstract)
+  * [Motivation](#motivation)
+  * [Syntax](#syntax)
+  * [API design](#api-design)
+    * [IDL](#idl)
+    * [Primitive types and general guidelines](#primitive-types-and-general-guidelines)
+    * [Language mappings](#language-mappings)
+    * [Application](#application)
+  * [The Waku API](#the-waku-api)
+    * [Initialise Waku node](#initialise-waku-node)
+      * [Type definitions](#type-definitions)
+      * [Function definitions](#function-definitions)
+      * [Predefined values](#predefined-values)
+      * [Extended definitions](#extended-definitions)
+  * [The Validation API](#the-validation-api)
+  * [Security/Privacy Considerations](#securityprivacy-considerations)
+  * [Copyright](#copyright)
+<!-- TOC -->
 
 ## Abstract
 
