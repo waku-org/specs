@@ -21,8 +21,14 @@ In a decentralized context, this problem is more pronounced as participants cann
 
 ## Definitions
 
-This document makes use of the shared terminology defined in the [CHATDEFS]() protocol.
-[Sender, Recipient, invite, OutOfBand]
+This document makes use of the shared terminology defined in the [CHAT-DEFINITIONS](https://github.com/waku-org/specs/blob/jazzz/chatdefs/informational/chatdefs.md) specification.
+
+The terms include:
+- Invite
+- OutOfBand
+- Recipient
+- Sender
+
 
 ## Inbox
 
