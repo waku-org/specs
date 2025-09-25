@@ -171,10 +171,10 @@ types:
   MessageValidation:
     type: struct
     fields:
-      max_message_size_bytes:
-        type: uint
-        default: 153600 # 150 KiB
-        description: "The maximum accepted message size in Bytes"
+      max_message_size:
+        type: string
+        default: "150 KiB"
+        description: "Maximum message size. Accepted units: KiB, KB, and B. e.g. 1024KiB; 1500 B; etc."
       # For now, RLN is the only message validation available
       rln_config:
         type: RlnConfig
@@ -288,13 +288,14 @@ whereas `relay` SHOULD be used if node has no strong hardware or bandwidth restr
 
 ## The Validation API
 
-[RLN Relay]() is currently the primary message validation mechanism in place.
+[WAKU2-RLN-RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/17/rln-relay.md) is currently the primary message validation mechanism in place.
 
 Work is scheduled to specify a validate API to enable plug-in validation.
-As part of this API, it will be expected that an validation object can be passed,
+As part of this API, it will be expected that a validation object can be passed,
 that would contain all validation parameters including RLN.
 
-In the time being, we 
+In the time being, parameters specific to RLN are accepted for the message validation.
+RLN can also be disabled.
 
 ## Security/Privacy Considerations
 
