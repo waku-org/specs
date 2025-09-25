@@ -145,7 +145,7 @@ types:
   NetworkingConfig:
     type: string
     fields:
-      listen_address:
+      listen_ipv4:
         # Is not applicable in some environments such as browser.
         type: string
         default: "0.0.0.0"
