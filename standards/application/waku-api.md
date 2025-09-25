@@ -115,6 +115,7 @@ types:
       networking_config:
         type: NetworkConfig
         default: DefaultNetworkingConfig
+      # TODO: to be reviewed, developers have expressed that accepting an object implementing specific traits is useful. 
       eth_rpc_endpoints:
         type: array<string>
         description: "Eth/Web3 RPC endpoint URLs"
