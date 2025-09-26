@@ -15,7 +15,6 @@ matrix:
     - pyspelling.filters.markdown
     - pyspelling.filters.html:
         comments: false
-        attributes: false
     - pyspelling.filters.text
   default_encoding: utf-8
   suggest: true
