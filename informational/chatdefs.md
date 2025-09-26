@@ -57,22 +57,19 @@ Terms are organized into the following categories for clarity and ease of refere
 
 **Delivery Acknowledgement**: A notification from a receiving client to sender that their message was successfully received. While similar to a read-receipt delivery acknowledgements differ in that the acknowledgement originates based on the client, where read-receipts are fired when they are displayed to a user.
 
-**Invite**: [TODO]
+**Invite**: An protocol message from one client to another to estblish a communication channel. Invites notify a client that somone wants to communicate with them, and provides the required information to do so.
 
 
 ### Transports
 
-**Out of Band**: [TODO]
-
-**Delivery Service**: [TODO]
+**Out-of-Band**: The transfer of information using a channel separate from the defined protocol channel. Data sent Out-of-Band is transmitted using an undefined mechanism. This is used when protocols requires information to be shared with another entity, but it does not describe how that should occur. The responsibility to define how this occurs is on implementors or other protocols in the suite. 
 
 
 ### TBD
 
-**Client**: [TODO]
+**Client**: Software that implements a chat protocol. It is responsible for establishing and maintaining communication with the underlying network, performing protocol operations (e.g., encryption, key management, frame generation), and exposing an interface for higher-level software. A Client serves as the technical component that provides messaging capabilities to Applications.
 
-**Application**: [TODO]
-
+**Application**: Software that integrates with a Client in order to send and receive content.
 
 
 
