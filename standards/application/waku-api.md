@@ -142,7 +142,7 @@ types:
   WakuConfig:
     type: struct
     fields:
-      seed_nodes:
+      entry_nodes:
         type: array<string>
         # Default means the node does not bootstrap, e.g. for local development
         default: []
@@ -244,7 +244,7 @@ values:
   TheWakuNetworkPreset:
     type: WakuConfig
     fields:
-      remote_nodes: [ "enrtree://AIRVQ5DDA4FFWLRBCHJWUWOO6X6S4ZTZ5B667LQ6AJU6PEYDLRD5O@sandbox.waku.nodes.status.im" ]
+      entry_nodes: [ "enrtree://AIRVQ5DDA4FFWLRBCHJWUWOO6X6S4ZTZ5B667LQ6AJU6PEYDLRD5O@sandbox.waku.nodes.status.im" ]
       # On TWN, we encourage the usage of discovered store nodes
       static_store_nodes: []
       cluster_id: 1
