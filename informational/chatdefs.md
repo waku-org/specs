@@ -53,7 +53,7 @@ Terms are organized into the following categories for clarity and ease of refere
 
 **Content**: The data that is intended for end-users or applications. Chat protocols transmit and route content between clients. 
 
-**ContentType**: The structured format of content. These data structures represent specific encodings of Text, Image, Audio data. 
+**Content Type**: The structured format of content. These data structures represent specific encodings of Text, Image, Audio data. 
 
 **Delivery Acknowledgement**: A notification from a receiving client to sender that their message was successfully received. While similar to a read-receipt delivery acknowledgements differ in that the acknowledgement originates based on the client, where read-receipts are fired when they are displayed to a user.
 
