@@ -49,13 +49,13 @@ Terms are organized into the following categories for clarity and ease of refere
 
 **Payload**: The encoded bytes as produced by a chat protocol. The term `message` is avoided due to conlicts with other layers.
 
-**Frame**: [TODO]
+**Frame**: A datastructure which is required to implement a chat protocol. Frames are used to disambiguate the objects defined by chat protocols from transport 'messages' and application `content`. 
 
-**Content**: The information that is intended for end-users or applications. This is in contrast with a `frame` which is 
+**Content**: The data that is intended for end-users or applications. Chat protocols transmit and route content between clients. 
 
-**ContentType**: [TODO]
+**ContentType**: The structured format of content. These datastructures represent specific encodings of Text, Image, Audio data. 
 
-**Delivery Acknowledgement**: [TODO]
+**Delivery Acknowledgement**: A notification from a receiving client to sender that their message was successfully received. While similar to a read-receipt delivery acknowledgements differ in that the acknowledgement originates based on the client, where read-receipts are fired when they are displayed to a user.
 
 **Invite**: [TODO]
 
