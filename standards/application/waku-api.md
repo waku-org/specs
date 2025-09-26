@@ -77,6 +77,8 @@ An alternative would be to choose a programming language. However, such choice m
   - `error`: Left to the implementor on whether `error` types are `string` or `object` in the given language.
 - Usage of `result` is RECOMMENDED, usage of exceptions is NOT RECOMMENDED, no matter the language.
 
+TODO: Review whether to specify categories of errors.
+
 ### Language mappings
 
 How the API definition should be translated to specific languages.
@@ -129,16 +131,15 @@ types:
         type: WakuConfig
         default: TheWakuNetworkPreset
       message_confirmation:
-        type: array<string>
-        constraints: [ "store", "filter" ]
-        default: []
+        type: bool
+        default: true
         description: "Whether to apply peer-to-peer reliability strategies to confirm that outgoing message have been received by other peers."
       networking_config:
         type: NetworkConfig
         default: DefaultNetworkingConfig 
       eth_rpc_endpoints:
         type: array<string>
-        description: "Eth/Web3 RPC endpoint URLs, onlyrequired for RLN message validation. Accepting an object for ETH RPC will be added at a later stage. Fail-over available by passing multiple URLs"
+        description: "Eth/Web3 RPC endpoint URLs, only required when RLN is used for message validation; fail-over available by passing multiple URLs. Accepting an object for ETH RPC will be added at a later stage."
 
   WakuConfig:
     type: object
@@ -312,8 +313,8 @@ whereas `relay` SHOULD be used if node has no strong hardware or bandwidth restr
 As defined in [P2P-RELIABILITY](/standards/application/p2p-reliability.md).
 Proceed with confirmation on whether outgoing messages were received by other nodes in the network.
 
-- `store`: [Store-based reliability for publishing is enabled](/standards/application/p2p-reliability.md#1-store-based-reliability-for-publishing)
-- `filter`: [Retransmit on possible message loss detection](/standards/application/p2p-reliability.md#4-retransmit-on-possible-message-loss-detection) by installing filter subscription(s) matching the content topic(s) used for publishing.
+When set to true, [Store-based reliability for publishing](/standards/application/p2p-reliability.md#1-store-based-reliability-for-publishing) SHOULD be enabled.
+In `edge` `mode`, [Retransmit on possible message loss detection](/standards/application/p2p-reliability.md#4-retransmit-on-possible-message-loss-detection) by installing filter subscription(s) matching the content topic(s) used for publishing, MAY be enabled.
 
 ## The Validation API
 
