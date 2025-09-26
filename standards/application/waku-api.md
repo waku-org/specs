@@ -46,7 +46,7 @@ Application developers SHOULD use it to access capabilities for peer discovery, 
 The accessibility of Waku protocols is capped by the accessibility of their implementations, and hence API.
 This RFC enables a concerted effort to draft an API that is simple and accessible, and provides an opinion on sane defaults.
 
-The API defined in this document is an opinionated-by-purpose method to use the more agnostic [WAKU2]() protocols.
+The API defined in this document is an opinionated-by-purpose method to use the more agnostic [WAKU2](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/10/waku2.md) protocols.
 
 ## Syntax
 
@@ -68,7 +68,7 @@ An alternative would be to choose a programming language. However, such choice m
 - No `default` means that the value is mandatory, meaning a `default` value implies an optional parameter.
 - Primitive types are `string`, `int`, `bool`, `enum` and `uint`
 - Complex pre-defined types are:
-  - `struct`: object and other nested types.
+  - `object`: object and other nested types.
   - `array`: iterable object containing values of all the same type.
   - `result`: an enum type that either contains a value or void (success), or an error (failure); The error is left to the implementor.
   - `error`: Left to the implementor on whether `error` types are `string` or `object` in the given language.
@@ -111,11 +111,11 @@ description: "Waku: a private and censorship-resistant message routing library."
 ```yaml
 types:
   WakuNode:
-    type: struct
+    type: object
     description: "A Waku node instance."
 
   NodeConfig:
-    type: struct
+    type: object
     fields:
       mode:
         type: string
@@ -128,7 +128,6 @@ types:
       message_confirmation:
         type: array<string>
         constraints: [ "store", "filter" ]
-        # Until further dogfooding, assuming default false, usage of SDS should be preferred
         default: [ "none" ]
         description: "Whether to apply peer-to-peer reliability strategies to confirm that outgoing message have been received by other peers."
       networking_config:
@@ -140,17 +139,17 @@ types:
         description: "Eth/Web3 RPC endpoint URLs"
 
   WakuConfig:
-    type: struct
+    type: object
     fields:
       entry_nodes:
         type: array<string>
-        # Default means the node does not bootstrap, e.g. for local development
         default: []
-        description: "Nodes to connect to; used for discovery bootstrapping and quick connectivity. entree and multiaddr formats are accepted."
+        description: "Nodes to connect to; used for discovery bootstrapping and quick connectivity. entree and multiaddr formats are accepted. If not provided, node does not bootstrap to the network (local dev)."
       static_store_nodes:
         type: array<string>
         default: []
-        description: "Only the passed nodes are used for store queries, discovered store nodes are discarded."
+        # TODO: confirm behaviour at implementation time.
+        description: "The passed nodes are prioritised for store queries."
       cluster_id:
         type: uint
       auto_sharding_config:
@@ -159,37 +158,34 @@ types:
         description: "The auto-sharding config, if sharding mode is `auto`"
       message_validation:
         type: MessageValidation
-        # If the default config for TWN is not used, then we still provide a message validation default 
+        description: "If the default config for TWN is not used, then we still provide default configuration for message validation." 
         default: DefaultMessageValidation
 
   NetworkingConfig:
     type: string
     fields:
       listen_ipv4:
-        # Is not applicable in some environments such as browser.
         type: string
         default: "0.0.0.0"
-        description: "The network IP address on which libp2p and discv5 listen for inbound connections" 
+        description: "The network IP address on which libp2p and discv5 listen for inbound connections. Not applicable for some environments such as the browser." 
       p2p_tcp_port:
-        # Is not applicable in non-TCP environments such as browser
         type: uint
         default: 60000
-        description: "The TCP port used for libp2p, relay, aka, general p2p message routing."
+        description: "The TCP port used for libp2p, relay, aka, general p2p message routing. Not applicable for some environments such as the browser."
       discv5_udp_port:
-        # Is not applicable in non-UDP environments such as browser
         type: uint
         default: 9000
-        description: "The UDP port used for discv5."
+        description: "The UDP port used for discv5. Not applicable for some environments such as the browser."
 
   AutoShardingConfig:
-    type: struct
+    type: object
     fields:
       num_shards_in_cluster:
         type: uint
         description: "The number of shards in the configured cluster; this is a globally agreed value for each cluster."
 
   MessageValidation:
-    type: struct
+    type: object
     fields:
       max_message_size:
         type: string
@@ -202,7 +198,7 @@ types:
         default: none
 
   RlnConfig:
-    type: struct
+    type: object
     fields:
       contract_address:
         type: string
