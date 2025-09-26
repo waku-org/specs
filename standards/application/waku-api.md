@@ -41,6 +41,8 @@ and for consumers to use as a single entry point to its functionalities.
 This API defines the RECOMMENDED interface for leveraging Waku protocols to send and receive messages. 
 Application developers SHOULD use it to access capabilities for peer discovery, message routing, and peer-to-peer reliability.
 
+TODO: This spec must be further extended to include connection health inspection, message sending, subscription and store hash queries.
+
 ## Motivation
 
 The accessibility of Waku protocols is capped by the accessibility of their implementations, and hence API.
@@ -135,7 +137,7 @@ types:
         default: DefaultNetworkingConfig 
       eth_rpc_endpoints:
         type: array<string>
-        description: "Eth/Web3 RPC endpoint URLs, required for RLN message validation. Accepting an object for ETH RPC will be added at a later stage. Fail-over available by passing multiple URLs"
+        description: "Eth/Web3 RPC endpoint URLs, onlyrequired for RLN message validation. Accepting an object for ETH RPC will be added at a later stage. Fail-over available by passing multiple URLs"
 
   WakuConfig:
     type: object
