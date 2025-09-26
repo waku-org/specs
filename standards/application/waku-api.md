@@ -2,6 +2,7 @@
 title: WAKU-API
 name: Waku API definition
 category: Standards Track
+status: raw
 tags: [reliability, application, api, protocol composition]
 editor: Oleksandr Kozlov <oleksandr@status.im>
 contributors:
