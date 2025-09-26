@@ -120,7 +120,7 @@ types:
       mode:
         type: string
         constraints: [ "edge", "relay" ]
-        default: "_platform dependent_"
+        default: "relay" # "edge" for mobile and browser devices.
         description: "The mode of operation of the Waku node. Core protocols used by the node are inferred from this mode."
       waku_config:
         type: WakuConfig
@@ -128,15 +128,14 @@ types:
       message_confirmation:
         type: array<string>
         constraints: [ "store", "filter" ]
-        default: [ "none" ]
+        default: []
         description: "Whether to apply peer-to-peer reliability strategies to confirm that outgoing message have been received by other peers."
       networking_config:
         type: NetworkConfig
-        default: DefaultNetworkingConfig
-      # TODO: to be reviewed, developers have expressed that accepting an object implementing specific traits is useful. 
+        default: DefaultNetworkingConfig 
       eth_rpc_endpoints:
         type: array<string>
-        description: "Eth/Web3 RPC endpoint URLs"
+        description: "Eth/Web3 RPC endpoint URLs, required for RLN message validation. Accepting an object for ETH RPC will be added at a later stage. Fail-over available by passing multiple URLs"
 
   WakuConfig:
     type: object
@@ -144,7 +143,7 @@ types:
       entry_nodes:
         type: array<string>
         default: []
-        description: "Nodes to connect to; used for discovery bootstrapping and quick connectivity. entree and multiaddr formats are accepted. If not provided, node does not bootstrap to the network (local dev)."
+        description: "Nodes to connect to; used for discovery bootstrapping and quick connectivity. enrtree and multiaddr formats are accepted. If not provided, node does not bootstrap to the network (local dev)."
       static_store_nodes:
         type: array<string>
         default: []
@@ -162,7 +161,7 @@ types:
         default: DefaultMessageValidation
 
   NetworkingConfig:
-    type: string
+    type: object
     fields:
       listen_ipv4:
         type: string
@@ -218,8 +217,8 @@ functions:
   createNode:
     description: "Initialise a Waku node instance"
     parameters:
-      - name: config
-        type: Config
+      - name: nodeConfig
+        type: NodeConfig
         description: "The Waku node configuration."
     returns:
         type: result<WakuNode, error>
@@ -233,7 +232,7 @@ values:
   DefaultNetworkingConfig:
     type: NetworkConfig
     fields:
-      listen_address: "0.0.0.0"
+      listen_ipv4: "0.0.0.0"
       p2p_tcp_port: 60000
       discv5_udp_port: 9000
 
@@ -246,13 +245,13 @@ values:
       cluster_id: 1
       auto_sharding_config:
         fields:
-          numShardsInCluster: 8
+          num_shards_in_cluster: 8
       message_validation: TheWakuNetworkMessageValidation
 
   TheWakuNetworkMessageValidation:
     type: MessageValidation
     fields:
-      max_message_bytes_uint: 153600 # 150 KiB
+      max_message_size: "150 KiB"
       rln_config:
         fields:
           contract_address: "0xB9cd878C90E49F797B4431fBF4fb333108CB90e6"
@@ -270,11 +269,13 @@ values:
   DefaultMessageValidation:
     type: MessageValidation
     fields:
-      max_message_bytes_uint: 153600 # 150 KiB
+      max_message_size: "150 KiB"
       rln_config: none
 ```
 
 #### Extended definitions
+
+**`mode`**:
 
 If the `mode` set is `edge`, the initialised `WakuNode` MUST mount:
 
@@ -302,6 +303,14 @@ And must use mount and use the following protocols to discover peers:
 
 `edge` mode SHOULD be used if node functions in resource restricted environment,
 whereas `relay` SHOULD be used if node has no strong hardware or bandwidth restrictions.
+
+**`message_confirmation`**:
+
+As defined in [P2P-RELIABILITY](/standards/application/p2p-reliability.md).
+Proceed with confirmation on whether outgoing messages were received by other nodes in the network.
+
+- `store`: [Store-based reliability for publishing is enabled](/standards/application/p2p-reliability.md#1-store-based-reliability-for-publishing)
+- `filter`: [Retransmit on possible message loss detection](/standards/application/p2p-reliability.md#4-retransmit-on-possible-message-loss-detection) by installing filter subscription(s) matching the content topic(s) used for publishing.
 
 ## The Validation API
 
