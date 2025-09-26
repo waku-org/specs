@@ -5,6 +5,8 @@ matrix:
   expect_match: false   # false -> supress errors if no markdown files were edited
   aspell:
     lang: en
+    mode: none
+    add-filter: url
   dictionary:
     wordlists:
     - .wordlist.txt
