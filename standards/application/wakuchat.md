@@ -37,6 +37,12 @@ This specification defines an implementation based on the Chat Protocol framewor
 - **Framing Strategy:** WapEnvelopes with protocol tagging
 
 
+# Registration
+
+A client is considered registered when it generates the required values:
+- A static curve25519 keypair referred to as its `InstallationKey` or `IK`
+-  
+
 # Protocol Definitions
 
 ## Discovery Protocol
@@ -47,9 +53,25 @@ Data Exchange is specified by using [Invite links](TODO).
 Senders require the following data in order to proceed with initialization:
 - Recipient IK
 - Recipient EK
-- 
+- delivery_address
+
+Where EK is the ephemeral keys used in the initialization protocol.
 
 ## Initialization Protocol
+This protocol uses `InboxV1` for handling of initial messages.
+
+
+### Delivery Address
+A clients inbox uses a static `delivery_address` so that Senders and Recipients can always derive it the same.
+
+TODO: define delivery_address
+
+### Conversation_id
+A clients inbox uses a static `conversation_id` so that Senders and Recipients can always derive it the same.
+
+It's defined as: `rhex(blake2b("inboxV1" || IK.public))`
+
+TODO: define key format
 
 ## Conversation Protocols
 
@@ -70,9 +92,9 @@ Waku encryption is not used. Instead protocols rely on the application level enc
 
 The content topic of a payload is defined using [23/WAKU2-TOPICS](https://rfc.vac.dev/waku/informational/23/topics#content-topics) where:
 
-- **application-name:** `wap`
+- **application-name:** `wapchat`
 - **version-of-the-application:** `0`
-- **content-topic-name:** `chat-{rhex(blake2b(delivery_address, 8))}` #TODO: Decide on client load factor
+- **content-topic-name:** `chat-{rhex(blake2b(delivery_address, 8))}` #TODO: Decide on client load factor, and where to define prefix
 - **encoding:** `proto`
 
 This `content-topic-name` scheme is possible because all protocols used rely on inbox-based-addressing.
