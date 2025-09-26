@@ -5,13 +5,16 @@ matrix:
   expect_match: false   # false -> supress errors if no markdown files were edited
   aspell:
     lang: en
+    mode: none
+    add-filter:
+      - url
   dictionary:
     wordlists:
     - .wordlist.txt
-  encoding: utf-8
   pipeline:
     - pyspelling.filters.markdown
+    - pyspelling.filters.html:
+        comments: false
     - pyspelling.filters.text
   default_encoding: utf-8
   suggest: true
-
