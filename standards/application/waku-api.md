@@ -99,7 +99,7 @@ language_mappings:
 
 ### Application
 
-This API is designed for generic use and ease across all programming languages, for `edge` and `sovereign` type nodes.
+This API is designed for generic use and ease across all programming languages, for `edge` and `core` type nodes.
 
 ## The Waku API
 
@@ -124,9 +124,9 @@ types:
     fields:
       mode:
         type: string
-        constraints: [ "edge", "sovereign" ]
-        default: "sovereign" # "edge" for mobile and browser devices.
-        description: "The mode of operation of the Waku node. Core protocols used by the node are inferred from this mode."
+        constraints: [ "edge", "core" ]
+        default: "core" # "edge" for mobile and browser devices.
+        description: "The mode of operation of the Waku node; 'edge' of the network: relies on other nodes for message routing; 'core' of the network: fully participate to message routing."
       waku_config:
         type: WakuConfig
         default: TheWakuNetworkPreset
@@ -292,7 +292,7 @@ And must use mount and use the following protocols to discover peers:
 
 - [PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/34/peer-exchange.md)
 
-If the `mode` set is `sovereign`, the initialised `WakuNode` MUST mount:
+If the `mode` set is `core`, the initialised `WakuNode` MUST mount:
 
 - [RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md)
 - [LIGHTPUSH](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/19/lightpush.md) as service node
@@ -308,7 +308,7 @@ And must use mount and use the following protocols to discover peers:
 - [RENDEZVOUS](https://github.com/waku-org/specs/blob/master/standards/core/rendezvous.md)
 
 `edge` mode SHOULD be used if node functions in resource restricted environment,
-whereas `sovereign` SHOULD be used if node has no strong hardware or bandwidth restrictions.
+whereas `core` SHOULD be used if node has no strong hardware or bandwidth restrictions.
 
 **`message_confirmation`**:
 
