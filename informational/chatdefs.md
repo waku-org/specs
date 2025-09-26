@@ -39,21 +39,19 @@ Terms are organized into the following categories for clarity and ease of refere
 
 ### Roles
 
-**Sender**: [TODO]
+**Sender**: A client which is pushing a payload on to the network, to one or more recipients.
 
-**Recipient**: [TODO]
+**Recipient**: A client which is the intended receiver of a payload. In a group context there maybe multiple recipients 
 
-**Participant**: [TODO]
-
-**Operator**: [TODO]
+**Participant**: A generic term for the rightful members of a conversation. Senders and Recipients are roles that participants can hold.
 
 ### Message Types
 
-**Payload**: [TODO]
+**Payload**: The encoded bytes as produced by a chat protocol. The term `message` is avoided due to conlicts with other layers.
 
 **Frame**: [TODO]
 
-**Content**: [TODO]
+**Content**: The information that is intended for end-users or applications. This is in contrast with a `frame` which is 
 
 **ContentType**: [TODO]
 
