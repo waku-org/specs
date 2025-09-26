@@ -6,14 +6,16 @@ matrix:
   aspell:
     lang: en
     mode: none
-    add-filter: url
+    add-filter:
+      - url
   dictionary:
     wordlists:
     - .wordlist.txt
-  encoding: utf-8
   pipeline:
     - pyspelling.filters.markdown
+    - pyspelling.filters.html:
+        comments: false
+        attributes: false
     - pyspelling.filters.text
   default_encoding: utf-8
   suggest: true
-
