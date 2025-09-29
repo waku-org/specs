@@ -130,10 +130,6 @@ types:
       waku_config:
         type: WakuConfig
         default: TheWakuNetworkPreset
-      message_confirmation:
-        type: bool
-        default: true
-        description: "Whether to apply peer-to-peer reliability strategies to confirm that outgoing message have been received by other peers."
       networking_config:
         type: NetworkConfig
         default: DefaultNetworkingConfig 
@@ -281,18 +277,16 @@ values:
 
 **`mode`**:
 
-If the `mode` set is `edge`, the initialised `WakuNode` MUST mount:
+If the `mode` set is `edge`, the initialised `WakuNode` SHOULD use:
 
 - [LIGHTPUSH](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/19/lightpush.md) as client 
 - [FILTER](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/12/filter.md) as client
 - [STORE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/13/store.md) as client
 - [METADATA](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/66/metadata.md) as client
+- [PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/34/peer-exchange.md) as client
+- [P2P-RELIABILITY](/standards/application/p2p-reliability.md)
 
-And must use mount and use the following protocols to discover peers:
-
-- [PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/34/peer-exchange.md)
-
-If the `mode` set is `core`, the initialised `WakuNode` MUST mount:
+If the `mode` set is `core`, the initialised `WakuNode` SHOULD use:
 
 - [RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md)
 - [LIGHTPUSH](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/19/lightpush.md) as service node
@@ -300,23 +294,13 @@ If the `mode` set is `core`, the initialised `WakuNode` MUST mount:
 - [PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/34/peer-exchange.md) as service node
 - [STORE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/13/store.md) as client
 - [METADATA](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/66/metadata.md) as client and service node
-
-And must use mount and use the following protocols to discover peers:
-
+- [P2P-RELIABILITY](/standards/application/p2p-reliability.md)
 - [DISCV5](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/33/discv5.md)
-- [PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/34/peer-exchange.md)
-- [RENDEZVOUS](https://github.com/waku-org/specs/blob/master/standards/core/rendezvous.md)
+- [PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/34/peer-exchange.md) as client and service node
+- [RENDEZVOUS](https://github.com/waku-org/specs/blob/master/standards/core/rendezvous.md) as client and service node
 
 `edge` mode SHOULD be used if node functions in resource restricted environment,
 whereas `core` SHOULD be used if node has no strong hardware or bandwidth restrictions.
-
-**`message_confirmation`**:
-
-As defined in [P2P-RELIABILITY](/standards/application/p2p-reliability.md).
-Proceed with confirmation on whether outgoing messages were received by other nodes in the network.
-
-When set to true, [Store-based reliability for publishing](/standards/application/p2p-reliability.md#1-store-based-reliability-for-publishing) SHOULD be enabled.
-In `edge` `mode`, [Retransmit on possible message loss detection](/standards/application/p2p-reliability.md#4-retransmit-on-possible-message-loss-detection) by installing filter subscription(s) matching the content topic(s) used for publishing, MAY be enabled.
 
 ## The Validation API
 
