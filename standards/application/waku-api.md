@@ -127,8 +127,8 @@ types:
         constraints: [ "edge", "core" ]
         default: "core" # "edge" for mobile and browser devices.
         description: "The mode of operation of the Waku node; 'edge' of the network: relies on other nodes for message routing; 'core' of the network: fully participate to message routing."
-      waku_config:
-        type: WakuConfig
+      protocols_config:
+        type: ProtocolsConfig
         default: TheWakuNetworkPreset
       networking_config:
         type: NetworkConfig
@@ -137,7 +137,7 @@ types:
         type: array<string>
         description: "Eth/Web3 RPC endpoint URLs, only required when RLN is used for message validation; fail-over available by passing multiple URLs. Accepting an object for ETH RPC will be added at a later stage."
 
-  WakuConfig:
+  ProtocolsConfig:
     type: object
     fields:
       entry_nodes:
@@ -237,7 +237,7 @@ values:
       discv5_udp_port: 9000
 
   TheWakuNetworkPreset:
-    type: WakuConfig
+    type: ProtocolsConfig
     fields:
       entry_nodes: [ "enrtree://AIRVQ5DDA4FFWLRBCHJWUWOO6X6S4ZTZ5B667LQ6AJU6PEYDLRD5O@sandbox.waku.nodes.status.im" ]
       # On TWN, we encourage the usage of discovered store nodes
