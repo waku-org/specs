@@ -29,6 +29,11 @@ contributors:
       * [Function definitions](#function-definitions)
       * [Predefined values](#predefined-values)
       * [Extended definitions](#extended-definitions)
+    * [Subscribe to messages](#subscribe-to-messages)
+      * [Type definitions](#type-definitions-1)
+      * [Function definitions](#function-definitions-1)
+      * [Predefined values](#predefined-values-1)
+      * [Extended definitions](#extended-definitions-1)
   * [The Validation API](#the-validation-api)
   * [Security/Privacy Considerations](#securityprivacy-considerations)
   * [Copyright](#copyright)
@@ -75,6 +80,7 @@ An alternative would be to choose a programming language. However, such choice m
   - `array`: iterable object containing values of all the same type.
   - `result`: an enum type that either contains a value or void (success), or an error (failure); The error is left to the implementor.
   - `error`: Left to the implementor on whether `error` types are `string` or `object` in the given language.
+  - `event_emitter`: An object that emit events.
 - Usage of `result` is RECOMMENDED, usage of exceptions is NOT RECOMMENDED, no matter the language.
 
 TODO: Review whether to specify categories of errors.
@@ -301,6 +307,59 @@ If the `mode` set is `core`, the initialised `WakuNode` SHOULD use:
 
 `edge` mode SHOULD be used if node functions in resource restricted environment,
 whereas `core` SHOULD be used if node has no strong hardware or bandwidth restrictions.
+
+### Subscribe to messages
+
+#### Type definitions
+
+```yaml
+types:
+  MessageEmitter:
+  type: event_emitter
+  description: "An event emitter for message-related events. Emits events keyed by content topic, with the message payload as bytes."
+  events:
+    string:
+      type: bytes
+      description: "Event emitted when a message is received on the specified content topic. The event name is the content topic string, and the event payload is the raw message bytes."
+```
+
+#### Function definitions
+
+```yaml
+functions:
+  subscribe:
+    description: "Subscribe to specific content topics"
+    parameters:
+      - name: contentTopics
+        type: Array<string>
+        description: "The content topics for the node to subscribe to."
+    returns:
+        type: result<void, error>
+```
+
+#### Predefined values
+
+Extending `WakuNode`:
+
+```yaml
+types:
+    WakuNode:
+      fields:
+        messageEmitter:
+          type: MessageEmitter
+          description: "Event emitter for received messages, keyed by content topic."
+```
+
+#### Extended definitions
+
+**`mode`**:
+
+If the `mode` set is `edge`, `subscribe` SHOULD trigger set up a subscription using [FILTER](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/12/filter.md) as client and [P2P-RELIABILITY](/standards/application/p2p-reliability.md).
+
+If the `mode` set is `core`, `subscribe` SHOULD trigger set up a subscription using [RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md) and [P2P-RELIABILITY](/standards/application/p2p-reliability.md).
+This MAY trigger joining a new shard if not already set.
+
+Only messages on subscribed content topics SHOULD be emitted by `messageEmitter`, meaning messages received via `RELAY` SHOULD be filtered by content topics before emission.
 
 ## The Validation API
 
