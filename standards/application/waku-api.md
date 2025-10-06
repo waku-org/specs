@@ -302,6 +302,57 @@ If the `mode` set is `core`, the initialised `WakuNode` SHOULD use:
 `edge` mode SHOULD be used if node functions in resource restricted environment,
 whereas `core` SHOULD be used if node has no strong hardware or bandwidth restrictions.
 
+## Send messages
+
+#### Type definitions
+
+```yaml
+types:
+  SendMessage:
+    type: object
+    fields:
+      contentTopic:
+        type: string
+        description: "The content topic for the message."
+      payload:
+        type: Uint8Array
+        description: "The message payload as bytes."
+      ephemeral:
+        type: bool
+        default: false
+        description: "Whether the message is ephemeral."
+      rateLimitProof:
+        type: Uint8Array
+        default: none
+        description: "Rate limiting proof as bytes"
+
+  RequestId:
+    type: string
+    description: "A unique identifier for a request"
+```
+
+#### Function definitions
+
+```yaml
+functions:
+  send:
+    description: "Send a message through the Waku network."
+    parameters:
+      - name: message
+        type: SendMessage
+        description: "The message to send"
+    returns:
+      type: result<RequestId, error>
+```
+
+#### Extended definitions
+
+When `message` is sent with `contentTopic` for a first time,
+the node SHOULD trigger a subscription based on `Subscribe to messages` section.
+
+Additionally, the node SHOULD initiate recurring [STORE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/13/store.md) queries
+to validate if sent message was stored on the network and `static_store_nodes` SHOULD be prioritised.
+
 ## The Validation API
 
 [WAKU2-RLN-RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/17/rln-relay.md) is currently the primary message validation mechanism in place.
