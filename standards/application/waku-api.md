@@ -316,7 +316,7 @@ types:
         description: "The content topic for the message."
       payload:
         type: Uint8Array
-        description: "The message payload as bytes."
+        description: "The message data to be sent."
       ephemeral:
         type: bool
         default: false
