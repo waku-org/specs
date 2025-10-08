@@ -313,7 +313,7 @@ types:
     fields:
       contentTopic:
         type: string
-        description: "The content topic for the message."
+        description: "Content-based filtering field as defined in [TOPICS](https://github.com/vacp2p/rfc-index/blob/main/waku/informational/23/topics.md#content-topics)"
       payload:
         type: Uint8Array
         description: "The message data to be sent."
