@@ -69,7 +69,7 @@ An alternative would be to choose a programming language. However, such choice m
 ### Primitive types and general guidelines
 
 - No `default` means that the value is mandatory, meaning a `default` value implies an optional parameter.
-- Primitive types are `string`, `int`, `bool`, `enum` and `uint`
+- Primitive types are `string`, `int`, `bool`, `byte`, `enum` and `uint`
 - Complex pre-defined types are:
   - `object`: object and other nested types.
   - `array`: iterable object containing values of all the same type.
@@ -315,16 +315,16 @@ types:
         type: string
         description: "The content topic for the message."
       payload:
-        type: Uint8Array
+        type: array<byte>
         description: "The message data to be sent."
       ephemeral:
         type: bool
         default: false
-        description: "Whether the message is ephemeral."
+        description: "Whether the message is ephemeral. Read at [ATTRIBUTES](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/14/message.md#message-attributes)"
       rateLimitProof:
-        type: Uint8Array
+        type: array<byte>
         default: none
-        description: "Rate limiting proof as bytes"
+        description: "Rate limiting proof needed for [PUBLISHING](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/17/rln-relay.md#publishing)"
 
   RequestId:
     type: string
@@ -336,7 +336,7 @@ types:
 ```yaml
 functions:
   send:
-    description: "Send a message through the Waku network."
+    description: "Send a message through the network."
     parameters:
       - name: message
         type: SendMessage
