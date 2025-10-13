@@ -318,9 +318,12 @@ types:
   type: event_emitter
   description: "An event emitter for message-related events. Emits events keyed by content topic, with the message payload as bytes."
   events:
-    string:
+    "message:*":
       type: bytes
-      description: "Event emitted when a message is received on the specified content topic. The event name is the content topic string, and the event payload is the raw message bytes."
+      description: "Event emitted when a message is received on the specified content topic. The event name is `message:` concatenated with the content topic string (e.g. `message:/supercrypto/1/notification/proto`, and the event payload is the raw message bytes."
+    "error:*":
+      type: string
+      description: "Event emitted when subscription irrevocably fails for specified content topic. The event name is `error:` concatenated with the content topic string (e.g. `error:/supercrypto/1/notification/proto`, and the event payload is a string describing the error."
 ```
 
 #### Function definitions
@@ -334,7 +337,7 @@ functions:
         type: Array<string>
         description: "The content topics for the node to subscribe to."
     returns:
-        type: result<void, error>
+        type: void
 ```
 
 #### Predefined values
@@ -360,6 +363,19 @@ If the `mode` set is `core`, `subscribe` SHOULD trigger set up a subscription us
 This MAY trigger joining a new shard if not already set.
 
 Only messages on subscribed content topics SHOULD be emitted by `messageEmitter`, meaning messages received via `RELAY` SHOULD be filtered by content topics before emission.
+
+**`error`**:
+
+Only irrevocable failures should lead to emitting a subscription error.
+Failure to reach nodes can be omitted, and should be handled via the health (todo) events;
+[P2P-RELIABILITY](/standards/application/p2p-reliability.md) SHOULD handle automated re-subscriptions and redundancy.
+
+Examples of irrevocable failures are:
+
+- Invalid content topic format
+- Exceeding number of content topics
+- Node not started
+- Other node-level configuration issue
 
 ## The Validation API
 
