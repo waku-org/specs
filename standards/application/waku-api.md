@@ -29,8 +29,10 @@ contributors:
       * [Function definitions](#function-definitions)
       * [Predefined values](#predefined-values)
       * [Extended definitions](#extended-definitions)
-    * [Subscribe to messages](#subscribe-to-messages)
+    * [General events emission](#general-events-emission)
       * [Type definitions](#type-definitions-1)
+    * [Subscribe to messages](#subscribe-to-messages)
+      * [Type definitions](#type-definitions-2)
       * [Function definitions](#function-definitions-1)
       * [Predefined values](#predefined-values-1)
       * [Extended definitions](#extended-definitions-1)
@@ -308,6 +310,27 @@ If the `mode` set is `core`, the initialised `WakuNode` SHOULD use:
 `edge` mode SHOULD be used if node functions in resource restricted environment,
 whereas `core` SHOULD be used if node has no strong hardware or bandwidth restrictions.
 
+### General events emission
+
+#### Type definitions
+
+```yaml
+types:
+  EventEmitter:
+    type: event_emitter
+    description: "An event emitter for general node events."
+    events:
+      "error:subscribe":
+        type: string
+        description: "Event emitted when subscription to a content topic irremediably fails. The event contains an error message."
+  # Extending `WakuNode` definition
+  WakuNode:
+    fields:
+      events:
+      type: EventEmitter
+      description: "Event emitter for Waku node."
+```
+
 ### Subscribe to messages
 
 #### Type definitions
@@ -315,15 +338,18 @@ whereas `core` SHOULD be used if node has no strong hardware or bandwidth restri
 ```yaml
 types:
   MessageEmitter:
-  type: event_emitter
-  description: "An event emitter for message-related events. Emits events keyed by content topic, with the message payload as bytes."
-  events:
-    "message:*":
-      type: bytes
-      description: "Event emitted when a message is received on the specified content topic. The event name is `message:` concatenated with the content topic string (e.g. `message:/supercrypto/1/notification/proto`, and the event payload is the raw message bytes."
-    "error:*":
-      type: string
-      description: "Event emitted when subscription irrevocably fails for specified content topic. The event name is `error:` concatenated with the content topic string (e.g. `error:/supercrypto/1/notification/proto`, and the event payload is a string describing the error."
+    type: event_emitter
+    description: "An event emitter for message-related events. Emits events keyed by content topic, with the message payload as bytes."
+    events:
+      string:
+        type: bytes
+        description: "Event emitted when a message is received on the specified content topic. The event name is the content topic string, and the event payload is the raw message bytes."
+  # Extending `WakuNode` definition
+  WakuNode:
+    fields:
+      messageEmitter:
+        type: MessageEmitter
+        description: "Event emitter for received messages, keyed by content topic."
 ```
 
 #### Function definitions
@@ -342,17 +368,6 @@ functions:
 
 #### Predefined values
 
-Extending `WakuNode`:
-
-```yaml
-types:
-    WakuNode:
-      fields:
-        messageEmitter:
-          type: MessageEmitter
-          description: "Event emitter for received messages, keyed by content topic."
-```
-
 #### Extended definitions
 
 **`mode`**:
@@ -366,11 +381,11 @@ Only messages on subscribed content topics SHOULD be emitted by `messageEmitter`
 
 **`error`**:
 
-Only irrevocable failures should lead to emitting a subscription error.
-Failure to reach nodes can be omitted, and should be handled via the health (todo) events;
+Only irremediable failures should lead to emitting a `"error:subscribe"`.
+Failure to reach nodes can be omitted, and should be handled via the health (TODO) events;
 [P2P-RELIABILITY](/standards/application/p2p-reliability.md) SHOULD handle automated re-subscriptions and redundancy.
 
-Examples of irrevocable failures are:
+Examples of irremediable failures are:
 
 - Invalid content topic format
 - Exceeding number of content topics
