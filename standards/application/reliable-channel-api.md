@@ -21,13 +21,12 @@ contributors:
     * [Primitive types and general guidelines](#primitive-types-and-general-guidelines)
   * [Architecture](#architecture)
     * [SDS Integration](#sds-integration)
-    * [Message Segmentation (Future)](#message-segmentation-future)
-    * [Rate Limit Management (Future)](#rate-limit-management-future)
+    * [Message Segmentation](#message-segmentation)
+    * [Rate Limit Management](#rate-limit-management)
   * [The Reliable Channel API](#the-reliable-channel-api)
     * [Create Reliable Channel](#create-reliable-channel)
       * [Type definitions](#type-definitions)
       * [Function definitions](#function-definitions)
-      * [Predefined values](#predefined-values)
       * [Extended definitions](#extended-definitions)
     * [Send messages](#send-messages)
       * [Function definitions](#function-definitions-1)
@@ -43,6 +42,8 @@ contributors:
     * [Synchronization messages](#synchronization-messages)
     * [Query on connect](#query-on-connect)
     * [Performance considerations](#performance-considerations)
+    * [Ephemeral messages](#ephemeral-messages)
+    * [Message segmentation](#message-segmentation-1)
   * [Security/Privacy Considerations](#securityprivacy-considerations)
   * [Copyright](#copyright)
 <!-- TOC -->
@@ -57,8 +58,8 @@ with message size restrictions such as [WAKU2](https://github.com/vacp2p/rfc-ind
 The Reliable Channel is built on top of:
 - [WAKU-API](/standards/application/waku-api.md) for Waku protocol integration
 - [SDS](https://github.com/vacp2p/rfc-index/blob/main/vac/raw/sds.md) (Scalable Data Sync) for causal ordering and acknowledgments
-- Message segmentation for handling large payloads (TBD)
-- Rate limit management for RLN compliance (TBD)
+- Message segmentation for handling large payloads
+- Rate limit management for [WAKU2-RLN-RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/17/rln-relay.md) compliance
 
 The Reliable Channel API ensures that:
 
@@ -67,7 +68,8 @@ The Reliable Channel API ensures that:
 - Missing messages are automatically detected and retrieved
 - Message delivery is retried until acknowledged or maximum retry attempts are reached
 - Messages are causally ordered using Lamport timestamps
-- Large messages can be segmented to fit transport constraints (TBD)
+- Large messages can be segmented to fit transport constraints
+- Messages are queued or dropped when the underlying routing transport has a rate limit and said limit is being reached
 
 ## Motivation
 
@@ -84,9 +86,8 @@ The Reliable Channel API provides this accessibility by:
 - **Abstracting complexity**: Hides the details of:
   - SDS message wrapping/unwrapping
   - Store queries for missing messages
-  - Query-on-connect behavior
-  - Message segmentation for large payloads (TBD)
-  - Rate limit compliance when using RLN (TBD)
+  - Message segmentation for large payloads
+  - Rate limit compliance when using [WAKU2-RLN-RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/17/rln-relay.md)
 
 The goal is to enable application developers to achieve end-to-end reliability
 with minimal configuration and without deep knowledge of the underlying protocols.
@@ -116,9 +117,9 @@ The Reliable Channel is a layered architecture that combines multiple components
 ┌─────────────────────────────────────────┐
 │      Reliable Channel API               │ ← Application-facing event-driven API
 ├─────────────────────────────────────────┤
-│  Message Segmentation (future)          │ ← Large message splitting/reassembly
+│  Message Segmentation                   │ ← Large message splitting/reassembly
 ├─────────────────────────────────────────┤
-│  Rate Limit Manager (future)            │ ← RLN compliance and pacing
+│  Rate Limit Manager                     │ ← WAKU2-RLN-RELAY compliance & pacing
 ├─────────────────────────────────────────┤
 │  SDS (Scalable Data Sync)               │ ← Causal ordering & acknowledgments
 ├─────────────────────────────────────────┤
@@ -128,7 +129,7 @@ The Reliable Channel is a layered architecture that combines multiple components
 
 ### SDS Integration
 
-The Reliable Channel wraps the [SDS](https://github.com/vacp2p/rfc-index/blob/main/vac/raw/sds.md) `MessageChannel` to provide:
+The Reliable Channel wraps the [SDS](https://github.com/vacp2p/rfc-index/blob/main/vac/raw/sds.md) `MessageChannel`, which provides:
 
 - **Causal ordering**: Using Lamport timestamps to establish message order
 - **Acknowledgments**: Via causal history (definitive) and bloom filters (probabilistic)
@@ -137,25 +138,44 @@ The Reliable Channel wraps the [SDS](https://github.com/vacp2p/rfc-index/blob/ma
 
 The Reliable Channel handles the integration between SDS and Waku protocols:
 - Wrapping user payloads in SDS messages before encoding
-- Unwrapping SDS messages after decoding
+- Unwrapping SDS messages after decoding (extracting `content` field)
+- Subscribing to messages via the Waku node's unified subscribe API
+- Receiving messages via the node's message emitter (content-topic based)
 - Scheduling SDS periodic tasks (sync, buffer sweeps, process tasks)
 - Mapping SDS events to user-facing events
+- Computing retrieval hints (Waku message hashes) for SDS messages
 
-### Message Segmentation (Future)
+### Message Segmentation
 
-For messages exceeding transport limits (e.g., 150 KiB for Waku with RLN):
-- Messages SHOULD be split into multiple segments
+For messages exceeding safe payload limits:
+- Messages SHOULD be split into segments of approximately 100 KB
+- The 100 KB limit accounts for overhead from:
+  - Encryption (message-encryption layer)
+  - [WAKU2-RLN-RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/17/rln-relay.md) proof
+  - SDS metadata (causal history, bloom filter, Lamport timestamp)
+  - Protocol buffers encoding
+- This ensures the final encoded Waku message stays well below the 150 KB routing layer limit
 - Each segment SHOULD be tracked independently through SDS
 - Segments SHOULD be reassembled before delivery to the application
 - Partial message state SHOULD be managed to handle segment loss
+- Segment order MUST be preserved during reassembly
 
-### Rate Limit Management (Future)
+TODO: refer to message segmentation spec
 
-When using [RLN-RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/17/rln-relay.md):
-- The Reliable Channel SHOULD pace message sending to comply with rate limits
-- Messages exceeding the rate limit SHOULD be queued
-- RLN proofs SHOULD be generated for each message/segment
+### Rate Limit Management
+
+When using [WAKU2-RLN-RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/17/rln-relay.md):
+- Regular messages and segments exceeding the rate limit SHOULD be queued
+- Ephemeral messages SHOULD be dropped (not sent nor queued) when the rate limit is approached or reached
+- "Approached" threshold SHOULD be configurable (e.g., drop ephemerals at 90% capacity)
 - Rate limit errors SHOULD be surfaced through events
+- When segmentation is enabled, each segment counts toward the rate limit independently
+- Messages coming from a retry mechanism should be queued when the rate limit is approached.
+
+TODO: refer to rate limit manager spec
+
+Note: at a later stage, we may prefer for the Waku node to expose rate limit information (total rate limit, usage so far)
+instead of having it a configurable on the reliable channel.
 
 ## The Reliable Channel API
 
@@ -227,33 +247,22 @@ types:
 
   MessageId:
     type: string
-    description: "A unique identifier for a message, derived from the message payload."
+    description: "A unique identifier for a logical message, derived from the message payload before segmentation."
 
-  DecodedMessage:
+  MessagePayload:
+    type: array<byte>
+    description: "The unwrapped message content (user payload extracted from SDS message)."
+
+  ChunkInfo:
     type: object
-    description: "A decoded Waku message with unwrapped payload."
+    description: "Information about message segmentation for tracking partial progress."
     fields:
-      payload:
-        type: array<byte>
-        description: "The unwrapped message content."
-      timestamp:
+      chunk_index:
         type: uint
-        description: "The message timestamp."
-      content_topic:
-        type: string
-        description: "The content topic of the message."
-      pubsub_topic:
-        type: string
-        description: "The pubsub topic of the message."
-      hash:
-        type: array<byte>
-        description: "The message hash."
-      ephemeral:
-        type: bool
-        description: "Whether the message is ephemeral."
-      meta:
-        type: array<byte>
-        description: "Optional metadata."
+        description: "Zero-based index of the current chunk (0 to total_chunks-1)."
+      total_chunks:
+        type: uint
+        description: "Total number of chunks for this message."
 ```
 
 #### Function definitions
@@ -272,12 +281,9 @@ functions:
       - name: sender_id
         type: SenderId
         description: "An identifier for this sender. SHOULD be unique and persisted between sessions."
-      - name: encoder
-        type: Encoder
-        description: "The encoder for messages. All messages in the channel use the same encryption layer."
-      - name: decoder
-        type: Decoder
-        description: "The decoder for messages. All messages in the channel use the same encryption layer."
+      - name: content_topic
+        type: ContentTopic
+        description: "The content topic to use for the channel."
       - name: options
         type: ReliableChannelOptions
         description: "Configuration options for the Reliable Channel."
@@ -285,37 +291,18 @@ functions:
       type: result<ReliableChannel, error>
 ```
 
-#### Predefined values
-
-```yaml
-values:
-  DefaultReliableChannelOptions:
-    type: ReliableChannelOptions
-    fields:
-      sync_min_interval_ms: 30000
-      retry_interval_ms: 30000
-      max_retry_attempts: 10
-      retrieve_frequency_ms: 10000
-      sweep_in_buf_interval_ms: 5000
-      query_on_connect: true
-      auto_start: true
-      process_task_min_elapse_ms: 1000
-```
-
 #### Extended definitions
+
+**Default configuration values**: See the [SDS Implementation Suggestions](https://github.com/vacp2p/rfc-index/blob/main/vac/raw/sds.md#sdk-usage-reliablechannel) section for recommended default values for `ReliableChannelOptions`.
 
 **`channel_id` and `sender_id`**:
 
 The `channel_id` MUST be the same for all participants in a channel.
 The `sender_id` SHOULD be unique for each participant and SHOULD be persisted between sessions to ensure proper acknowledgment tracking.
 
-**`encoder` and `decoder`**:
+**`content_topic`**:
 
-A Reliable Channel operates within a singular encryption layer.
-All messages sent and received in the channel MUST use the same encoder and decoder.
-This ensures that:
-- All participants can decrypt all messages
-- Messages are sent to the same content topic(s)
+A Reliable Channel uses a unique content topic. This ensure that all messages are retrievable.
 
 **`options.auto_start`**:
 
@@ -344,16 +331,15 @@ functions:
       type: MessageId
       description: "A unique identifier for the message, used to track events."
 
-  getMessageId:
-    description: "Get the message ID for a given payload. Used to track message events before sending."
-    static: true
+  sendEphemeral:
+    description: "Send an ephemeral message in the channel. Ephemeral messages are not tracked for acknowledgment, not included in causal history, and are dropped when rate limits are approached or reached."
     parameters:
       - name: message_payload
         type: array<byte>
-        description: "The message content (before SDS wrapping)."
+        description: "The message content to send (before SDS wrapping)."
     returns:
       type: MessageId
-      description: "The unique identifier that will be used for this message."
+      description: "A unique identifier for the message, used to track events (limited to `message-sent` or `ephemeral-message-dropped` event)."
 ```
 
 ### Event handling
@@ -369,49 +355,92 @@ types:
     description: "Events emitted by the Reliable Channel."
     events:
       sending-message:
-        type: event<MessageId>
-        description: "Emitted when a message is being sent over the wire. MAY be emitted multiple times if retry mechanism kicks in."
+        type: event<SendingMessageEvent>
+        description: "Emitted when a message chunk is being sent over the wire. MAY be emitted multiple times if retry mechanism kicks in. For segmented messages, emitted once per chunk."
 
       message-sent:
-        type: event<MessageId>
-        description: "Emitted when a message has been sent over the wire but has not been acknowledged yet. MAY be emitted multiple times if retry mechanism kicks in."
+        type: event<MessageSentEvent>
+        description: "Emitted when a message chunk has been sent over the wire but has not been acknowledged yet. MAY be emitted multiple times if retry mechanism kicks in. For segmented messages, emitted once per chunk."
 
       message-possibly-acknowledged:
         type: event<PossibleAcknowledgment>
-        description: "Emitted when a bloom filter indicates the message was possibly received by another party. This is probabilistic. Retry mechanism will wait longer before trying again."
+        description: "Emitted when a bloom filter indicates a message chunk was possibly received by another party. This is probabilistic. For segmented messages, emitted per chunk."
 
       message-acknowledged:
-        type: event<MessageId>
-        description: "Emitted when a message was fully acknowledged by other members of the channel (present in their causal history)."
+        type: event<MessageAcknowledgedEvent>
+        description: "Emitted when a message chunk was fully acknowledged by other members of the channel (present in their causal history). For segmented messages, emitted per chunk as each is acknowledged."
 
       sending-message-irrecoverable-error:
         type: event<MessageError>
-        description: "Emitted when a message could not be sent due to a non-recoverable error (likely an internal error)."
+        description: "Emitted when a message chunk could not be sent due to a non-recoverable error. For segmented messages, emitted per chunk that fails."
 
       message-received:
-        type: event<DecodedMessage>
-        description: "Emitted when a new message has been received from another participant."
+        type: event<MessagePayload>
+        description: "Emitted when a new complete message has been received and reassembled from another participant. The payload is the unwrapped user content (SDS content field). Only emitted once all chunks are received."
 
       irretrievable-message:
         type: event<HistoryEntry>
         description: "Emitted when the channel is aware of a missing message but failed to retrieve it successfully."
+
+      ephemeral-message-dropped:
+        type: event<EphemeralDropReason>
+        description: "Emitted when an ephemeral message was dropped due to rate limit constraints."
+
+  SendingMessageEvent:
+    type: object
+    fields:
+      message_id:
+        type: MessageId
+        description: "The logical message ID."
+      chunk_info:
+        type: ChunkInfo
+        description: "Information about which chunk is being sent. For non-segmented messages, chunk_index=0 and total_chunks=1."
+
+  MessageSentEvent:
+    type: object
+    fields:
+      message_id:
+        type: MessageId
+        description: "The logical message ID."
+      chunk_info:
+        type: ChunkInfo
+        description: "Information about which chunk was sent. For non-segmented messages, chunk_index=0 and total_chunks=1."
+
+  MessageAcknowledgedEvent:
+    type: object
+    fields:
+      message_id:
+        type: MessageId
+        description: "The logical message ID."
+      chunks_acknowledged:
+        type: array<uint>
+        description: "Array of chunk indices that have been acknowledged so far (e.g., [0, 2, 4] means chunks 0, 2, and 4 are acknowledged). Use `.length` to get total count. For non-segmented messages, this is [0]."
+      total_chunks:
+        type: uint
+        description: "Total number of chunks for this message. For non-segmented messages, this is 1."
 
   PossibleAcknowledgment:
     type: object
     fields:
       message_id:
         type: MessageId
-        description: "The message ID that was possibly acknowledged."
+        description: "The logical message ID that was possibly acknowledged."
+      chunk_info:
+        type: ChunkInfo
+        description: "Information about which chunk was possibly acknowledged."
       possible_ack_count:
         type: uint
-        description: "The number of possible acknowledgments detected."
+        description: "The number of possible acknowledgments detected for this chunk."
 
   MessageError:
     type: object
     fields:
       message_id:
         type: MessageId
-        description: "The message ID that encountered an error."
+        description: "The logical message ID that encountered an error."
+      chunk_info:
+        type: ChunkInfo
+        description: "Information about which chunk encountered the error. For non-segmented messages, chunk_index=0 and total_chunks=1."
       error:
         type: error
         description: "The error that occurred."
@@ -419,22 +448,61 @@ types:
   HistoryEntry:
     type: object
     description: "An entry in the message history that could not be retrieved."
+
+  EphemeralDropReason:
+    type: object
+    fields:
+      reason:
+        type: string
+        description: "The reason the ephemeral message was dropped (e.g., 'rate_limit_approached', 'rate_limit_reached')."
+      rate_limit_utilization:
+        type: uint
+        description: "Percentage of rate limit consumed (0-100)."
 ```
 
 #### Extended definitions
 
 **Event lifecycle**:
 
-For each message sent, the following event sequence is expected:
+For each regular message sent via `send()`, the following event sequence is expected:
 
-1. `sending-message`: Emitted when the message encoding and sending begins
-2. `message-sent`: Emitted when the message has been successfully sent over the network
+**Non-segmented messages** (payload ≤ 100 KB):
+1. `sending-message`: Emitted once with `chunk_info.chunk_index=0, total_chunks=1`
+2. `message-sent`: Emitted once with `chunk_info.chunk_index=0, total_chunks=1`
 3. One of:
-   - `message-possibly-acknowledged`: (Optional, probabilistic) Emitted when bloom filters suggest acknowledgment
-   - `message-acknowledged`: Emitted when causal history confirms acknowledgment
+   - `message-possibly-acknowledged`: (Optional, probabilistic) with chunk info
+   - `message-acknowledged`: Emitted once with chunk info when acknowledged
    - `sending-message-irrecoverable-error`: Emitted if an unrecoverable error occurs
 
-Events 1-2 MAY be emitted multiple times if the retry mechanism is activated due to lack of acknowledgment.
+**Segmented messages** (payload > 100 KB):
+1. `sending-message`: Emitted once per chunk (e.g., 5 times for a 5-chunk message)
+   - Each emission includes `chunk_info` showing which chunk (0/5, 1/5, 2/5, 3/5, 4/5)
+2. `message-sent`: Emitted once per chunk with corresponding `chunk_info`
+3. `message-acknowledged`: Emitted each time a new chunk is acknowledged
+   - `chunks_acknowledged` array grows as chunks are acknowledged
+   - Example progression for a 5-chunk message:
+     - First ack: `chunks_acknowledged=[0], total_chunks=5`
+     - Second ack: `chunks_acknowledged=[0, 1], total_chunks=5`
+     - Third ack: `chunks_acknowledged=[0, 1, 3], total_chunks=5` (chunk 2 still pending)
+     - Fourth ack: `chunks_acknowledged=[0, 1, 2, 3], total_chunks=5` (chunk 2 now received)
+   - All events share the same `message_id`
+   - Application can:
+     - Check overall progress: `chunks_acknowledged.length / total_chunks` (e.g., 3/5 = 60%)
+     - Track specific chunks: `chunks_acknowledged.includes(2)` to see if chunk 2 is done
+     - Display which chunks remain: chunks not in the array
+
+Events 1-2 MAY be emitted multiple times per chunk if the retry mechanism is activated.
+
+**For received messages**:
+- `message-received`: Emitted **only once** after all chunks are received and reassembled
+- The payload is the complete reassembled message
+- No chunk information is provided (reassembly is transparent to the receiver)
+
+For ephemeral messages sent via `sendEphemeral()`:
+- Ephemeral messages are NEVER segmented (if too large, they are rejected)
+- `message-sent`: Emitted once with `chunk_info.chunk_index=0, total_chunks=1`
+- `ephemeral-message-dropped`: Emitted if the message is dropped due to rate limit constraints
+- `sending-message-irrecoverable-error`: Emitted if encoding, sending, or size check fails
 
 **Irrecoverable errors**:
 
@@ -442,7 +510,7 @@ The following errors are considered irrecoverable and will trigger `sending-mess
 - Encoding failed
 - Empty payload
 - Message size too large
-- RLN proof generation failed
+- WAKU2-RLN-RELAY proof generation failed
 
 When an irrecoverable error occurs, the retry mechanism SHOULD NOT attempt to resend the message.
 
@@ -453,10 +521,9 @@ When an irrecoverable error occurs, the retry mechanism SHOULD NOT attempt to re
 ```yaml
 functions:
   start:
-    description: "Start the Reliable Channel. Sets up event listeners, begins sync loop, starts missing message retrieval, and subscribes to messages."
+    description: "Start the Reliable Channel. Sets up event listeners, begins sync loop, starts missing message retrieval, and subscribes to messages via the Waku node."
     returns:
-      type: result<bool, error>
-      description: "True if successfully started, error otherwise."
+      type: void
 
   stop:
     description: "Stop the Reliable Channel. Stops sync loop, missing message retrieval, and clears intervals."
@@ -484,29 +551,43 @@ The Reliable Channel MUST use the [SDS](https://github.com/vacp2p/rfc-index/blob
 
 1. **Message wrapping**: User payloads MUST be wrapped in SDS `ContentMessage` before sending:
    ```
-   User payload → SDS ContentMessage → Waku Message → Network
+   User payload → SDS ContentMessage (encode) → Waku Message → Network
    ```
 
 2. **Message unwrapping**: Received Waku messages MUST be unwrapped to extract user payloads:
    ```
-   Network → Waku Message → SDS ContentMessage → User payload
+   Network → Waku Message → SDS Message (decode) → User payload (content field)
    ```
+   - The Reliable Channel receives raw `Uint8Array` payloads from the node's message emitter
+   - SDS decoding extracts the message structure
+   - Only the `content` field is emitted to the application via `message-received` event
 
 3. **SDS configuration**: Implementations SHOULD configure the SDS MessageChannel with:
    - `causalHistorySize`: Number of recent message IDs in causal history (default: 200)
    - `bloomFilterSize`: Bloom filter capacity for probabilistic ACKs (default: 10,000 messages)
    - `bloomFilterErrorRate`: False positive rate (default: 0.001)
 
-4. **Task scheduling**: Implementations MUST periodically call SDS methods:
+4. **Subscription and reception**:
+   - Call `node.subscribe([contentTopic])` to subscribe via the Waku node's unified API
+   - Listen to `node.messageEmitter` on the content topic for incoming messages
+   - Process raw `Uint8Array` payloads through SDS decoding
+   - Extract and emit the `content` field to the application
+
+5. **Retrieval hint computation**:
+   - Compute Waku message hash from the SDS-wrapped payload before sending
+   - Include hash in SDS `HistoryEntry` as `retrievalHint`
+   - Use hash for targeted store queries when retrieving missing messages
+
+6. **Task scheduling**: Implementations MUST periodically call SDS methods:
    - `processTasks()`: Process queued send/receive operations
    - `sweepIncomingBuffer()`: Deliver messages with met dependencies
    - `sweepOutgoingBuffer()`: Identify messages for retry
 
-5. **Event mapping**: SDS events SHOULD be mapped to Reliable Channel events:
+7. **Event mapping**: SDS events SHOULD be mapped to Reliable Channel events:
    - `OutMessageSent` → `message-sent`
    - `OutMessageAcknowledged` → `message-acknowledged`
    - `OutMessagePossiblyAcknowledged` → `message-possibly-acknowledged`
-   - `InMessageReceived` → `message-received`
+   - `InMessageReceived` → (internal, triggers sync restart)
    - `InMessageMissing` → Missing message retrieval trigger
 
 **Default SDS configuration values** (from js-waku):
@@ -597,6 +678,85 @@ To avoid overload when processing many messages:
 3. **Lazy task execution**: Queue process tasks with a minimum elapsed time between executions
 
 **Reference**: `js-waku/packages/sdk/src/reliable_channel/reliable_channel.ts:460-473`
+
+### Ephemeral messages
+
+Ephemeral messages are defined in the [SDS specification](https://github.com/vacp2p/rfc-index/blob/main/vac/raw/sds.md#ephemeral-messages) as short-lived messages for which no synchronization or reliability is required.
+
+**Implementation notes**:
+
+1. **SDS integration**:
+   - Send ephemeral messages with `lamport_timestamp`, `causal_history`, and `bloom_filter` unset
+   - Do NOT add to unacknowledged outgoing buffer after broadcast
+   - Do NOT include in causal history or bloom filters
+   - Do NOT add to local log
+
+2. **Rate limit awareness**:
+   - Before sending an ephemeral message, check rate limit utilization
+   - If utilization >= threshold (default: 90%), drop the message and emit `ephemeral-message-dropped`
+   - This ensures reliable messages are never blocked by ephemeral traffic
+
+3. **Use cases**:
+   - Typing indicators
+   - Presence updates
+   - Real-time status updates
+   - Other transient UI state that doesn't require guaranteed delivery
+
+4. **Receiving ephemeral messages**:
+   - Deliver immediately without buffering for causal dependencies
+   - Emit `message-received` event (same as regular messages)
+   - Do NOT add to local log or acknowledge
+
+**Reference**: SDS specification section on [Ephemeral Messages](https://github.com/vacp2p/rfc-index/blob/main/vac/raw/sds.md#ephemeral-messages)
+
+### Message segmentation
+
+To handle large messages while accounting for protocol overhead, implementations SHOULD:
+
+1. **Segment size calculation**:
+   - Target segment size: ~100 KB (102,400 bytes) of user payload
+   - This accounts for overhead that will be added:
+     - Encryption: Variable depending on encryption scheme (e.g., ~48 bytes for ECIES)
+     - SDS metadata: ~12.8 KB with default causal history (200 × 64 bytes)
+     - WAKU2-RLN-RELAY proof: ~128 bytes
+     - Protobuf encoding overhead: ~few hundred bytes
+   - Final Waku message stays well under 150 KB routing layer limit
+
+2. **Message ID and chunk tracking**:
+   - Compute a single logical `message_id` from the **complete** user payload (before segmentation)
+   - All chunks of the same message share this `message_id`
+   - Each chunk has its own SDS message ID for tracking in causal history
+   - Chunk info (`chunk_index`, `total_chunks`) is included in all events
+
+3. **Segmentation strategy**:
+   - Split large user payloads into ~100 KB chunks
+   - Wrap each chunk in a separate SDS `ContentMessage`
+   - Include segmentation metadata in each SDS message (chunk index, total chunks, logical message ID)
+   - Each chunk is sent and tracked independently through SDS
+
+4. **Event emission**:
+   - `sending-message`: Emitted once per chunk with `chunk_info` indicating which chunk
+   - `message-sent`: Emitted once per chunk with `chunk_info` indicating which chunk
+   - `message-acknowledged`: Emitted each time a new chunk is acknowledged
+     - `chunks_acknowledged` contains ALL acknowledged chunks so far (cumulative)
+     - Example progression: `[0]` → `[0, 1]` → `[0, 1, 3]` → `[0, 1, 2, 3]` → `[0, 1, 2, 3, 4]`
+     - Application can show: `${chunks_acknowledged.length}/${total_chunks} chunks sent (60%)`
+     - Or track individual chunks: `!chunks_acknowledged.includes(2)` to show "chunk 2 pending"
+   - All events for the same logical message share the same `message_id`
+
+5. **Reassembly (receiving)**:
+   - Buffer received chunks keyed by logical message ID
+   - Track which chunks have been received (by chunk index)
+   - Verify chunk count matches expected total from metadata
+   - Reassemble in sequence order when all chunks present
+   - Emit `message-received` **only once** with complete payload
+   - Handle partial message timeout (mark as irretrievable after threshold)
+
+6. **Interaction with retries and rate limits**:
+   - Each chunk is retried independently if not acknowledged
+   - When using WAKU2-RLN-RELAY, each chunk consumes one message slot per epoch
+   - Large messages may take multiple epochs to send completely
+   - Partial acknowledgments allow applications to show progress to users
 
 ## Security/Privacy Considerations
 
