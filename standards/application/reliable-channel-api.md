@@ -246,6 +246,25 @@ types:
   MessagePayload:
     type: array<byte>
     description: "The unwrapped message content (user payload extracted from SDS message)."
+
+  Encryption:
+    type: object
+    description: "Handles for encryption and decryption of messages. Encryption happens after SDS wrapping and before sending; decryption happens after receiving and before SDS unwrapping."
+    fields:
+      encrypt:
+        type: function
+        parameters:
+          - name: clear_payload
+            type: array<byte>
+        returns: array<byte>
+        description: "Encrypts the clear payload (SDS-wrapped message)."
+      decrypt:
+        type: function
+        parameters:
+          - name: encrypted_payload
+            type: array<byte>
+        returns: array<byte>
+        description: "Decrypts the encrypted payload to reveal the SDS-wrapped message."
 ```
 
 #### Function definitions
@@ -267,6 +286,9 @@ functions:
       - name: content_topic
         type: ContentTopic
         description: "The content topic to use for the channel."
+      - name: encryption
+        type: IEncryption
+        description: "Optional encryption/decryption interface. If not provided, messages are sent without encryption (passthrough)."
       - name: options
         type: ReliableChannelOptions
         description: "Configuration options for the Reliable Channel."
