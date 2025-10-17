@@ -20,11 +20,11 @@ contributors:
     * [IDL](#idl)
     * [Primitive types and general guidelines](#primitive-types-and-general-guidelines)
   * [Architecture](#architecture)
-    * [SDS Integration](#sds-integration)
-    * [Message Segmentation](#message-segmentation)
-    * [Rate Limit Management](#rate-limit-management)
+    * [SDS integration](#sds-integration)
+    * [Message segmentation](#message-segmentation)
+    * [Rate limit management](#rate-limit-management)
   * [The Reliable Channel API](#the-reliable-channel-api)
-    * [Create Reliable Channel](#create-reliable-channel)
+    * [Create reliable channel](#create-reliable-channel)
       * [Type definitions](#type-definitions)
       * [Function definitions](#function-definitions)
       * [Extended definitions](#extended-definitions)
@@ -39,7 +39,7 @@ contributors:
     * [SDS MessageChannel integration](#sds-messagechannel-integration)
     * [Message retries](#message-retries)
     * [Missing message retrieval](#missing-message-retrieval)
-    * [Synchronization messages](#synchronization-messages)
+    * [Synchronisation messages](#synchronisation-messages)
     * [Query on connect](#query-on-connect)
     * [Performance considerations](#performance-considerations)
     * [Ephemeral messages](#ephemeral-messages)
@@ -57,7 +57,7 @@ with message size restrictions such as [WAKU2](https://github.com/vacp2p/rfc-ind
 
 The Reliable Channel is built on top of:
 - [WAKU-API](/standards/application/waku-api.md) for Waku protocol integration
-- [SDS](https://github.com/vacp2p/rfc-index/blob/main/vac/raw/sds.md) (Scalable Data Sync) for causal ordering and acknowledgments
+- [SDS](https://github.com/vacp2p/rfc-index/blob/main/vac/raw/sds.md) (Scalable Data Sync) for causal ordering and acknowledgements
 - Message segmentation for handling large payloads
 - Rate limit management for [WAKU2-RLN-RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/17/rln-relay.md) compliance
 
@@ -74,7 +74,7 @@ The Reliable Channel API ensures that:
 ## Motivation
 
 While protocols like [SDS](https://github.com/vacp2p/rfc-index/blob/main/vac/raw/sds.md) provide the mechanisms for achieving reliability
-(causal ordering, acknowledgments, missing message detection),
+(causal ordering, acknowledgements, missing message detection),
 and [WAKU-API](/standards/application/waku-api.md) provides the transport layer,
 there is a need for an opinionated, high-level API that makes these capabilities accessible and easy to use.
 
@@ -121,13 +121,13 @@ The Reliable Channel is a layered architecture that combines multiple components
 ├─────────────────────────────────────────┤
 │  Rate Limit Manager                     │ ← WAKU2-RLN-RELAY compliance & pacing
 ├─────────────────────────────────────────┤
-│  SDS (Scalable Data Sync)               │ ← Causal ordering & acknowledgments
+│  SDS (Scalable Data Sync)               │ ← Causal ordering & acknowledgements
 ├─────────────────────────────────────────┤
 │  WAKU-API (LightPush/Filter/Store)      │ ← Message transport layer
 └─────────────────────────────────────────┘
 ```
 
-### SDS Integration
+### SDS integration
 
 The Reliable Channel wraps the [SDS](https://github.com/vacp2p/rfc-index/blob/main/vac/raw/sds.md) `MessageChannel`, which provides:
 
@@ -145,7 +145,7 @@ The Reliable Channel handles the integration between SDS and Waku protocols:
 - Mapping SDS events to user-facing events
 - Computing retrieval hints (Waku message hashes) for SDS messages
 
-### Message Segmentation
+### Message segmentation
 
 For messages exceeding safe payload limits:
 - Messages SHOULD be split into segments of approximately 100 KB
@@ -162,7 +162,7 @@ For messages exceeding safe payload limits:
 
 TODO: refer to message segmentation spec
 
-### Rate Limit Management
+### Rate limit management
 
 When using [WAKU2-RLN-RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/17/rln-relay.md):
 - Regular messages and segments exceeding the rate limit SHOULD be queued
@@ -185,7 +185,7 @@ library_name: "waku-reliable-channel"
 description: "Reliable Channel: an event-driven API for eventual message consistency in Waku channels."
 ```
 
-### Create Reliable Channel
+### Create reliable channel
 
 #### Type definitions
 
@@ -238,7 +238,7 @@ types:
         description: "The time in milliseconds after which a message dependency that could not be resolved is marked as irretrievable. Disabled if undefined or 0. Passed to the underlying SDS MessageChannel."
       possible_acks_threshold:
         type: uint
-        description: "How many possible acknowledgments (bloom filter hits) does it take to consider it a definitive acknowledgment. Passed to the underlying SDS MessageChannel."
+        description: "How many possible acknowledgements (bloom filter hits) does it take to consider it a definitive acknowledgement. Passed to the underlying SDS MessageChannel."
 
   ChannelId:
     type: string
@@ -290,7 +290,7 @@ functions:
 **`channel_id` and `sender_id`**:
 
 The `channel_id` MUST be the same for all participants in a channel.
-The `sender_id` SHOULD be unique for each participant and SHOULD be persisted between sessions to ensure proper acknowledgment tracking.
+The `sender_id` SHOULD be unique for each participant and SHOULD be persisted between sessions to ensure proper acknowledgement tracking.
 
 **`content_topic`**:
 
@@ -324,7 +324,7 @@ functions:
       description: "A unique identifier for the message, used to track events."
 
   sendEphemeral:
-    description: "Send an ephemeral message in the channel. Ephemeral messages are not tracked for acknowledgment, not included in causal history, and are dropped when rate limits are approached or reached."
+    description: "Send an ephemeral message in the channel. Ephemeral messages are not tracked for acknowledgement, not included in causal history, and are dropped when rate limits are approached or reached."
     parameters:
       - name: message_payload
         type: array<byte>
@@ -346,12 +346,12 @@ types:
     type: object
     description: "Information about message segmentation for tracking partial progress."
     fields:
-      chunk_index:
-        type: uint
-        description: "Zero-based index of the current chunk (0 to total_chunks-1)."
+      chunks:
+        type: array<uint>
+        description: "Array of chunk indices (e.g., [0, 1, 3] means chunks 0, 1, and 3). For non-segmented messages, this is [0]."
       total_chunks:
         type: uint
-        description: "Total number of chunks for this message."
+        description: "Total number of chunks for this message. For non-segmented messages, this is 1. When chunks.length == total_chunks, all chunks are complete."
 
   ReliableChannelEvents:
     type: object
@@ -397,7 +397,7 @@ types:
         description: "The logical message ID."
       chunk_info:
         type: ChunkInfo
-        description: "Information about which chunk is being sent. For non-segmented messages, chunk_index=0 and total_chunks=1."
+        description: "Chunk indices being sent. The chunks array contains all chunks sending so far."
 
   MessageSentEvent:
     type: object
@@ -407,7 +407,7 @@ types:
         description: "The logical message ID."
       chunk_info:
         type: ChunkInfo
-        description: "Information about which chunk was sent. For non-segmented messages, chunk_index=0 and total_chunks=1."
+        description: "Chunk indices that have been sent. The chunks array contains all chunks sent so far."
 
   MessageAcknowledgedEvent:
     type: object
@@ -415,12 +415,9 @@ types:
       message_id:
         type: MessageId
         description: "The logical message ID."
-      chunks_acknowledged:
-        type: array<uint>
-        description: "Array of chunk indices that have been acknowledged so far (e.g., [0, 2, 4] means chunks 0, 2, and 4 are acknowledged). Use `.length` to get total count. For non-segmented messages, this is [0]."
-      total_chunks:
-        type: uint
-        description: "Total number of chunks for this message. For non-segmented messages, this is 1."
+      chunk_info:
+        type: ChunkInfo
+        description: "Chunk indices that have been acknowledged. The chunks array contains all acknowledged chunks so far. When chunks.length == total_chunks, all chunks are acknowledged."
 
   PossibleAcknowledgment:
     type: object
@@ -430,10 +427,7 @@ types:
         description: "The logical message ID that was possibly acknowledged."
       chunk_info:
         type: ChunkInfo
-        description: "Information about which chunk was possibly acknowledged."
-      possible_ack_count:
-        type: uint
-        description: "The number of possible acknowledgments detected for this chunk."
+        description: "Chunk indices that have been possibly acknowledged (via bloom filters). The chunks array contains all possibly acknowledged chunks so far. Note: this may not be an ideal API to use, further revision may be needed."
 
   MessageError:
     type: object
@@ -443,7 +437,7 @@ types:
         description: "The logical message ID that encountered an error."
       chunk_info:
         type: ChunkInfo
-        description: "Information about which chunk encountered the error. For non-segmented messages, chunk_index=0 and total_chunks=1."
+        description: "Chunk indices that have failed. The chunks array contains all failed chunks so far."
       error:
         type: error
         description: "The error that occurred."
@@ -467,31 +461,36 @@ types:
 For each regular message sent via `send()`, the following event sequence is expected:
 
 **Non-segmented messages** (payload ≤ 100 KB):
-1. `sending-message`: Emitted once with `chunk_info.chunk_index=0, total_chunks=1`
-2. `message-sent`: Emitted once with `chunk_info.chunk_index=0, total_chunks=1`
+1. `sending-message`: Emitted once with `chunk_info={chunks: [0], total_chunks: 1}`
+2. `message-sent`: Emitted once with `chunk_info={chunks: [0], total_chunks: 1}`
 3. One of:
-   - `message-possibly-acknowledged`: (Optional, probabilistic) with chunk info
-   - `message-acknowledged`: Emitted once with chunk info when acknowledged
+   - `message-possibly-acknowledged`: (Optional, probabilistic) with `chunk_info={chunks: [0], total_chunks: 1}`
+   - `message-acknowledged`: Emitted once with `chunk_info={chunks: [0], total_chunks: 1}` when acknowledged
    - `sending-message-irrecoverable-error`: Emitted if an unrecoverable error occurs
 
 **Segmented messages** (payload > 100 KB):
-1. `sending-message`: Emitted once per chunk (e.g., 5 times for a 5-chunk message)
-   - Each emission includes `chunk_info` showing which chunk (0/5, 1/5, 2/5, 3/5, 4/5)
-2. `message-sent`: Emitted once per chunk with corresponding `chunk_info`
-3. `message-acknowledged`: Emitted each time a new chunk is acknowledged
-   - `chunks_acknowledged` array grows as chunks are acknowledged
+1. `sending-message`: Emitted each time chunks are sent, with cumulative array
    - Example progression for a 5-chunk message:
-     - First ack: `chunks_acknowledged=[0], total_chunks=5`
-     - Second ack: `chunks_acknowledged=[0, 1], total_chunks=5`
-     - Third ack: `chunks_acknowledged=[0, 1, 3], total_chunks=5` (chunk 2 still pending)
-     - Fourth ack: `chunks_acknowledged=[0, 1, 2, 3], total_chunks=5` (chunk 2 now received)
+     - First send: `chunk_info={chunks: [0], total_chunks: 5}`
+     - Second send: `chunk_info={chunks: [0, 1], total_chunks: 5}`
+     - Fifth send: `chunk_info={chunks: [0, 1, 2, 3, 4], total_chunks: 5}`
+2. `message-sent`: Emitted with same cumulative pattern as `sending-message`
+3. `message-acknowledged`: Emitted each time new chunks are acknowledged
+   - `chunk_info.chunks` array grows as chunks are acknowledged
+   - Example progression for a 5-chunk message:
+     - First ack: `chunk_info={chunks: [0], total_chunks: 5}`
+     - Second ack: `chunk_info={chunks: [0, 1], total_chunks: 5}`
+     - Third ack: `chunk_info={chunks: [0, 1, 3], total_chunks: 5}` (chunk 2 still pending)
+     - Fourth ack: `chunk_info={chunks: [0, 1, 2, 3], total_chunks: 5}` (chunk 2 now received)
+     - Final ack: `chunk_info={chunks: [0, 1, 2, 3, 4], total_chunks: 5}` (complete when `chunks.length == total_chunks`)
    - All events share the same `message_id`
    - Application can:
-     - Check overall progress: `chunks_acknowledged.length / total_chunks` (e.g., 3/5 = 60%)
-     - Track specific chunks: `chunks_acknowledged.includes(2)` to see if chunk 2 is done
+     - Check overall progress: `chunk_info.chunks.length / chunk_info.total_chunks` (e.g., 3/5 = 60%)
+     - Check if complete: `chunk_info.chunks.length == chunk_info.total_chunks`
+     - Track specific chunks: `chunk_info.chunks.includes(2)` to see if chunk 2 is done
      - Display which chunks remain: chunks not in the array
 
-Events 1-2 MAY be emitted multiple times per chunk if the retry mechanism is activated.
+Events 1-2 MAY be emitted multiple times if the retry mechanism is activated, always with the cumulative array of chunks.
 
 **For received messages**:
 - `message-received`: Emitted **only once** after all chunks are received and reassembled
@@ -500,7 +499,7 @@ Events 1-2 MAY be emitted multiple times per chunk if the retry mechanism is act
 
 For ephemeral messages sent via `sendEphemeral()`:
 - Ephemeral messages are NEVER segmented (if too large, they are rejected)
-- `message-sent`: Emitted once with `chunk_info.chunk_index=0, total_chunks=1`
+- `message-sent`: Emitted once with `chunk_info={chunks: [0], total_chunks: 1}`
 - `ephemeral-message-dropped`: Emitted if the message is dropped due to rate limit constraints
 - `sending-message-irrecoverable-error`: Emitted if encoding, sending, or size check fails
 
@@ -634,7 +633,7 @@ The Reliable Channel SHOULD implement automatic detection and retrieval of missi
 - Retrieved messages SHOULD be removed from the missing messages list once received
 - If a message cannot be retrieved, implementations MAY emit an `irretrievable-message` event
 
-### Synchronization messages
+### Synchronisation messages
 
 Sync messages are empty messages that carry only causal history and bloom filter information.
 They serve to:
@@ -681,7 +680,7 @@ To avoid overload when processing many messages:
 
 ### Ephemeral messages
 
-Ephemeral messages are defined in the [SDS specification](https://github.com/vacp2p/rfc-index/blob/main/vac/raw/sds.md#ephemeral-messages) as short-lived messages for which no synchronization or reliability is required.
+Ephemeral messages are defined in the [SDS specification](https://github.com/vacp2p/rfc-index/blob/main/vac/raw/sds.md#ephemeral-messages) as short-lived messages for which no synchronisation or reliability is required.
 
 **Implementation notes**:
 
@@ -735,13 +734,14 @@ To handle large messages while accounting for protocol overhead, implementations
    - Each chunk is sent and tracked independently through SDS
 
 4. **Event emission**:
-   - `sending-message`: Emitted once per chunk with `chunk_info` indicating which chunk
-   - `message-sent`: Emitted once per chunk with `chunk_info` indicating which chunk
-   - `message-acknowledged`: Emitted each time a new chunk is acknowledged
-     - `chunks_acknowledged` contains ALL acknowledged chunks so far (cumulative)
-     - Example progression: `[0]` → `[0, 1]` → `[0, 1, 3]` → `[0, 1, 2, 3]` → `[0, 1, 2, 3, 4]`
-     - Application can show: `${chunks_acknowledged.length}/${total_chunks} chunks sent (60%)`
-     - Or track individual chunks: `!chunks_acknowledged.includes(2)` to show "chunk 2 pending"
+   - `sending-message`: Emitted each time chunks are sent with cumulative `chunk_info`
+   - `message-sent`: Emitted each time chunks are sent with cumulative `chunk_info`
+   - `message-acknowledged`: Emitted each time new chunks are acknowledged
+     - `chunk_info.chunks` contains ALL acknowledged chunks so far (cumulative)
+     - Example progression: `{chunks: [0], total_chunks: 5}` → `{chunks: [0, 1], total_chunks: 5}` → `{chunks: [0, 1, 3], total_chunks: 5}` → `{chunks: [0, 1, 2, 3, 4], total_chunks: 5}`
+     - Application can show: `${chunk_info.chunks.length}/${chunk_info.total_chunks} chunks sent (60%)`
+     - Check if complete: `chunk_info.chunks.length == chunk_info.total_chunks`
+     - Track individual chunks: `!chunk_info.chunks.includes(2)` to show "chunk 2 pending"
    - All events for the same logical message share the same `message_id`
 
 5. **Reassembly (receiving)**:
@@ -756,15 +756,15 @@ To handle large messages while accounting for protocol overhead, implementations
    - Each chunk is retried independently if not acknowledged
    - When using WAKU2-RLN-RELAY, each chunk consumes one message slot per epoch
    - Large messages may take multiple epochs to send completely
-   - Partial acknowledgments allow applications to show progress to users
+   - Partial acknowledgements allow applications to show progress to users
 
 ## Security/Privacy Considerations
 
 1. **Encryption**: All participants in a Reliable Channel MUST be able to decrypt messages.
    Implementations SHOULD use the same encryption layer (encoder/decoder) for all messages.
 
-2. **Sender identity**: The `sender_id` is used to differentiate acknowledgments.
-   Implementations SHOULD ensure that acknowledgments are only considered valid when they originate from a different sender.
+2. **Sender identity**: The `sender_id` is used to differentiate acknowledgements.
+   Implementations SHOULD ensure that acknowledgements are only considered valid when they originate from a different sender.
 
 3. **Channel isolation**: Messages in different channels are isolated.
    A participant SHOULD only process messages that match their channel ID.
