@@ -221,7 +221,7 @@ types:
       query_on_connect:
         type: bool
         default: true
-        description: "Whether to automatically do a store query after connection to store nodes."
+        description: "Whether to automatically do a store query after connection to store nodes. Note: this should be moved to the Waku API."
       auto_start:
         type: bool
         default: true
@@ -233,9 +233,12 @@ types:
       causal_history_size:
         type: uint
         description: "The number of recent messages to include in causal history. Passed to the underlying SDS MessageChannel."
-      bloom_filter_size:
+      timeout_for_lost_messages_ms:
         type: uint
-        description: "The size of the bloom filter for probabilistic acknowledgments. Passed to the underlying SDS MessageChannel."
+        description: "The time in milliseconds after which a message dependency that could not be resolved is marked as irretrievable. Disabled if undefined or 0. Passed to the underlying SDS MessageChannel."
+      possible_acks_threshold:
+        type: uint
+        description: "How many possible acknowledgments (bloom filter hits) does it take to consider it a definitive acknowledgment. Passed to the underlying SDS MessageChannel."
 
   ChannelId:
     type: string
@@ -252,17 +255,6 @@ types:
   MessagePayload:
     type: array<byte>
     description: "The unwrapped message content (user payload extracted from SDS message)."
-
-  ChunkInfo:
-    type: object
-    description: "Information about message segmentation for tracking partial progress."
-    fields:
-      chunk_index:
-        type: uint
-        description: "Zero-based index of the current chunk (0 to total_chunks-1)."
-      total_chunks:
-        type: uint
-        description: "Total number of chunks for this message."
 ```
 
 #### Function definitions
@@ -350,6 +342,17 @@ The Reliable Channel uses an event-driven model to notify applications about mes
 
 ```yaml
 types:
+  ChunkInfo:
+    type: object
+    description: "Information about message segmentation for tracking partial progress."
+    fields:
+      chunk_index:
+        type: uint
+        description: "Zero-based index of the current chunk (0 to total_chunks-1)."
+      total_chunks:
+        type: uint
+        description: "Total number of chunks for this message."
+
   ReliableChannelEvents:
     type: object
     description: "Events emitted by the Reliable Channel."
@@ -455,9 +458,6 @@ types:
       reason:
         type: string
         description: "The reason the ephemeral message was dropped (e.g., 'rate_limit_approached', 'rate_limit_reached')."
-      rate_limit_utilization:
-        type: uint
-        description: "Percentage of rate limit consumed (0-100)."
 ```
 
 #### Extended definitions
