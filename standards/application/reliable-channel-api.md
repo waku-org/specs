@@ -5,8 +5,6 @@ category: Standards Track
 status: raw
 tags: [reliability, application, api]
 editor: Franck Royer <franck@status.im>
-contributors:
-- Franck Royer <franck@status.im>
 ---
 
 ## Table of contents
@@ -35,7 +33,8 @@ contributors:
       * [Extended definitions](#extended-definitions-1)
     * [Channel lifecycle](#channel-lifecycle)
       * [Function definitions](#function-definitions-2)
-  * [Security/Privacy Considerations](#securityprivacy-considerations)
+  * [Future improvements](#future-improvements)
+  * [Security/Privacy considerations](#securityprivacy-considerations)
   * [Copyright](#copyright)
 <!-- TOC -->
 
@@ -105,17 +104,17 @@ The primitive types and general guidelines are the same as defined in [WAKU-API]
 The Reliable Channel is a layered architecture that combines multiple components:
 
 ```
-┌─────────────────────────────────────────┐
-│      Reliable Channel API               │ ← Application-facing event-driven API
-├─────────────────────────────────────────┤
-│  Message Segmentation                   │ ← Large message splitting/reassembly
-├─────────────────────────────────────────┤
-│  Rate Limit Manager                     │ ← WAKU2-RLN-RELAY compliance & pacing
-├─────────────────────────────────────────┤
-│  SDS (Scalable Data Sync)               │ ← Causal ordering & acknowledgements
-├─────────────────────────────────────────┤
-│  WAKU-API (LightPush/Filter/Store)      │ ← Message transport layer
-└─────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────┐
+│      Reliable Channel API                                │ ← Application-facing event-driven API
+├──────────────────────────────────────────────────────────┤
+│  Message Segmentation                                    │ ← Large message splitting/reassembly
+├──────────────────────────────────────────────────────────┤
+│  Rate Limit Manager                                      │ ← WAKU2-RLN-RELAY compliance & pacing
+├──────────────────────────────────────────────────────────┤
+│  SDS (Scalable Data Sync)                                │ ← Causal ordering & acknowledgements
+├──────────────────────────────────────────────────────────┤
+│  WAKU-API (LightPush/Filter/Store/P2P Reliability)       │ ← Message transport layer
+└──────────────────────────────────────────────────────────┘
 ```
 
 ### SDS integration
@@ -164,9 +163,6 @@ When using [WAKU2-RLN-RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/
 - Messages coming from a retry mechanism should be queued when the rate limit is approached.
 
 TODO: refer to rate limit manager spec
-
-Note: at a later stage, we may prefer for the Waku node to expose rate limit information (total rate limit, usage so far)
-instead of having it a configurable on the reliable channel.
 
 ## The Reliable Channel API
 
@@ -220,7 +216,7 @@ types:
       process_task_min_elapse_ms:
         type: uint
         default: 1000
-        description: "The minimum elapsed time between calling the underlying channel process task for incoming messages. This prevents overload when processing many messages."
+        description: "The minimum elapsed time between calling the underlying SDS channel process task for incoming messages. This prevents overload when processing many messages."
       causal_history_size:
         type: uint
         description: "The number of recent messages to include in causal history. Passed to the underlying SDS MessageChannel."
@@ -546,7 +542,8 @@ functions:
 ## Future improvements
 
 - Developer may prefer to have control over the content topics for privacy and anonymity purposes, future improvements may enable this.
-- Developers may prefer the message routing service (aka [WAKU2]()) to provide message rate limit information.
+- Developers may prefer the message routing service (aka [WAKU2](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/10/waku2.md)) to provide message rate limit information.
+- "Query on connect" is most likely more suited at the [WAKU-API](/standards/application/waku-api.md) layer
 
 ## Security/Privacy considerations
 
