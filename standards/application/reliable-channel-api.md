@@ -460,23 +460,18 @@ types:
 
 For each regular message sent via `send()`, the following event sequence is expected:
 
-**Non-segmented messages** (payload ≤ 100 KB):
-1. `sending-message`: Emitted once with `chunk_info={chunks: [0], total_chunks: 1}`
-2. `message-sent`: Emitted once with `chunk_info={chunks: [0], total_chunks: 1}`
-3. One of:
-   - `message-possibly-acknowledged`: (Optional, probabilistic) with `chunk_info={chunks: [0], total_chunks: 1}`
-   - `message-acknowledged`: Emitted once with `chunk_info={chunks: [0], total_chunks: 1}` when acknowledged
-   - `sending-message-irrecoverable-error`: Emitted if an unrecoverable error occurs
-
-**Segmented messages** (payload > 100 KB):
-1. `sending-message`: Emitted each time chunks are sent, with cumulative array
+1. `sending-message`: Emitted each time chunks are sent, with cumulative array (MAY be emitted multiple times if retry mechanism kicks in)
+   - Example progression for a 1-chunk message:
+     - sendindg: `chunk_info={chunks: [0], total_chunks: 1}`
    - Example progression for a 5-chunk message:
      - First send: `chunk_info={chunks: [0], total_chunks: 5}`
      - Second send: `chunk_info={chunks: [0, 1], total_chunks: 5}`
      - Fifth send: `chunk_info={chunks: [0, 1, 2, 3, 4], total_chunks: 5}`
-2. `message-sent`: Emitted with same cumulative pattern as `sending-message`
+2. `message-sent`: Emitted with same cumulative pattern as `sending-message` (MAY be emitted multiple times if retry mechanism kicks in)
 3. `message-acknowledged`: Emitted each time new chunks are acknowledged
    - `chunk_info.chunks` array grows as chunks are acknowledged
+   - Example progression for a 1-chunk message:
+     - Only ack: `chunk_info={chunks: [0], total_chunks: 1}` (complete when `chunks.length == total_chunks`)
    - Example progression for a 5-chunk message:
      - First ack: `chunk_info={chunks: [0], total_chunks: 5}`
      - Second ack: `chunk_info={chunks: [0, 1], total_chunks: 5}`
@@ -490,11 +485,15 @@ For each regular message sent via `send()`, the following event sequence is expe
      - Track specific chunks: `chunk_info.chunks.includes(2)` to see if chunk 2 is done
      - Display which chunks remain: chunks not in the array
 
-Events 1-2 MAY be emitted multiple times if the retry mechanism is activated, always with the cumulative array of chunks.
+Alternatively, instead of `message-acknowledged`, the message lifecycle MAY end with:
+   - `sending-message-irrecoverable-error`: Emitted if an unrecoverable error occurs
+
+Optionally, before final acknowledgement:
+   - `message-possibly-acknowledged`: (Probabilistic) MAY be emitted as bloom filter hits are detected
 
 **For received messages**:
-- `message-received`: Emitted **only once** after all chunks are received and reassembled
-- The payload is the complete reassembled message
+- `message-received`: Emitted **only once** after all chunks are received and reassembled. Note: we may want to provide progressive reception information.
+- The payload is the complete-reassembled message
 - No chunk information is provided (reassembly is transparent to the receiver)
 
 For ephemeral messages sent via `sendEphemeral()`:
