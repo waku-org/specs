@@ -35,15 +35,6 @@ contributors:
       * [Extended definitions](#extended-definitions-1)
     * [Channel lifecycle](#channel-lifecycle)
       * [Function definitions](#function-definitions-2)
-  * [Implementation Suggestions](#implementation-suggestions)
-    * [SDS MessageChannel integration](#sds-messagechannel-integration)
-    * [Message retries](#message-retries)
-    * [Missing message retrieval](#missing-message-retrieval)
-    * [Synchronisation messages](#synchronisation-messages)
-    * [Query on connect](#query-on-connect)
-    * [Performance considerations](#performance-considerations)
-    * [Ephemeral messages](#ephemeral-messages)
-    * [Message segmentation](#message-segmentation-1)
   * [Security/Privacy Considerations](#securityprivacy-considerations)
   * [Copyright](#copyright)
 <!-- TOC -->
@@ -498,6 +489,7 @@ Optionally, before final acknowledgement:
 
 For ephemeral messages sent via `sendEphemeral()`:
 - Ephemeral messages are NEVER segmented (if too large, they are rejected)
+  Rationale: Segmenting ephemeral messages would consume multiple rate limit slots without guarantees that all chunks get across, potentially wasting bandwidth on incomplete messages that provide no value to the application
 - `message-sent`: Emitted once with `chunk_info={chunks: [0], total_chunks: 1}`
 - `ephemeral-message-dropped`: Emitted if the message is dropped due to rate limit constraints
 - `sending-message-irrecoverable-error`: Emitted if encoding, sending, or size check fails
@@ -527,240 +519,17 @@ functions:
     description: "Stop the Reliable Channel. Stops sync loop, missing message retrieval, and clears intervals."
     returns:
       type: void
-
-  isStarted:
-    description: "Check if the Reliable Channel is currently started."
-    returns:
-      type: bool
-      description: "True if the channel is started, false otherwise."
 ```
 
-## Implementation Suggestions
+## Future improvements
 
-This section provides practical implementation guidance based on the [js-waku](https://github.com/waku-org/js-waku) implementation.
+- Developer may prefer to have control over the content topics for privacy and anonymity purposes, future improvements may enable this.
+- Developers may prefer the message routing service (aka [WAKU2]()) to provide message rate limit information.
 
-### SDS MessageChannel integration
-
-The Reliable Channel MUST use the [SDS](https://github.com/vacp2p/rfc-index/blob/main/vac/raw/sds.md) `MessageChannel` as its core reliability mechanism.
-
-**Reference**: `js-waku/packages/sds/src/message_channel/message_channel.ts:1`
-
-**Key integration points**:
-
-1. **Message wrapping**: User payloads MUST be wrapped in SDS `ContentMessage` before sending:
-   ```
-   User payload → SDS ContentMessage (encode) → Waku Message → Network
-   ```
-
-2. **Message unwrapping**: Received Waku messages MUST be unwrapped to extract user payloads:
-   ```
-   Network → Waku Message → SDS Message (decode) → User payload (content field)
-   ```
-   - The Reliable Channel receives raw `Uint8Array` payloads from the node's message emitter
-   - SDS decoding extracts the message structure
-   - Only the `content` field is emitted to the application via `message-received` event
-
-3. **SDS configuration**: Implementations SHOULD configure the SDS MessageChannel with:
-   - `causalHistorySize`: Number of recent message IDs in causal history (default: 200)
-   - `bloomFilterSize`: Bloom filter capacity for probabilistic ACKs (default: 10,000 messages)
-   - `bloomFilterErrorRate`: False positive rate (default: 0.001)
-
-4. **Subscription and reception**:
-   - Call `node.subscribe([contentTopic])` to subscribe via the Waku node's unified API
-   - Listen to `node.messageEmitter` on the content topic for incoming messages
-   - Process raw `Uint8Array` payloads through SDS decoding
-   - Extract and emit the `content` field to the application
-
-5. **Retrieval hint computation**:
-   - Compute Waku message hash from the SDS-wrapped payload before sending
-   - Include hash in SDS `HistoryEntry` as `retrievalHint`
-   - Use hash for targeted store queries when retrieving missing messages
-
-6. **Task scheduling**: Implementations MUST periodically call SDS methods:
-   - `processTasks()`: Process queued send/receive operations
-   - `sweepIncomingBuffer()`: Deliver messages with met dependencies
-   - `sweepOutgoingBuffer()`: Identify messages for retry
-
-7. **Event mapping**: SDS events SHOULD be mapped to Reliable Channel events:
-   - `OutMessageSent` → `message-sent`
-   - `OutMessageAcknowledged` → `message-acknowledged`
-   - `OutMessagePossiblyAcknowledged` → `message-possibly-acknowledged`
-   - `InMessageReceived` → (internal, triggers sync restart)
-   - `InMessageMissing` → Missing message retrieval trigger
-
-**Default SDS configuration values** (from js-waku):
-- Bloom filter capacity: 10,000 messages
-- Bloom filter error rate: 0.001 (0.1% false positive rate)
-- Causal history size: 200 message IDs (≈12.8 KB overhead per message)
-- Possible ACKs threshold: 2 bloom filter hits before considering acknowledged
-
-### Message retries
-
-The retry mechanism SHOULD use a simple fixed-interval retry strategy:
-
-- When a message is sent, start a retry timer
-- Every `retry_interval_ms`, attempt to resend the message
-- Stop retrying when:
-  - The message is acknowledged (via causal history)
-  - `max_retry_attempts` is reached
-  - An irrecoverable error occurs
-
-**Reference**: `js-waku/packages/sdk/src/reliable_channel/retry_manager.ts:1`
-
-**Implementation notes**:
-
-- Retry intervals SHOULD be configurable (default: 30 seconds)
-- Maximum retry attempts SHOULD be configurable (default: 10 attempts)
-- Future implementations MAY implement exponential back-off strategies
-- Implementations SHOULD NOT retry sending if the node is known to be offline
-
-### Missing message retrieval
-
-The Reliable Channel SHOULD implement automatic detection and retrieval of missing messages:
-
-1. **Detection**: When processing incoming messages, the SDS layer detects gaps in causal history
-2. **Tracking**: Missing messages are tracked with their message IDs and retrieval hints (Waku message hashes)
-3. **Retrieval**: Periodic store queries retrieve missing messages using retrieval hints
-4. **Processing**: Retrieved messages are processed through the normal message pipeline
-
-**Reference**: `js-waku/packages/sdk/src/reliable_channel/missing_message_retriever.ts:1`
-
-**Implementation notes**:
-
-- Missing message checks SHOULD run periodically (default: every 10 seconds)
-- Store queries SHOULD use message hashes for targeted retrieval
-- Retrieved messages SHOULD be removed from the missing messages list once received
-- If a message cannot be retrieved, implementations MAY emit an `irretrievable-message` event
-
-### Synchronisation messages
-
-Sync messages are empty messages that carry only causal history and bloom filter information.
-They serve to:
-- Acknowledge received messages without sending new content
-- Keep the channel active
-- Allow participants to learn about each other's message state
-
-**Implementation notes**:
-
-- Sync messages SHOULD be sent periodically with randomized delays
-- The sync interval is shared responsibility: `sync_interval = random() * sync_min_interval_ms`
-- When a content message is received, sync SHOULD be scheduled sooner (multiplier: 0.5)
-- When a content message is sent, sync SHOULD be rescheduled at normal interval (multiplier: 1.0)
-- When a sync message is received, sync SHOULD be rescheduled at normal interval
-- After failing to send a sync, retry SHOULD use a longer interval (multiplier: 2.0)
-
-**Reference**: `js-waku/packages/sdk/src/reliable_channel/reliable_channel.ts:515-529`
-
-### Query on connect
-
-When enabled, the Reliable Channel SHOULD automatically query the store when connecting to store nodes.
-This helps participants catch up on missed messages after being offline.
-
-**Implementation notes**:
-
-- Query on connect SHOULD be triggered when:
-  - A store node becomes available
-  - The node reconnects after being offline (health status changes)
-  - A configurable time threshold has elapsed since the last query (default: 5 minutes)
-- Queries SHOULD stop when finding a message with causal history from the same channel
-- Queries SHOULD continue if all retrieved messages are from different channels
-
-**Reference**: `js-waku/packages/sdk/src/reliable_channel/reliable_channel.ts:183-196`
-
-### Performance considerations
-
-To avoid overload when processing many messages:
-
-1. **Throttled processing**: Don't call the SDS process task more frequently than `process_task_min_elapse_ms` (default: 1 second)
-2. **Batched sweeping**: Sweep the incoming buffer at regular intervals rather than per-message (default: every 5 seconds)
-3. **Lazy task execution**: Queue process tasks with a minimum elapsed time between executions
-
-**Reference**: `js-waku/packages/sdk/src/reliable_channel/reliable_channel.ts:460-473`
-
-### Ephemeral messages
-
-Ephemeral messages are defined in the [SDS specification](https://github.com/vacp2p/rfc-index/blob/main/vac/raw/sds.md#ephemeral-messages) as short-lived messages for which no synchronisation or reliability is required.
-
-**Implementation notes**:
-
-1. **SDS integration**:
-   - Send ephemeral messages with `lamport_timestamp`, `causal_history`, and `bloom_filter` unset
-   - Do NOT add to unacknowledged outgoing buffer after broadcast
-   - Do NOT include in causal history or bloom filters
-   - Do NOT add to local log
-
-2. **Rate limit awareness**:
-   - Before sending an ephemeral message, check rate limit utilization
-   - If utilization >= threshold (default: 90%), drop the message and emit `ephemeral-message-dropped`
-   - This ensures reliable messages are never blocked by ephemeral traffic
-
-3. **Use cases**:
-   - Typing indicators
-   - Presence updates
-   - Real-time status updates
-   - Other transient UI state that doesn't require guaranteed delivery
-
-4. **Receiving ephemeral messages**:
-   - Deliver immediately without buffering for causal dependencies
-   - Emit `message-received` event (same as regular messages)
-   - Do NOT add to local log or acknowledge
-
-**Reference**: SDS specification section on [Ephemeral Messages](https://github.com/vacp2p/rfc-index/blob/main/vac/raw/sds.md#ephemeral-messages)
-
-### Message segmentation
-
-To handle large messages while accounting for protocol overhead, implementations SHOULD:
-
-1. **Segment size calculation**:
-   - Target segment size: ~100 KB (102,400 bytes) of user payload
-   - This accounts for overhead that will be added:
-     - Encryption: Variable depending on encryption scheme (e.g., ~48 bytes for ECIES)
-     - SDS metadata: ~12.8 KB with default causal history (200 × 64 bytes)
-     - WAKU2-RLN-RELAY proof: ~128 bytes
-     - Protobuf encoding overhead: ~few hundred bytes
-   - Final Waku message stays well under 150 KB routing layer limit
-
-2. **Message ID and chunk tracking**:
-   - Compute a single logical `message_id` from the **complete** user payload (before segmentation)
-   - All chunks of the same message share this `message_id`
-   - Each chunk has its own SDS message ID for tracking in causal history
-   - Chunk info (`chunk_index`, `total_chunks`) is included in all events
-
-3. **Segmentation strategy**:
-   - Split large user payloads into ~100 KB chunks
-   - Wrap each chunk in a separate SDS `ContentMessage`
-   - Include segmentation metadata in each SDS message (chunk index, total chunks, logical message ID)
-   - Each chunk is sent and tracked independently through SDS
-
-4. **Event emission**:
-   - `sending-message`: Emitted each time chunks are sent with cumulative `chunk_info`
-   - `message-sent`: Emitted each time chunks are sent with cumulative `chunk_info`
-   - `message-acknowledged`: Emitted each time new chunks are acknowledged
-     - `chunk_info.chunks` contains ALL acknowledged chunks so far (cumulative)
-     - Example progression: `{chunks: [0], total_chunks: 5}` → `{chunks: [0, 1], total_chunks: 5}` → `{chunks: [0, 1, 3], total_chunks: 5}` → `{chunks: [0, 1, 2, 3, 4], total_chunks: 5}`
-     - Application can show: `${chunk_info.chunks.length}/${chunk_info.total_chunks} chunks sent (60%)`
-     - Check if complete: `chunk_info.chunks.length == chunk_info.total_chunks`
-     - Track individual chunks: `!chunk_info.chunks.includes(2)` to show "chunk 2 pending"
-   - All events for the same logical message share the same `message_id`
-
-5. **Reassembly (receiving)**:
-   - Buffer received chunks keyed by logical message ID
-   - Track which chunks have been received (by chunk index)
-   - Verify chunk count matches expected total from metadata
-   - Reassemble in sequence order when all chunks present
-   - Emit `message-received` **only once** with complete payload
-   - Handle partial message timeout (mark as irretrievable after threshold)
-
-6. **Interaction with retries and rate limits**:
-   - Each chunk is retried independently if not acknowledged
-   - When using WAKU2-RLN-RELAY, each chunk consumes one message slot per epoch
-   - Large messages may take multiple epochs to send completely
-   - Partial acknowledgements allow applications to show progress to users
-
-## Security/Privacy Considerations
+## Security/Privacy considerations
 
 1. **Encryption**: All participants in a Reliable Channel MUST be able to decrypt messages.
-   Implementations SHOULD use the same encryption layer (encoder/decoder) for all messages.
+   Implementations SHOULD use the same encryption mechanisms for all messages.
 
 2. **Sender identity**: The `sender_id` is used to differentiate acknowledgements.
    Implementations SHOULD ensure that acknowledgements are only considered valid when they originate from a different sender.
