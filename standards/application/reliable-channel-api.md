@@ -219,12 +219,15 @@ types:
         description: "The minimum elapsed time between calling the underlying SDS channel process task for incoming messages. This prevents overload when processing many messages."
       causal_history_size:
         type: uint
+        default: 200
         description: "The number of recent messages to include in causal history. Passed to the underlying SDS MessageChannel."
       timeout_for_lost_messages_ms:
         type: uint
+        default: 0
         description: "The time in milliseconds after which a message dependency that could not be resolved is marked as irretrievable. Disabled if undefined or 0. Passed to the underlying SDS MessageChannel."
       possible_acks_threshold:
         type: uint
+        default: 2
         description: "How many possible acknowledgements (bloom filter hits) does it take to consider it a definitive acknowledgement. Passed to the underlying SDS MessageChannel."
 
   ChannelId:
@@ -283,7 +286,7 @@ functions:
         type: ContentTopic
         description: "The content topic to use for the channel."
       - name: encryption
-        type: IEncryption
+        type: Encryption
         description: "Optional encryption/decryption interface. If not provided, messages are sent without encryption (passthrough)."
       - name: options
         type: ReliableChannelOptions
