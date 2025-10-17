@@ -25,12 +25,11 @@ editor: Franck Royer <franck@status.im>
     * [Create reliable channel](#create-reliable-channel)
       * [Type definitions](#type-definitions)
       * [Function definitions](#function-definitions)
-      * [Extended definitions](#extended-definitions)
     * [Send messages](#send-messages)
       * [Function definitions](#function-definitions-1)
     * [Event handling](#event-handling)
       * [Type definitions](#type-definitions-1)
-      * [Extended definitions](#extended-definitions-1)
+      * [Extended definitions](#extended-definitions)
     * [Channel lifecycle](#channel-lifecycle)
       * [Function definitions](#function-definitions-2)
   * [Future improvements](#future-improvements)
@@ -295,29 +294,6 @@ functions:
       type: result<ReliableChannel, error>
 ```
 
-#### Extended definitions
-
-**Default configuration values**: See the [SDS Implementation Suggestions](https://github.com/vacp2p/rfc-index/blob/main/vac/raw/sds.md#sdk-usage-reliablechannel) section for recommended default values for `ReliableChannelOptions`.
-
-**`channel_id` and `sender_id`**:
-
-The `channel_id` MUST be the same for all participants in a channel.
-The `sender_id` SHOULD be unique for each participant and SHOULD be persisted between sessions to ensure proper acknowledgement tracking.
-
-**`content_topic`**:
-
-A Reliable Channel uses a unique content topic. This ensure that all messages are retrievable.
-
-**`options.auto_start`**:
-
-If set to `true` (default), the Reliable Channel SHOULD automatically call `start()` during creation.
-If set to `false`, the application MUST call `start()` before the channel will process messages.
-
-**`options.query_on_connect`**:
-
-If set to `true` (default) and the Waku node has store capability,
-the Reliable Channel SHOULD automatically query the store for missing messages when connecting to store nodes.
-This helps ensure message consistency when participants come online after being offline.
 
 ### Send messages
 
@@ -474,7 +450,7 @@ For each regular message sent via `send()`, the following event sequence is expe
 
 1. `sending-message`: Emitted each time chunks are sent, with cumulative array (MAY be emitted multiple times if retry mechanism kicks in)
    - Example progression for a 1-chunk message:
-     - sendindg: `chunk_info={chunks: [0], total_chunks: 1}`
+     - sending: `chunk_info={chunks: [0], total_chunks: 1}`
    - Example progression for a 5-chunk message:
      - First send: `chunk_info={chunks: [0], total_chunks: 5}`
      - Second send: `chunk_info={chunks: [0, 1], total_chunks: 5}`
@@ -504,8 +480,8 @@ Optionally, before final acknowledgement:
    - `message-possibly-acknowledged`: (Probabilistic) MAY be emitted as bloom filter hits are detected
 
 **For received messages**:
-- `message-received`: Emitted **only once** after all chunks are received and reassembled. Note: we may want to provide progressive reception information.
-- The payload is the complete-reassembled message
+- `message-received`: Emitted **only once** after all chunks are received and reassembled.
+- The payload is the complete reassembled message
 - No chunk information is provided (reassembly is transparent to the receiver)
 
 For ephemeral messages sent via `sendEphemeral()`:
@@ -547,6 +523,7 @@ functions:
 - Developer may prefer to have control over the content topics for privacy and anonymity purposes, future improvements may enable this.
 - Developers may prefer the message routing service (aka [WAKU2](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/10/waku2.md)) to provide message rate limit information.
 - "Query on connect" is most likely more suited at the [WAKU-API](/standards/application/waku-api.md) layer
+- Message received events could be emitted per chunk, to enable the consumer to provide feedback to the users in terms of large messages being received.
 
 ## Security/Privacy considerations
 
