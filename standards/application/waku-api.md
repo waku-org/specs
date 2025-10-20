@@ -321,10 +321,6 @@ types:
         type: bool
         default: false
         description: "Whether the message is ephemeral. Read at [ATTRIBUTES](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/14/message.md#message-attributes)"
-      rateLimitProof:
-        type: array<byte>
-        default: none
-        description: "Rate limiting proof needed for [PUBLISHING](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/17/rln-relay.md#publishing)"
 
   RequestId:
     type: string
@@ -347,11 +343,67 @@ functions:
 
 #### Extended definitions
 
-When `message` is sent with `contentTopic` for a first time,
+When `message` is sent with `contentTopic` for the first time,
 the node SHOULD trigger a subscription based on `Subscribe to messages` section.
 
-Additionally, the node SHOULD initiate recurring [STORE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/13/store.md) queries
-to validate if sent message was stored on the network and `static_store_nodes` SHOULD be prioritised.
+The node uses [P2P-RELIABILITY](/standards/application/p2p-reliability.md) strategies to ensure message delivery.
+
+## Event source
+
+#### Type definitions
+
+```yaml
+types:
+  MessageSentEvent:
+    type: object
+    fields:
+      eventType:
+        type: string
+        default: "message:sent"
+        description: "Event type identifier"
+      requestId:
+        type: RequestId
+        description: "The request ID associated with the sent message"
+
+  MessageErrorEvent:
+    type: object
+    fields:
+      eventType:
+        type: string
+        default: "message:error"
+        description: "Event type identifier"
+      requestId:
+        type: RequestId
+        description: "The request ID associated with the failed message"
+      error:
+        type: string
+        description: "Error message describing what went wrong"
+
+  MessageAckEvent:
+    type: object
+    fields:
+      eventType:
+        type: string
+        default: "message:ack"
+        description: "Event type identifier"
+      requestId:
+        type: RequestId
+        description: "The request ID associated with the acknowledged message"
+      ackType:
+        type: string
+        description: "Type of acknowledgment (e.g., 'store', 'filter')"
+
+  EventSource:
+    type: object
+    description: "Event source for message-related events"
+    fields:
+      onEvent:
+        type: function
+        description: "Callback for message:sent events"
+        parameters:
+          - name: event
+            type: MessageSentEvent | MessageErrorEvent | MessageAckEvent
+```
 
 ## The Validation API
 
