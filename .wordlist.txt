@@ -15,6 +15,7 @@ iana
 IANA
 Keccak
 libp2p
+maxTotalSegments
 md
 Nim
 nim
