@@ -338,7 +338,7 @@ although performance or reliability may be impacted.
 `Healthy` indicates that the node is operating optimally,
 with full support for message processing and transmission.
 
-## Event source
+## Event Source
 
 #### Type definitions
 
