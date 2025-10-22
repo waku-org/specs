@@ -379,19 +379,19 @@ types:
         type: string
         description: "Error message describing what went wrong"
 
-  MessageAckEvent:
+  MessagePropagatedEvent:
     type: object
     fields:
       eventType:
         type: string
-        default: "message:ack"
+        default: "message:propagated"
         description: "Event type identifier"
       requestId:
         type: RequestId
-        description: "The request ID associated with the acknowledged message"
-      ackType:
+        description: "The request ID associated with the propagated message in the network"
+      messageHash:
         type: string
-        description: "Type of acknowledgment (e.g., 'store', 'filter')"
+        description: "Hash of the message that got propagated within the network"
 
   EventSource:
     type: object
