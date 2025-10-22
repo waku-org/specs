@@ -30,6 +30,8 @@ contributors:
       * [Predefined values](#predefined-values)
       * [Extended definitions](#extended-definitions)
   * [The Validation API](#the-validation-api)
+  * [Health Status](#health-status)
+  * [Event Source](#event-source)
   * [Security/Privacy Considerations](#securityprivacy-considerations)
   * [Copyright](#copyright)
 <!-- TOC -->
@@ -312,6 +314,58 @@ that would contain all validation parameters including RLN.
 
 In the time being, parameters specific to RLN are accepted for the message validation.
 RLN can also be disabled.
+
+## Health Status
+
+#### Type definitions
+
+```yml
+types:
+  HealthStatus:
+    type: enum
+    values: [Unhealthy, MinimallyHealthy, Healthy]
+    description: "Used to identify health of the operating node"
+```
+
+#### Extended definitions
+
+`Unhealthy` indicates that the node has lost connectivity for message reception,
+sending, or both, and as a result, it cannot reliably process or transmit messages.
+
+`MinimallyHealthy` indicates that the node meets the minimum operational requirements,
+although performance or reliability may be impacted.
+
+`Healthy` indicates that the node is operating optimally,
+with full support for message processing and transmission.
+
+## Event source
+
+#### Type definitions
+
+```yaml
+types:
+  HealthStatus:
+    type: object
+    fields:
+      eventType:
+        type: string
+        default: "health"
+        description: "Event type identifier"
+      status:
+        type: HealthStatus
+        description: "Node health status emitted on state change"
+
+EventSource:
+  type: object
+  description: "Event source for Waku API events"
+  fields:
+    onEvent:
+      type: function
+      description: "Callback for captured events"
+      parameters:
+        - name: event
+          type: HealthStatus
+```
 
 ## Security/Privacy Considerations
 
