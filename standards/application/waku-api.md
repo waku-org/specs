@@ -344,7 +344,7 @@ with full support for message processing and transmission.
 
 ```yaml
 types:
-  HealthStatus:
+  HealthStatusEvent:
     type: object
     fields:
       eventType:
@@ -364,7 +364,7 @@ EventSource:
       description: "Callback for captured events"
       parameters:
         - name: event
-          type: HealthStatus
+          type: HealthStatusEvent
 ```
 
 ## Security/Privacy Considerations
