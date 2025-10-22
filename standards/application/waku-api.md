@@ -402,7 +402,7 @@ types:
         description: "Callback for message:sent events"
         parameters:
           - name: event
-            type: MessageSentEvent | MessageErrorEvent | MessageAckEvent
+            type: MessageSentEvent | MessageErrorEvent | MessagePropagatedEvent
 ```
 
 ## The Validation API
