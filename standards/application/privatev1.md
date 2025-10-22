@@ -34,17 +34,18 @@ Private Conversations have the following properties:
 This document makes use of the shared terminology defined in the [CHAT-DEFINITIONS](https://github.com/waku-org/specs/blob/jazzz/chatdefs/informational/chatdefs.md) specification.
 
 The terms include:
-- Recipient
-- Sender
-- Payload
+- Application
 - Content
 - Participant
-- Application
+- Payload
+- Recipient
+- Sender
 
 
 ## Architecture
 
-This conversation type assumes there is some service or application which wishes to generate and receive encrypted content. It also assumes that some other component will be responsible for delivering the generated payloads. How messages are sent are to be determined by implementors.
+This conversation type assumes there is some service or application which wishes to generate and receive encrypted content. 
+It also assumes that some other component will be responsible for delivering the generated payloads. 
 
 ```mermaid
 flowchart LR
@@ -52,16 +53,16 @@ flowchart LR
     classDef plain fill:none,stroke:transparent;
 ```
 
-### Application
-Responsible for the creation and generation of content. 
+### Payload Delivery
+How payloads are sent and received by clients is not described in this protocol. 
+The choice of delivery method has no impact on the security of this conversation type, though the choice may affect sender privacy and censorship resistance. 
+In practice, any best-effort method of transmitting payloads will suffice, as no assumptions are made.
 
-### Delivery Service
-This protocols assumes there is a abstract delivery service which is responsible for routing payloads to their destination. See: [TODO](link.to.spec).
 
 ## Initialization
 
-Prior to operation participants MUST agree on the following parameters fopr each conversation. 
-- `rda` - delivery address (recipient)
+Prior to operation participants MUST agree on the following parameters for each conversation. 
+- `rda` - delivery address (recipient) !TODO: Can delivery addresses be removed from this spec?
 - `sda` - delivery address (sender)
 - `sk` - initial secret key  [32 bytes]
 
@@ -92,12 +93,14 @@ flowchart TD
 
 - **Segmentation**: Divides contents into smaller fragments for transportation. 
 - **Reliability**: Adds tracking information to detect dropped messages.
-- **Encryption**: 
+- **Encryption**: Provides confidentiality and tamper resistence.
 
 The output of each phase of the operational pipeline is the input of the next.
 
 ### Segmentation
-This protocol places no restriction on the size of the content to be delivered. In order to support restrictions of any delivery service messages are segmented to a predefined size.
+Thought the protocol has no limitation, it is assumed that a delivery mechanism MAY have restrictions on the max message size. 
+While this is a transport level issue, it's included here because defering segementation has negative impacts on bandwidth efficiency and privacy. Forcing the transport layer to handle segmentation would require either reassembling unauthenticated segments which are open to malicious interference or implementing encryption at the transport layer.
+In the event of a dropped payload, segmentation after reliability would require clients to re-broadcast entire frames, rather than only the missing segments. Increasing load on the network, and increasing a DOS attack surface. To optimize the entire pipeline, segmentation is handled first, so that segments can benefit from the reliability and robust encryption already in place.
 
 The segmentation strategy used is defined by [!TODO: Flatten link once completed](https://github.com/waku-org/specs/pull/91)
 
