@@ -332,7 +332,8 @@ types:
 `Unhealthy` indicates that the node has lost connectivity for message reception,
 sending, or both, and as a result, it cannot reliably process or transmit messages.
 
-`MinimallyHealthy` indicates that the node meets the minimum operational requirements,
+`MinimallyHealthy` indicates that the node meets the minimum operational requirements: connect to at least one peer with a protocol to send messages ([LIGHT-PUSH]() or [RELAY]()) and one peer with a protocol to receive messages ([FILTER ] or [RELAY])
+and one peer with store service capabilities.
 although performance or reliability may be impacted.
 
 `Healthy` indicates that the node is operating optimally,
