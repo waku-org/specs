@@ -12,7 +12,7 @@ contributors:
 
 # Background
 
-Pairwise encrypted messaging channels are a foundational component in building chat systems. They allow for confidential, authenticated payloads to be delivered between two clients. Groupchats an more conversation based communication often rely on pairwise channels (at least partially) to deliver state updates and coordination messages. 
+Pairwise encrypted messaging channels are a foundational component in building chat systems. They allow for confidential, authenticated payloads to be delivered between two clients. Groupchats and channel based communication often rely on pairwise channels (at least partially) to deliver state updates and coordination messages. 
 
 Having robust pairwise communication channels allow for 1:1 communication while also providing the infrastructure for more complicated communication.
 
@@ -26,7 +26,7 @@ Private Conversations have the following properties:
  - Sender Privacy: Only the recipient can determine who the sender was.
  - Forward Secrecy: A compromise in the future does not allow previous messages to be decrypted by a third party.
  - Post Compromise Security: Conversations eventually recover from a compromise which occurs today.
- - Message Reliablity: Messages sent with this protocol are 
+ - Message Reliability: Messages sent with this protocol are 
  - Partial Message Order: !TODO: 
 
 ## Definitions
@@ -49,7 +49,7 @@ It also assumes that some other component will be responsible for delivering the
 
 ```mermaid
 flowchart LR
-    Content:::plain--> Privatev1 --> Payload:::plain
+    ContentFrame:::plain--> Privatev1 --> Payload:::plain
     classDef plain fill:none,stroke:transparent;
 ```
 
@@ -58,23 +58,32 @@ How payloads are sent and received by clients is not described in this protocol.
 The choice of delivery method has no impact on the security of this conversation type, though the choice may affect sender privacy and censorship resistance. 
 In practice, any best-effort method of transmitting payloads will suffice, as no assumptions are made.
 
+### Content 
+This protocol expects that all content be wrapped in a ContentFrame as per [CONTENTFRAME](https://github.com/waku-org/specs/blob/jazzz/content_frame/standards/application/contentframe.md) specification. 
+
+This increases observability when issues arise due to client versions mismatches. By enforcing that only ContentFrames will be passed to applications, this creates a clear boundary between Content and protocol owned meta messages.  
 
 ## Initialization
 
-Prior to operation participants MUST agree on the following parameters for each conversation. 
+The channel is initialized by both sender and recipient agreeing on the following values for each conversation:
+- `sk` - initial secret key  [32 bytes]
+- `ssk` - sender DH seed key
+- `rsk` - recipient DH seed key
 - `rda` - delivery address (recipient) !TODO: Can delivery addresses be removed from this spec?
 - `sda` - delivery address (sender)
-- `sk` - initial secret key  [32 bytes]
 
-To maintain the security properties `sk`:
-- MUST be known only by the participants.
-- MUST be mutually authenticated.  
+
+To maintain the security properties:
+- `sk` MUST be known only by the participants.
+- `sk` MUST be derived in a way that ensures mutual authentication of the participants
+- `sk` SHOULD have forward secrecy by incorporating ephemeral key material 
+- `rsk` and `ssk` SHOULD incorporate ephemeral key material
 
 Additionally implementations MUST determine the following constants:
-- `max_seg_size` - maximum segmentation size.
-- `max_skip` - number of keys which can be skipped per session.
+- `max_seg_size` - maximum segmentation size to be used.
+- `max_skip` - number of keys which can be skipped per session. Values are determined by 
 
-## Operation
+## Frame Encoding
 
 There are 3 phases to operation.
 
@@ -93,38 +102,43 @@ flowchart TD
 
 - **Segmentation**: Divides contents into smaller fragments for transportation. 
 - **Reliability**: Adds tracking information to detect dropped messages.
-- **Encryption**: Provides confidentiality and tamper resistence.
+- **Encryption**: Provides confidentiality and tamper resistance.
 
 The output of each phase of the operational pipeline is the input of the next.
 
 ### Segmentation
 Thought the protocol has no limitation, it is assumed that a delivery mechanism MAY have restrictions on the max message size. 
-While this is a transport level issue, it's included here because defering segementation has negative impacts on bandwidth efficiency and privacy. Forcing the transport layer to handle segmentation would require either reassembling unauthenticated segments which are open to malicious interference or implementing encryption at the transport layer.
-In the event of a dropped payload, segmentation after reliability would require clients to re-broadcast entire frames, rather than only the missing segments. Increasing load on the network, and increasing a DOS attack surface. To optimize the entire pipeline, segmentation is handled first, so that segments can benefit from the reliability and robust encryption already in place.
+While this is a transport level issue, it's included here because deferring segmentation has negative impacts on bandwidth efficiency and privacy. 
+Forcing the transport layer to handle segmentation would require either reassembling unauthenticated segments (which are open to malicious interference) or implementing encryption at the transport layer.
+In the event of a dropped payload, segmentation after reliability would require clients to re-broadcast entire frames, rather than only the missing segments. 
+This unnecessarily increases load on the network/clients and increases a DOS attack surface. 
+To optimize the entire pipeline, segmentation is handled first, so that segments can benefit from the reliability and robust encryption already in place.
 
 The segmentation strategy used is defined by [!TODO: Flatten link once completed](https://github.com/waku-org/specs/pull/91)
 
+Implementation specifics:
+- Error correction is not used, as reliable delivery is already provided by lower layers. 
+- `segmentSize` = `max_seg_size` 
 !TODO: ^Spec currently has a limit of 
 
 ### Message Reliability
 Scalable Data Sync is used to detect missing messages and provide delivery receipts to the sender after successful reception of a payload.
-SDS is implementated according to the [specification](https://github.com/vacp2p/rfc-index/blob/3505da6bd66d2830e5711deb0b5c2b4de9212a4d/vac/raw/sds.md).
-
+SDS is implemented according to the [specification](https://github.com/vacp2p/rfc-index/blob/3505da6bd66d2830e5711deb0b5c2b4de9212a4d/vac/raw/sds.md).
 
 !TODO: define: sender_id mapping
 !TODO: define: message_id mapping
-!TODO: update to latest version and inlcude SDS-R
+!TODO: update to latest version and include SDS-R
 
-!NOTE: The defaultConfig in nim-SDS creates a bloom filter with the parameters n=10000, p=0.001 which has a size of ~18KiB. The bloom filter is included in every message which results in a bestcase overhead rate of 13.3% (assuming waku's MSS of 150KB).  Given a target content size of 4KB, that puts the utilization factor at 80+% (Without considering other layers). This needs to be looked at, lowering to n=2000 would lower overhead to ~3.5 KiB.
+!NOTE: The defaultConfig in nim-SDS creates a bloom filter with the parameters n=10000, p=0.001 which has a size of ~18KiB. The bloom filter is included in every message which results in a best-case overhead rate of 13.3% (assuming waku's MSS of 150KB).  Given a target content size of 4KB, that puts the utilization factor at 80+% (Without considering other layers). This needs to be looked at, lowering to n=2000 would lower overhead to ~3.5 KiB.
 
 ### Encryption
 
-Payloads are encrypted using [doubleratchet](https://signal.org/docs/specifications/doubleratchet/).
+Payloads are encrypted using [`doubleratchet`](https://signal.org/docs/specifications/doubleratchet/).
 
-With the following choices for external fucntions:
+With the following choices for external functions:
 - `DH`: X25519
-- `KDF_RF`: HKDF with SHA256, info = "logoschat_privatev1"
-- `KDF_CK`: HKDF with SHA256, input = "0x01 for message key, and "0x02" for chainkey
+- `KDF_RF`: HKDF with SHA256, info = `logoschat_privatev1`
+- `KDF_CK`: HKDF with SHA256, input = "0x01 for message_key, and "0x02" for chain_key
 - `KDF_MK`: HKDF with SHA256, hdkf.info = "PrivateV1MessageKey"
 - `ENCRYPT`: Implemented with AEAD_CHACHA20_POLY1305
 
@@ -133,30 +147,39 @@ With the following choices for external fucntions:
 AEAD_CHACHA20_POLY1305 is implemented using randomly generated nonces. The nonce and tag are combined with the ciphertext for transport where `ciphertext = nonce || encrypted_bytes || tag`.
 
 
+## Frame Handling
+
+This protocol uses explicit tagging of content, to remove ambiguity when parsing/handling frames. 
+This allows for clear distinction between content and frames providing protocol functionality. Even if new frames are added in the future, Clients can be certain whether the payload is intended for itself or applications. This is achieved through an invariant - All non-content frames are intended to be consumed by the client. When a new unknown frame arrives it can be certain that a version compatibility issue has occurred. 
+
+- Clients SHALL only pass content frames to Applications
+- Clients MAY drop unrecognized frames 
+
+
 # Wire Format Specification / Syntax
 
 ## Payload Parse Tree
 
-A deterministic parse tree is used to avoid ambiguity when recieving payloads.
+A deterministic parse tree is used to avoid ambiguity when receiving payloads.
 
 ```mermaid
 flowchart TD
 
     D[DoubleRatchet]
     S[SDS Message]
-    Seg1[ Segment]
-    Seg2[ Segment]
-    Seg3[ Segment]
+    Segment1[ Segment]
+    Segment2[ Segment]
+    Segment3[ Segment]
     P[PrivateV1Frame]
 
     start@{ shape: start }
     start --> D
     D -->|Payload| S
-    S -->|Payload| Seg1
+    S -->|Payload| Segment1
 
-    Seg1 --> P
-    Seg2:::plain --> P
-    Seg3:::plain --> P
+    Segment1 --> P
+    Segment2:::plain --> P
+    Segment3:::plain --> P
     
     P --> T{frame_type}
     T --> ContentFrame
@@ -208,9 +231,9 @@ message ReliablePayload {
 
 ### Segmentation 
 
-This payload is used without modification form the Segmentation [specification](https://github.com/waku-org/specs/blob/fa2993b427f12796356a232c54be75814fac5d98/standards/application/segmentation.md)
+This payload is used without modification from the Segmentation [specification](https://github.com/waku-org/specs/blob/fa2993b427f12796356a232c54be75814fac5d98/standards/application/segmentation.md)
 
-```proto
+```protobuf
 
 message SegmentMessageProto {
   bytes  entire_message_hash    = 1; // 32 Bytes
@@ -225,6 +248,8 @@ message SegmentMessageProto {
 
 **payload**: This field is an protobuf encoded `PrivateV1Frame`
 
+!TODO: This should be encoded as a FrameType so it can be optional.
+
 ### Frame
 
 ```protobuf
@@ -238,19 +263,29 @@ message PrivateV1Frame {
 }
 ```
 
+!TODO: This is the only place where this protocol is explicitly dependent on ContentFrame. 
+A concept of a content tagging is required, but the exact structure could be a implementation detail. How best to abstract the exact type away?
+
 
 
 ## Implementation Suggestions
-An *implementation suggestions* section may provide suggestions on how to approach implementation details,
-as well as more context an implementer may need to be aware off when proceeding with the implementation.
 
-if available, point to existing implementations for reference.
+### Initialization
 
+Mutual authentication is provided by the `sk`, so there is no requirement of using authenticated keys for `ssk` and `rsk`. Implementations SHOULD use the most ephemeral key available in order incorporate as much key material as possible. This means that senders SHOULD generate a new ephemeral key for `ssk` for every conversation assuming channels are asynchronously initialized.
 
-## (Further Optional Sections)
+### Excessive Skipped Message 
 
+Handling of skipped message keys is not strictly defined in double ratchet. Implementations need to choose an strategy which works best for their environment, and delivery mechanism. Halting operation of the channel is the safest, as it bounds resource utilization in the event of a DOS attack but is not always possible.  
+
+If eventual delivery of messages is not guaranteed, implementors should regularly delete keys that are older than a given time window. Unreliable delivery mechanisms will result in increased key storage over time, as more messages are lost with no hope of delivery. 
+
+!TODO: Worth making deletion of stale keys part of the spec?
 
 ## Security/Privacy Considerations
+
+### Sender Derivation
+
 
 ### Segmentation Session Binding 
 
@@ -268,4 +303,4 @@ Copyright and related rights waived via [CC0](https://creativecommons.org/public
 
 ## References
 
-A list of references.
+A list of references. use SHA256 or SAH256.
