@@ -60,12 +60,16 @@ flowchart LR
 ```
 ### Content
 
-Applications provide content as encoded bytes, which is then packaged into payloads for transmission
+Applications provide content as encoded bytes, which is then packaged into payloads for transmission.
 
 **Size Limit**
 
 Content MUST be smaller than `255 * max_seg_size`
 due to segmentation protocol limitations.
+
+**Agnostic**
+
+The protocol treats the contents as a arbitrary sequence of bytes and is agnostic to its contents.
 
 ### Payload Delivery
 How payloads are sent and received by clients is deliberately not specified by this protocol.
@@ -100,8 +104,8 @@ Additionally implementations MUST determine the following constants:
 
 ## Protocol Operation
 
-There are 3 phases to operation.
-
+PRIVATE1 processes messages through a three-stage pipeline where each stage's output becomes the next stage's input.
+The specific ordering of these stages is critical for maintaining security properties while enabling efficient operation.
 
 ```mermaid
 flowchart TD
@@ -114,20 +118,31 @@ flowchart TD
 
     classDef plain fill:none,stroke:transparent;
 ```
+**Pipeline Stages:**
+- **Segmentation**: Divides content into transport-appropriate fragments
+- **Reliability (SDS)**: Adds tracking metadata for delivery detection and ordering
+- **Encryption (Double Ratchet)**: Provides confidentiality, authentication, and forward secrecy
 
-- **Segmentation**: Divides content into smaller fragments for transportation. 
-- **Reliability**: Adds tracking information to detect dropped messages.
-- **Encryption**: Provides confidentiality and tamper resistance.
 
-The output of each phase of the operational pipeline is the input of the next.
 
 ### Segmentation
-Thought the protocol has no limitation, it is assumed that a delivery mechanism MAY have restrictions on the max message size. 
-While this is a transport level issue, it's included here because deferring segmentation has negative impacts on bandwidth efficiency and privacy. 
-Forcing the transport layer to handle segmentation would require either reassembling unauthenticated segments (which are open to malicious interference) or implementing encryption at the transport layer.
-In the event of a dropped payload, segmentation after reliability would require clients to re-broadcast entire frames, rather than only the missing segments. 
-This unnecessarily increases load on the network/clients and increases a DOS attack surface. 
-To optimize the entire pipeline, segmentation is handled first so that segments can benefit from the reliability and robust encryption already in place.
+
+While PRIVATE1 itself has no inherent message size limitation, practical transport mechanisms typically impose maximum payload sizes.
+Segmentation is intentionally placed as the first pipeline stage rather than deferring it to the transport layer
+
+**Why Segment Before Encryption**
+
+Segmenting after encryption would force the transport layer to handle fragmentation of ciphertext blobs, creating several problems.
+- Transport-layer segmentation would require buffering all segments before any can be authenticated, increasing the DOS attack surface.
+- Unauthenticated segment reassembly opens the door to malicious segment injection and substitution attacks.
+- Unencrypted segmentation metadata reveals size and other metadata about the content in transit. 
+
+**Why Segment Before Reliability**
+
+Placing segmentation after reliability tracking would mean retransmission of a dropped payload requires re-broadcasting the entire frame.
+By segmenting first, the reliability layer can track individual segments and request retransmission of only the missing fragments.
+
+**Implementation**
 
 The segmentation strategy used is defined by [!TODO: Flatten link once completed](https://github.com/waku-org/specs/pull/91)
 
@@ -149,20 +164,51 @@ This needs to be looked at, lowering to n=2000 would lower overhead to ~3.5 KiB.
 
 ### Encryption
 
-Payloads are encrypted using the [doubleratchet](https://signal.org/docs/specifications/doubleratchet/) protocol.
+Payloads are encrypted using the [Double Ratchet](https://signal.org/docs/specifications/doubleratchet/) algorithm with the following cryptographic primitive choices:
 
-With the following choices for external functions:
-- `DH`: X25519
-- `KDF_RF`: HKDF with SHA256, info = `logoschat_privatev1`
-- `KDF_CK`: HKDF with SHA256, input = "0x01 for message_key, and "0x02" for chain_key
-- `KDF_MK`: HKDF with SHA256, hkdf.info = "PrivateV1MessageKey"
-- `ENCRYPT`: Implemented with AEAD_CHACHA20_POLY1305
+**Double Ratchet Configuration**
 
-!TODO: Define AssociatedData
+- `DH`: X25519 for Diffie-Hellman operations
+- `KDF_RK`: HKDF with SHA256, `info = "PrivateV1RootKey"`
+- `KDF_CK`: HKDF with SHA256, using `input`=`0x01` for message keys and `input`=`0x02` for chain keys
+- `KDF_MK`: HKDF with SHA256, `info = "PrivateV1MessageKey"`
+- `ENCRYPT`: AEAD_CHACHA20_POLY1305
 
-AEAD_CHACHA20_POLY1305 is implemented using randomly generated nonces. 
-The nonce and tag are combined with the ciphertext for transport where `ciphertext = nonce || encrypted_bytes || tag`.
+**AEAD Implementation**
 
+ChaCha20-Poly1305 is used with randomly generated 96-bit (12-byte) nonces.
+The nonce MUST be generated using a cryptographically secure random number generator for each message.
+The complete ciphertext format for transport is:
+```
+encrypted_payload = nonce || ciphertext || tag
+```
+
+Where `nonce` is 12 bytes, `ciphertext` is variable length, and `tag` is 16 bytes.
+
+## Frame Handling
+
+This protocol uses explicit frame type tagging to remove ambiguity when parsing and handling frames.
+This creates a clear distinction between protocol-generated frames and application content.
+
+**Type Discrimination**
+
+All frames carry an explicit type field that identifies their purpose.
+The `content` frame type is reserved exclusively for application-level data.
+All other frame types are protocol-owned and intended for client processing, not application consumption.
+
+This establishes a critical invariant: any frame that is not `content` is meant for the protocol layer.
+When a client encounters an unknown frame type, it can definitively conclude this represents a version compatibility issue rather than corrupted application data.
+
+**Processing Rules**
+
+- All application-level content MUST use the `content` frame type
+- Clients SHALL only pass `content` frames to applications
+- Clients MAY drop unrecognized frame types
+
+**Future Extensibility**
+
+This explicit tagging mechanism allows the protocol to evolve without breaking existing implementations.
+Future versions may define additional frame types for protocol-level functionality while legacy clients continue processing `content` frames normally.
 
 ## Frame Handling
 
