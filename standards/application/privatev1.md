@@ -77,9 +77,6 @@ The channel is initialized by both sender and recipient agreeing on the followin
 - `sk` - initial secret key  [32 bytes]
 - `ssk` - sender DH seed key
 - `rsk` - recipient DH seed key
-- `rda` - delivery address (recipient) !TODO: Can delivery addresses be removed from this spec?
-- `sda` - delivery address (sender)
-
 
 To maintain the security properties:
 - `sk` MUST be known only by the participants.
