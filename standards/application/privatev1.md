@@ -46,25 +46,31 @@ The terms include:
 
 ## Architecture
 
-This conversation type assumes there is some service or application which wishes to generate and receive encrypted content. 
-It also assumes that some other component will be responsible for delivering the generated payloads. 
+This conversation type assumes there is some service or application which wishes to generate and receive end-to-end encrypted content. 
+It also assumes that some other component will be responsible for delivering the generated payloads. At its core this protocol takes the content provided and creates a series of payloads to be sent to the recipient.
 
 ```mermaid
 flowchart LR
-    ContentFrame:::plain--> Privatev1 --> Payload:::plain
+    Content:::plain--> Privatev1 --> Payload:::plain
     classDef plain fill:none,stroke:transparent;
 ```
 
+### Content 
+
+Content is provided to the protocol as encoded bytes. 
+Due to segmentation limitations there is a restriction on the maximum size of content. 
+This value is variable and is dependent upon which delivery service is used. 
+In practice content size MUST be less that `255` * `max_seg_size` see: [initialization](#initialization)
+
+Other than its size, the protocol is agnostic of content. 
+
+
 ### Payload Delivery
+
 How payloads are sent and received by clients is not described in this protocol. 
 The choice of delivery method has no impact on the security of this conversation type, though the choice may affect sender privacy and censorship resistance. 
 In practice, any best-effort method of transmitting payloads will suffice, as no assumptions are made.
 
-### Content 
-This protocol expects that all content be wrapped in a ContentFrame as per [CONTENTFRAME](https://github.com/waku-org/specs/blob/jazzz/content_frame/standards/application/contentframe.md) specification. 
-
-This increases observability when issues arise due to client versions mismatches. 
-By enforcing that only ContentFrames will be passed to applications, this creates a clear boundary between Content and protocol owned meta messages.  
 
 ## Initialization
 
@@ -103,7 +109,7 @@ flowchart TD
     classDef plain fill:none,stroke:transparent;
 ```
 
-- **Segmentation**: Divides contents into smaller fragments for transportation. 
+- **Segmentation**: Divides content into smaller fragments for transportation. 
 - **Reliability**: Adds tracking information to detect dropped messages.
 - **Encryption**: Provides confidentiality and tamper resistance.
 
@@ -191,7 +197,7 @@ flowchart TD
     Segment3:::plain --> P
     
     P --> T{frame_type}
-    T --> ContentFrame
+    T --content--> Bytes
     T --> Placeholder
 
     classDef plain fill:none,stroke:transparent;
@@ -263,21 +269,24 @@ message SegmentMessageProto {
 
 ```protobuf
 message PrivateV1Frame {                 
-    uint64 timestamp = 3;             // Sender reported timestamp
+    uint64 timestamp = 1;             // Sender reported timestamp
 	oneof frame_type {
-		common_frames.ContentFrame content = 10;
+		bytes content = 10;
         Placeholder placeholder = 11;
         // ....
 	}
 }
 ```
 
-!TODO: This is the only place where this protocol is explicitly dependent on ContentFrame. 
-A concept of a content tagging is required, but the exact structure could be a implementation detail. How best to abstract the exact type away?
-
+**content:** is encoded as bytes in order to allow implementations to define the type at runtime. 
 
 
 ## Implementation Suggestions
+
+### Content Types
+
+Implementors need to be mindful of maintaining interoperability between clients, when deciding how content is encoded prior to transmission.
+In a decentralized context, clients cannot be assumed to be using the same version let alone application. It is recommended that implementors use a self-describing content payload such as [CONTENTFRAME](https://github.com/waku-org/specs/blob/jazzz/content_frame/standards/application/contentframe.md) specification. This provides the ability for clients to determine support for incoming frames, regardless of the software used to receive them. 
 
 ### Initialization
 
@@ -318,3 +327,4 @@ Copyright and related rights waived via [CC0](https://creativecommons.org/public
 ## References
 
 A list of references. use SHA256 or SAH256.
+
