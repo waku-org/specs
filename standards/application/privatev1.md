@@ -2,7 +2,7 @@
 title: PRIVATE1
 name: Private conversation
 category: Standards Track
-tags: an optional list of tags, not standard
+tags:
 editor: Jazz Alyxzander (@Jazzz)
 contributors:
 ---
@@ -12,7 +12,9 @@ contributors:
 
 # Background
 
-Pairwise encrypted messaging channels are a foundational component in building chat systems. They allow for confidential, authenticated payloads to be delivered between two clients. Groupchats and channel based communication often rely on pairwise channels (at least partially) to deliver state updates and coordination messages. 
+Pairwise encrypted messaging channels are a foundational component in building chat systems. 
+They allow for confidential, authenticated payloads to be delivered between two clients.
+Groupchats and channel based communication often rely on pairwise channels (at least partially) to deliver state updates and coordination messages. 
 
 Having robust pairwise communication channels allow for 1:1 communication while also providing the infrastructure for more complicated communication.
 
@@ -61,7 +63,8 @@ In practice, any best-effort method of transmitting payloads will suffice, as no
 ### Content 
 This protocol expects that all content be wrapped in a ContentFrame as per [CONTENTFRAME](https://github.com/waku-org/specs/blob/jazzz/content_frame/standards/application/contentframe.md) specification. 
 
-This increases observability when issues arise due to client versions mismatches. By enforcing that only ContentFrames will be passed to applications, this creates a clear boundary between Content and protocol owned meta messages.  
+This increases observability when issues arise due to client versions mismatches. 
+By enforcing that only ContentFrames will be passed to applications, this creates a clear boundary between Content and protocol owned meta messages.  
 
 ## Initialization
 
@@ -112,7 +115,7 @@ While this is a transport level issue, it's included here because deferring segm
 Forcing the transport layer to handle segmentation would require either reassembling unauthenticated segments (which are open to malicious interference) or implementing encryption at the transport layer.
 In the event of a dropped payload, segmentation after reliability would require clients to re-broadcast entire frames, rather than only the missing segments. 
 This unnecessarily increases load on the network/clients and increases a DOS attack surface. 
-To optimize the entire pipeline, segmentation is handled first, so that segments can benefit from the reliability and robust encryption already in place.
+To optimize the entire pipeline, segmentation is handled first so that segments can benefit from the reliability and robust encryption already in place.
 
 The segmentation strategy used is defined by [!TODO: Flatten link once completed](https://github.com/waku-org/specs/pull/91)
 
@@ -129,7 +132,9 @@ SDS is implemented according to the [specification](https://github.com/vacp2p/rf
 !TODO: define: message_id mapping
 !TODO: update to latest version and include SDS-R
 
-!NOTE: The defaultConfig in nim-SDS creates a bloom filter with the parameters n=10000, p=0.001 which has a size of ~18KiB. The bloom filter is included in every message which results in a best-case overhead rate of 13.3% (assuming waku's MSS of 150KB).  Given a target content size of 4KB, that puts the utilization factor at 80+% (Without considering other layers). This needs to be looked at, lowering to n=2000 would lower overhead to ~3.5 KiB.
+!NOTE: The defaultConfig in nim-SDS creates a bloom filter with the parameters n=10000, p=0.001 which has a size of ~18KiB. The bloom filter is included in every message which results in a best-case overhead rate of 13.3% (assuming waku's MSS of 150KB).
+Given a target content size of 4KB, that puts the utilization factor at 80+% (Without considering other layers). 
+This needs to be looked at, lowering to n=2000 would lower overhead to ~3.5 KiB.
 
 ### Encryption
 
@@ -144,13 +149,17 @@ With the following choices for external functions:
 
 !TODO: Define AssociatedData
 
-AEAD_CHACHA20_POLY1305 is implemented using randomly generated nonces. The nonce and tag are combined with the ciphertext for transport where `ciphertext = nonce || encrypted_bytes || tag`.
+AEAD_CHACHA20_POLY1305 is implemented using randomly generated nonces. 
+The nonce and tag are combined with the ciphertext for transport where `ciphertext = nonce || encrypted_bytes || tag`.
 
 
 ## Frame Handling
 
 This protocol uses explicit tagging of content, to remove ambiguity when parsing/handling frames. 
-This allows for clear distinction between content and frames providing protocol functionality. Even if new frames are added in the future, Clients can be certain whether the payload is intended for itself or applications. This is achieved through an invariant - All non-content frames are intended to be consumed by the client. When a new unknown frame arrives it can be certain that a version compatibility issue has occurred. 
+This allows for clear distinction between content and frames providing protocol functionality. 
+Even if new frames are added in the future, Clients can be certain whether the payload is intended for itself or applications. 
+This is achieved through an invariant - All non-content frames are intended to be consumed by the client. 
+When a new unknown frame arrives it can be certain that a version compatibility issue has occurred. 
 
 - Clients SHALL only pass content frames to Applications
 - Clients MAY drop unrecognized frames 
@@ -272,13 +281,18 @@ A concept of a content tagging is required, but the exact structure could be a i
 
 ### Initialization
 
-Mutual authentication is provided by the `sk`, so there is no requirement of using authenticated keys for `ssk` and `rsk`. Implementations SHOULD use the most ephemeral key available in order incorporate as much key material as possible. This means that senders SHOULD generate a new ephemeral key for `ssk` for every conversation assuming channels are asynchronously initialized.
+Mutual authentication is provided by the `sk`, so there is no requirement of using authenticated keys for `ssk` and `rsk`. 
+Implementations SHOULD use the most ephemeral key available in order incorporate as much key material as possible. 
+This means that senders SHOULD generate a new ephemeral key for `ssk` for every conversation assuming channels are asynchronously initialized.
 
 ### Excessive Skipped Message 
 
-Handling of skipped message keys is not strictly defined in double ratchet. Implementations need to choose an strategy which works best for their environment, and delivery mechanism. Halting operation of the channel is the safest, as it bounds resource utilization in the event of a DOS attack but is not always possible.  
+Handling of skipped message keys is not strictly defined in double ratchet. 
+Implementations need to choose an strategy which works best for their environment, and delivery mechanism. 
+Halting operation of the channel is the safest, as it bounds resource utilization in the event of a DOS attack but is not always possible.  
 
-If eventual delivery of messages is not guaranteed, implementors should regularly delete keys that are older than a given time window. Unreliable delivery mechanisms will result in increased key storage over time, as more messages are lost with no hope of delivery. 
+If eventual delivery of messages is not guaranteed, implementors should regularly delete keys that are older than a given time window. 
+Unreliable delivery mechanisms will result in increased key storage over time, as more messages are lost with no hope of delivery. 
 
 !TODO: Worth making deletion of stale keys part of the spec?
 
