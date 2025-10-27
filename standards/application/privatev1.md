@@ -15,7 +15,7 @@ The protocol is transport-agnostic and designed to support both direct messaging
 
 # Background
 
-Pairwise encrypted messaging channels represent the foundational building block upon which modern secure communication systems are constructed. While end-to-end encrypted group chats and public channels dominate user-facing features and capture the majority of user attention, the underlying infrastructure enabling these complex communication patterns relies fundamentally on secure one-to-one communication primitives. Just as higher-level network protocols are built upon reliable transport primitives like TCP, sophisticated group communication systems depend on robust pairwise channels to function correctly and securely.
+Pairwise encrypted messaging channels represent the foundational building block of modern secure communication systems. While end-to-end encrypted group chats capture user attention, the underlying infrastructure that makes these systems possible relies (at least somewhat) on secure one-to-one communication primitives. Just as higher-level network protocols are built upon reliable transport primitives like TCP, sophisticated communication systems depend on robust pairwise channels to function correctly and securely.
 
 These channels serve purposes beyond simple content delivery. They transmit not only user-visible messages but also critical metadata, coordination signals, and state synchronization information between clients. This signaling capability makes pairwise channels essential infrastructure for distributed systems: key material distribution, membership updates, administrative actions, and protocol coordination all flow through these channels. While more sophisticated group communication strategies can achieve better efficiency at scale—particularly for broadcast-style communication patterns with many participants—they struggle to match the privacy and security properties that pairwise channels provide inherently. The fundamental asymmetry of two-party communication enables stronger guarantees: minimal metadata exposure, simpler key management, clearer authentication boundaries, and more straightforward security analysis.
 
@@ -25,15 +25,14 @@ However, being encrypted is merely the starting point, not the complete solution
 
 # Private V1
 
-PrivateV1 is conversation type which establishes a full-duplex secure channel between two participants.
+PrivateV1 is a conversation type specification that establishes a full-duplex secure communication channel between two participants. It combines the Double Ratchet algorithm for encryption with Scalable Data Sync (SDS) for reliable delivery and an efficient segmentation strategy to handle transport constraints.
 
-Private Conversations have the following properties:
- - Payload Confidentiality: Only the participants can read the contents of any message sent.
- - Content Integrity: Recipients can detect if the contents were modified by a third party.
- - Sender Privacy: Only the recipient can determine who the sender was.
- - Forward Secrecy: A compromise in the future does not allow previous messages to be decrypted by a third party.
- - Post Compromise Security: Conversations eventually recover from a compromise which occurs today.
- - Dropped Message Observability: Messages which were lost in transit are eventually visible to both sender and recipient.
+- **Payload Confidentiality**: Only the two participants can read the contents of any message sent. Observers, transport providers, and other third parties cannot decrypt message contents.
+- **Content Integrity**: Recipients can detect if message contents were modified by a third party. Any tampering with encrypted payloads will cause decryption to fail, preventing corrupted messages from being accepted as authentic.
+- **Sender Privacy**: Only the recipient can determine who the sender was. Observers cannot identify the sender from encrypted payloads, though both participants can authenticate each other's messages.
+- **Forward Secrecy**: A compromise in the future does not allow previous messages to be decrypted by a third party. Message keys are deleted immediately after use and cannot be reconstructed from current state, even if long-term keys are later compromised.
+- **Post-Compromise Security**: Conversations eventually recover from a key compromise. After an attacker loses access to a device, the security properties are eventually restored.
+- **Dropped Message Observability**: Messages lost in transit are eventually observable to both sender and recipient. 
 
 ## Definitions
 
@@ -48,6 +47,7 @@ The terms include:
 - Sender
 
 
+
 ## Architecture
 
 This conversation type assumes there is some service or application which wishes to generate and receive end-to-end encrypted content. 
@@ -58,22 +58,28 @@ flowchart LR
     Content:::plain--> Privatev1 --> Payload:::plain
     classDef plain fill:none,stroke:transparent;
 ```
+### Content
 
-### Content 
+Applications provide content as encoded bytes, which is then packaged into payloads for transmission
 
-Content is provided to the protocol as encoded bytes. 
-Due to segmentation limitations there is a restriction on the maximum size of content. 
-This value is variable and is dependent upon which delivery service is used. 
-In practice content size MUST be less that `255` * `max_seg_size` see: [initialization](#initialization)
+**Size Limit**
 
-Other than its size, the protocol is agnostic of content. 
+Content MUST be smaller than `255 * max_seg_size`
+due to segmentation protocol limitations.
 
 ### Payload Delivery
+How payloads are sent and received by clients is deliberately not specified by this protocol.
+Transport choice is an implementation decision that should be made based on deployment requirements.
 
-How payloads are sent and received by clients is not described in this protocol. 
-The choice of delivery method has no impact on the security of this conversation type, though the choice may affect sender privacy and censorship resistance. 
-In practice, any best-effort method of transmitting payloads will suffice, as no assumptions are made.
+The choice of transport mechanism has no impact on PRIVATE1's security properties.
+Confidentiality, integrity, and forward secrecy are provided regardless of how payloads are delivered.
+However, transport choice may affect other properties.
 
+**Sender Privacy:** 
+Implementations may leak sensitive metadata.
+
+**Reliability**
+While PRIVATE1 handles message losses, more reliable transports reduce retransmission overhead. 
 
 ## Initialization
 
@@ -92,7 +98,7 @@ Additionally implementations MUST determine the following constants:
 - `max_seg_size` - maximum segmentation size to be used.
 - `max_skip` - number of keys which can be skipped per session. Values are determined by 
 
-## Frame Encoding
+## Protocol Operation
 
 There are 3 phases to operation.
 
@@ -128,7 +134,6 @@ The segmentation strategy used is defined by [!TODO: Flatten link once completed
 Implementation specifics:
 - Error correction is not used, as reliable delivery is already provided by lower layers. 
 - `segmentSize` = `max_seg_size` 
-!TODO: ^Spec currently has a limit of 
 
 ### Message Reliability
 Scalable Data Sync is used to detect missing messages and provide delivery receipts to the sender after successful reception of a payload.
@@ -150,7 +155,7 @@ With the following choices for external functions:
 - `DH`: X25519
 - `KDF_RF`: HKDF with SHA256, info = `logoschat_privatev1`
 - `KDF_CK`: HKDF with SHA256, input = "0x01 for message_key, and "0x02" for chain_key
-- `KDF_MK`: HKDF with SHA256, hdkf.info = "PrivateV1MessageKey"
+- `KDF_MK`: HKDF with SHA256, hkdf.info = "PrivateV1MessageKey"
 - `ENCRYPT`: Implemented with AEAD_CHACHA20_POLY1305
 
 !TODO: Define AssociatedData
