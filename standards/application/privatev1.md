@@ -9,14 +9,19 @@ contributors:
 
 # Abstract
 
+This specification defines PRIVATE1, a conversation protocol for establishing secure, full-duplex encrypted communication channels between two participants. PRIVATE1 provides end-to-end encryption with forward secrecy and post-compromise security using the DoubleRatchet algorithm, combined with reliable message delivery via Scalable Data Sync (SDS) and efficient segmentation for transport-constrained environments.
+
+The protocol is transport-agnostic and designed to support both direct messaging and as a foundation for group communication systems. PRIVATE1 ensures payload confidentiality, content integrity, sender privacy, and message reliability while remaining resilient to network disruptions and message reordering.
 
 # Background
 
-Pairwise encrypted messaging channels are a foundational component in building chat systems. 
-They allow for confidential, authenticated payloads to be delivered between two clients.
-Groupchats and channel based communication often rely on pairwise channels (at least partially) to deliver state updates and coordination messages. 
+Pairwise encrypted messaging channels represent the foundational building block upon which modern secure communication systems are constructed. While end-to-end encrypted group chats and public channels dominate user-facing features and capture the majority of user attention, the underlying infrastructure enabling these complex communication patterns relies fundamentally on secure one-to-one communication primitives. Just as higher-level network protocols are built upon reliable transport primitives like TCP, sophisticated group communication systems depend on robust pairwise channels to function correctly and securely.
 
-Having robust pairwise communication channels allow for 1:1 communication while also providing the infrastructure for more complicated communication.
+These channels serve purposes beyond simple content delivery. They transmit not only user-visible messages but also critical metadata, coordination signals, and state synchronization information between clients. This signaling capability makes pairwise channels essential infrastructure for distributed systems: key material distribution, membership updates, administrative actions, and protocol coordination all flow through these channels. While more sophisticated group communication strategies can achieve better efficiency at scale—particularly for broadcast-style communication patterns with many participants—they struggle to match the privacy and security properties that pairwise channels provide inherently. The fundamental asymmetry of two-party communication enables stronger guarantees: minimal metadata exposure, simpler key management, clearer authentication boundaries, and more straightforward security analysis.
+
+However, being encrypted is merely the starting point, not the complete solution. Production-quality one-to-one channels must function reliably in the messy reality of modern networks. Real-world deployment demands resilience to unreliable networks where messages may be lost, delayed, duplicated, or arrive out of order. Channels must efficiently handle arbitrarily large payloads—from short text messages to multi-megabyte file transfers—while respecting the maximum transmission unit constraints imposed by various transport layers. Perhaps most critically, the protocol must remain fully operational even when one or more participants are offline or intermittently connected, a common scenario in mobile environments where users move between network conditions, battery limitations force background restrictions, or time zone differences mean participants are rarely simultaneously active. These practical requirements shape the protocol design as significantly as cryptographic considerations, demanding careful attention to segmentation strategies, reliability mechanisms, state management, and resource constraints alongside the core security properties.
+
+
 
 # Private V1
 
@@ -139,7 +144,7 @@ This needs to be looked at, lowering to n=2000 would lower overhead to ~3.5 KiB.
 
 ### Encryption
 
-Payloads are encrypted using [`doubleratchet`](https://signal.org/docs/specifications/doubleratchet/).
+Payloads are encrypted using the [doubleratchet](https://signal.org/docs/specifications/doubleratchet/) protocol.
 
 With the following choices for external functions:
 - `DH`: X25519
