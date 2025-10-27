@@ -28,8 +28,7 @@ Private Conversations have the following properties:
  - Sender Privacy: Only the recipient can determine who the sender was.
  - Forward Secrecy: A compromise in the future does not allow previous messages to be decrypted by a third party.
  - Post Compromise Security: Conversations eventually recover from a compromise which occurs today.
- - Message Reliability: Messages sent with this protocol are 
- - Partial Message Order: !TODO: 
+ - Dropped Message Observability: Messages which were lost in transit are eventually visible to both sender and recipient.
 
 ## Definitions
 
