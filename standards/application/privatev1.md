@@ -205,19 +205,6 @@ This configuration produces bloom filters of approximately 3.5 KiB per message.
 
 !TODO: Can the bloom filter be dropped in 1:1 communication?
 
-
-### Message Reliability
-Scalable Data Sync is used to detect missing messages and provide delivery receipts to the sender after successful reception of a payload.
-SDS is implemented according to the [specification](https://github.com/vacp2p/rfc-index/blob/3505da6bd66d2830e5711deb0b5c2b4de9212a4d/vac/raw/sds.md).
-
-!TODO: define: sender_id mapping
-!TODO: define: message_id mapping
-!TODO: update to latest version and include SDS-R
-
-!NOTE: The defaultConfig in nim-SDS creates a bloom filter with the parameters n=10000, p=0.001 which has a size of ~18KiB. The bloom filter is included in every message which results in a best-case overhead rate of 13.3% (assuming waku's MSS of 150KB).
-Given a target content size of 4KB, that puts the utilization factor at 80+% (Without considering other layers). 
-This needs to be looked at, lowering to n=2000 would lower overhead to ~3.5 KiB.
-
 ### Encryption
 
 Payloads are encrypted using the [Double Ratchet](https://signal.org/docs/specifications/doubleratchet/) algorithm with the following cryptographic primitive choices:
@@ -398,23 +385,16 @@ Halting operation of the channel is the safest, as it bounds resource utilizatio
 If eventual delivery of messages is not guaranteed, implementors should regularly delete keys that are older than a given time window. 
 Unreliable delivery mechanisms will result in increased key storage over time, as more messages are lost with no hope of delivery. 
 
-!TODO: Worth making deletion of stale keys part of the spec?
-
-
-
 ## Security/Privacy Considerations
 
-### Sender Derivation
+### Sender Deniability and Authentication**
 
+Encrypted messages do not have a cryptographically provable sender to third parties due to the deniability property of the Double Ratchet algorithm.
+However, participants in a conversation can authenticate each other through the shared cryptographic state.
+When receiving a message, the recipient knows it must have come from the other participant because only they possess the necessary key material to produce valid ciphertexts.
 
-### Segmentation Session Binding 
-
-
-
-
-### Privacy - ContentSize
-
-
+Because sender identity is implicitly authenticated through shared secrets rather than explicit signatures, it is critical that the initial shared secret `sk` be derived from an authenticated key exchange process.
+Without proper authentication during initialization, an adversary could perform a man-in-the-middle attack and establish separate sessions with each participant, allowing them to read and modify all messages.
 
 
 ## Copyright
