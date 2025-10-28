@@ -91,6 +91,7 @@ The channel is initialized by both sender and recipient agreeing on the followin
 - `sk` - initial secret key  [32 bytes]
 - `ssk` - sender DH seed key
 - `rsk` - recipient DH seed key
+- `conversation_id` - globally unique identifier
 
 To maintain the security properties:
 - `sk` MUST be known only by the participants.
@@ -98,9 +99,39 @@ To maintain the security properties:
 - `sk` SHOULD have forward secrecy by incorporating ephemeral key material 
 - `rsk` and `ssk` SHOULD incorporate ephemeral key material
 
+As PRIVATE1 is agnostic to identity defining a unique identifier is difficult at this layer. The exact derivation is left to implementations to determine.
+- `conversation_id` MUST be unique across all instances of chat conversations
+- `conversation_id` SHOULD be consistent across applications to maintain interoperability
+
 Additionally implementations MUST determine the following constants:
 - `max_seg_size` - maximum segmentation size to be used.
 - `max_skip` - number of keys which can be skipped per session. Values are determined by 
+
+## Value Derivations
+
+These values are derived during protocol operation and are deterministically computed from protocol data.
+
+### Frame Identifier
+
+For reliability tracking, every payload MUST have a unique deterministic identifier.
+
+The frame identifier is computed as:
+```
+frame_id = rhex(blake2b(encoded_frame_bytes))
+```
+
+Where:
+- `rhex` is lowercase hexadecimal encoding without the `0x` prefix
+- `blake2b` is BLAKE2b hash function with 128-bit output
+- `encoded_frame_bytes` is the protobuf-encoded `PrivateV1Frame`
+- `frame_id` is a 32 character string
+
+**Protobuf Encoding Considerations**
+
+Protobuf does not guarantee byte-identical outputs for multiple serializations of the same logical message.
+Because of this, the `frame_id` represents the hash of specific encoded bytes rather than an abstract frame structure.
+Implementations MUST compute `frame_id` from the actual bytes being transmitted to ensure sender and receiver derive identical identifiers.
+
 
 ## Protocol Operation
 
@@ -148,7 +179,32 @@ The segmentation strategy used is defined by [!TODO: Flatten link once completed
 
 Implementation specifics:
 - Error correction is not used, as reliable delivery is already provided by lower layers. 
-- `segmentSize` = `max_seg_size` 
+- `segmentSize` = `max_seg_size
+ 
+### Message Reliability
+
+Scalable Data Sync (SDS) is used to detect missing messages, provide delivery confirmation, and handle retransmission of payloads.
+SDS is implemented according to the [specification](https://github.com/vacp2p/rfc-index/blob/main/vac/raw/sds.md).
+
+**SDS Field Mappings**
+
+The following mappings connect PRIVATE1 concepts to SDS fields:
+
+- `sender_id`: !TODO: This requires PRIVATE1 to be identity aware
+- `message_id`: uses the `frame_id` definition. 
+- `channel_id`: uses the `conversation_id` parameter.
+
+**Sender Validation**
+SDS uses a `sender_id` payload field to determine whether a message was sent by the remote party. This value is sender reported and not validated which can have unknown implications if trusted in other contexts. For security hygiene Clients SHOULD drop SDS messages if `sender_id` != the sender derived from the encryption layer.
+
+
+**Bloom Filter Configuration**
+
+PRIVATE1 uses bloom filter parameters of `n=2000` (expected elements) and `p=0.001` (false positive probability).
+This configuration produces bloom filters of approximately 3.5 KiB per message.
+
+!TODO: Can the bloom filter be dropped in 1:1 communication?
+
 
 ### Message Reliability
 Scalable Data Sync is used to detect missing messages and provide delivery receipts to the sender after successful reception of a payload.
@@ -343,6 +399,8 @@ If eventual delivery of messages is not guaranteed, implementors should regularl
 Unreliable delivery mechanisms will result in increased key storage over time, as more messages are lost with no hope of delivery. 
 
 !TODO: Worth making deletion of stale keys part of the spec?
+
+
 
 ## Security/Privacy Considerations
 
