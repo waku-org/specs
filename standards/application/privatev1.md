@@ -179,7 +179,7 @@ The segmentation strategy used is defined by [!TODO: Flatten link once completed
 
 Implementation specifics:
 - Error correction is not used, as reliable delivery is already provided by lower layers. 
-- `segmentSize` = `max_seg_size
+- `segmentSize` = `max_seg_size`
 - All payloads regardless of size are wrapped in a segmentation message.
  
 ### Message Reliability
@@ -215,11 +215,11 @@ Payloads are encrypted using the [Double Ratchet](https://signal.org/docs/specif
 - `KDF_RK`: HKDF with SHA256, `info = "PrivateV1RootKey"`
 - `KDF_CK`: HKDF with SHA256, using `input`=`0x01` for message keys and `input`=`0x02` for chain keys
 - `KDF_MK`: HKDF with SHA256, `info = "PrivateV1MessageKey"`
-- `ENCRYPT`: AEAD_CHACHA20_POLY1305
+- `ENCRYPT`: `AEAD_CHACHA20_POLY1305`
 
 **AEAD Implementation**
 
-ChaCha20-Poly1305 is used with randomly generated 96-bit (12-byte) nonces.
+`ChaCha20-Poly1305` is used with randomly generated 96-bit (12-byte) nonces.
 The nonce MUST be generated using a cryptographically secure random number generator for each message.
 The complete ciphertext format for transport is:
 ```
@@ -365,8 +365,8 @@ message PrivateV1Frame {
 
 ### Content Types
 
-Implementors need to be mindful of maintaining interoperability between clients, when deciding how content is encoded prior to transmission.
-In a decentralized context, clients cannot be assumed to be using the same version let alone application. It is recommended that implementors use a self-describing content payload such as [CONTENTFRAME](https://github.com/waku-org/specs/blob/jazzz/content_frame/standards/application/contentframe.md) specification. This provides the ability for clients to determine support for incoming frames, regardless of the software used to receive them. 
+Implementers need to be mindful of maintaining interoperability between clients, when deciding how content is encoded prior to transmission.
+In a decentralized context, clients cannot be assumed to be using the same version let alone application. It is recommended that implementers use a self-describing content payload such as [CONTENTFRAME](https://github.com/waku-org/specs/blob/jazzz/content_frame/standards/application/contentframe.md) specification. This provides the ability for clients to determine support for incoming frames, regardless of the software used to receive them. 
 
 ### Initialization
 
@@ -380,7 +380,7 @@ Handling of skipped message keys is not strictly defined in double ratchet.
 Implementations need to choose a strategy which works best for their environment, and delivery mechanism. 
 Halting operation of the channel is the safest, as it bounds resource utilization in the event of a DOS attack but is not always possible.  
 
-If eventual delivery of messages is not guaranteed, implementors should regularly delete keys that are older than a given time window. 
+If eventual delivery of messages is not guaranteed, implementers should regularly delete keys that are older than a given time window. 
 Unreliable delivery mechanisms will result in increased key storage over time, as more messages are lost with no hope of delivery. 
 
 ## Security/Privacy Considerations
