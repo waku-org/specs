@@ -224,6 +224,15 @@ functions:
         type: result<WakuNode, error>
 ```
 
+#### Property definitions
+
+```yaml
+properties:
+  events:
+    type: EventEmitter
+    description: "Event source for message-related events"
+```
+
 #### Predefined values
 
 ```yaml
