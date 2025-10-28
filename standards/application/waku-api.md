@@ -308,7 +308,7 @@ whereas `core` SHOULD be used if node has no strong hardware or bandwidth restri
 
 ```yaml
 types:
-  SendMessage:
+  MessageEnvelope:
     type: object
     fields:
       contentTopic:
@@ -335,16 +335,16 @@ functions:
     description: "Send a message through the network."
     parameters:
       - name: message
-        type: SendMessage
-        description: "The message to send"
+        type: MessageEnvelope
+        description: "Parameters for sending the message."
     returns:
       type: result<RequestId, error>
 ```
 
 #### Extended definitions
 
-When `message` is sent with `contentTopic` for the first time,
-the node SHOULD trigger a subscription based on `Subscribe to messages` section.
+A first `message` sent with a certain `contentTopic`
+SHOULD trigger a subscription based on `Subscribe to messages` section for such `contentTopic`.
 
 The node uses [P2P-RELIABILITY](/standards/application/p2p-reliability.md) strategies to ensure message delivery.
 
@@ -364,6 +364,9 @@ types:
       requestId:
         type: RequestId
         description: "The request ID associated with the sent message"
+      messageHash:
+        type: string
+        description: "Hash of the message that got sent to the network"
 
   MessageErrorEvent:
     type: object
@@ -375,6 +378,9 @@ types:
       requestId:
         type: RequestId
         description: "The request ID associated with the failed message"
+      messageHash:
+        type: string
+        description: "Optional property. Hash of the message that got error"
       error:
         type: string
         description: "Error message describing what went wrong"
@@ -393,13 +399,13 @@ types:
         type: string
         description: "Hash of the message that got propagated within the network"
 
-  EventSource:
-    type: object
+  EventEmitter:
+    type: event_emitter
     description: "Event source for message-related events"
     fields:
-      onEvent:
+      addEventListener:
         type: function
-        description: "Callback for message:sent events"
+        description: "Callback for subscribing to events"
         parameters:
           - name: event
             type: MessageSentEvent | MessageErrorEvent | MessagePropagatedEvent
