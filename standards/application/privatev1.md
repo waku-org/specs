@@ -15,17 +15,18 @@ The protocol is transport-agnostic and designed to support both direct messaging
 
 # Background
 
-Pairwise encrypted messaging channels represent the foundational building block of modern secure communication systems. While end-to-end encrypted group chats capture user attention, the underlying infrastructure that makes these systems possible relies (at least somewhat) on secure one-to-one communication primitives. Just as higher-level network protocols are built upon reliable transport primitives like TCP, sophisticated communication systems depend on robust pairwise channels to function correctly and securely.
+Pairwise encrypted messaging channels represent a foundational building block of modern secure communication systems. While end-to-end encrypted group chats capture user attention, the underlying infrastructure that makes these systems possible relies (at least somewhat) on secure one-to-one communication primitives. Just as higher-level network protocols are built upon reliable transport primitives like TCP, sophisticated communication systems depend on robust pairwise channels to function correctly and securely.
 
-These channels serve purposes beyond simple content delivery. They transmit not only user-visible messages but also critical metadata, coordination signals, and state synchronization information between clients. This signaling capability makes pairwise channels essential infrastructure for distributed systems: key material distribution, membership updates, administrative actions, and protocol coordination all flow through these channels. While more sophisticated group communication strategies can achieve better efficiency at scale—particularly for broadcast-style communication patterns with many participants—they struggle to match the privacy and security properties that pairwise channels provide inherently. The fundamental asymmetry of two-party communication enables stronger guarantees: minimal metadata exposure, simpler key management, clearer authentication boundaries, and more straightforward security analysis.
+These channels serve purposes beyond simple content delivery. They transmit not only user-visible messages but also critical metadata, coordination signals, and state synchronization information between clients. This signaling capability makes pairwise channels essential infrastructure for distributed systems: key material distribution, membership updates, administrative actions, and protocol coordination all flow through these channels. While more sophisticated group communication strategies can achieve better efficiency at scale—particularly for broadcast-style communication patterns — they struggle to match the privacy and security properties that pairwise channels provide inherently. The fundamental asymmetry of two-party communication enables stronger guarantees: minimal metadata exposure, simpler key management, clearer authentication boundaries, and more straightforward security analysis.
 
-However, being encrypted is merely the starting point, not the complete solution. Production-quality one-to-one channels must function reliably in the messy reality of modern networks. Real-world deployment demands resilience to unreliable networks where messages may be lost, delayed, duplicated, or arrive out of order. Channels must efficiently handle arbitrarily large payloads—from short text messages to multi-megabyte file transfers—while respecting the maximum transmission unit constraints imposed by various transport layers. Perhaps most critically, the protocol must remain fully operational even when one or more participants are offline or intermittently connected, a common scenario in mobile environments where users move between network conditions, battery limitations force background restrictions, or time zone differences mean participants are rarely simultaneously active. These practical requirements shape the protocol design as significantly as cryptographic considerations, demanding careful attention to segmentation strategies, reliability mechanisms, state management, and resource constraints alongside the core security properties.
-
+However, being encrypted is merely the starting point, not the complete solution. Production-quality one-to-one channels must function reliably in the messy reality of modern networks. Real-world deployment demands resilience to unreliable networks where messages may be lost, delayed, duplicated, or arrive out of order. Channels must efficiently handle arbitrarily large payloads—from short text messages to multi-megabyte file transfers—while respecting the maximum transmission unit constraints imposed by various transport layers. Perhaps most critically, the protocol must remain fully operational even when one or more participants are offline or intermittently connected. 
 
 
 # Private V1
 
-PrivateV1 is a conversation type specification that establishes a full-duplex secure communication channel between two participants. It combines the Double Ratchet algorithm for encryption with Scalable Data Sync (SDS) for reliable delivery and an efficient segmentation strategy to handle transport constraints.
+PrivateV1 is a conversation type specification that establishes a full-duplex secure communication channel between two participants. It combines the Double Ratchet algorithm for encryption with Scalable Data Sync (SDS) for reliable delivery and an efficient segmentation strategy to handle transport constraints. 
+
+PRIVATE1 provides the following properties:
 
 - **Payload Confidentiality**: Only the two participants can read the contents of any message sent. Observers, transport providers, and other third parties cannot decrypt message contents.
 - **Content Integrity**: Recipients can detect if message contents were modified by a third party. Any tampering with encrypted payloads will cause decryption to fail, preventing corrupted messages from being accepted as authentic.
@@ -51,7 +52,7 @@ The terms include:
 ## Architecture
 
 This conversation type assumes there is some service or application which wishes to generate and receive end-to-end encrypted content. 
-It also assumes that some other component will be responsible for delivering the generated payloads. At its core this protocol takes the content provided and creates a series of payloads to be sent to the recipient.
+It also assumes that some other component is responsible for delivering the generated payloads. At its core this protocol takes the content provided and creates a series of payloads to be sent to the recipient.
 
 ```mermaid
 flowchart LR
@@ -99,7 +100,7 @@ To maintain the security properties:
 - `sk` SHOULD have forward secrecy by incorporating ephemeral key material 
 - `rsk` and `ssk` SHOULD incorporate ephemeral key material
 
-As PRIVATE1 is agnostic to identity defining a unique identifier is difficult at this layer. The exact derivation is left to implementations to determine.
+PRIVATE1 requires a unique identifier, however the exact derivation is left to implementations to determine.
 - `conversation_id` MUST be unique across all instances of chat conversations
 - `conversation_id` SHOULD be consistent across applications to maintain interoperability
 
@@ -159,7 +160,6 @@ flowchart TD
 ### Segmentation
 
 While PRIVATE1 itself has no inherent message size limitation, practical transport mechanisms typically impose maximum payload sizes.
-Segmentation is intentionally placed as the first pipeline stage rather than deferring it to the transport layer
 
 **Why Segment Before Encryption**
 
@@ -170,7 +170,7 @@ Segmenting after encryption would force the transport layer to handle fragmentat
 
 **Why Segment Before Reliability**
 
-Placing segmentation after reliability tracking would mean retransmission of a dropped payload requires re-broadcasting the entire frame.
+Placing segmentation after reliability tracking would mean retransmission of a dropped segment would require re-broadcasting the entire frame.
 By segmenting first, the reliability layer can track individual segments and request retransmission of only the missing fragments.
 
 **Implementation**
@@ -180,6 +180,7 @@ The segmentation strategy used is defined by [!TODO: Flatten link once completed
 Implementation specifics:
 - Error correction is not used, as reliable delivery is already provided by lower layers. 
 - `segmentSize` = `max_seg_size
+- All payloads regardless of size are wrapped in a segmentation message.
  
 ### Message Reliability
 
@@ -195,8 +196,7 @@ The following mappings connect PRIVATE1 concepts to SDS fields:
 - `channel_id`: uses the `conversation_id` parameter.
 
 **Sender Validation**
-SDS uses a `sender_id` payload field to determine whether a message was sent by the remote party. This value is sender reported and not validated which can have unknown implications if trusted in other contexts. For security hygiene Clients SHOULD drop SDS messages if `sender_id` != the sender derived from the encryption layer.
-
+SDS uses a `sender_id` payload field to determine whether a message was sent by the remote party. This value is sender reported and not validated which can have unknown implications if trusted in other contexts. For security hygiene Clients SHOULD drop SDS messages if `sender_id` != the sender derived from the encryption layer. !TODO: PrivateV1 is not sender aware currently
 
 **Bloom Filter Configuration**
 
@@ -240,7 +240,7 @@ The `content` frame type is reserved exclusively for application-level data.
 All other frame types are protocol-owned and intended for client processing, not application consumption.
 
 This establishes a critical invariant: any frame that is not `content` is meant for the protocol layer.
-When a client encounters an unknown frame type, it can definitively conclude this represents a version compatibility issue rather than corrupted application data.
+When a client encounters an unknown frame type, it can definitively conclude this represents a version compatibility issue.
 
 **Processing Rules**
 
@@ -280,11 +280,10 @@ flowchart TD
     
     P --> T{frame_type}
     T --content--> Bytes
-    T --> Placeholder
+
 
     classDef plain fill:none,stroke:transparent;
 ```
-!TODO: Replace placeholder 
 
 
 ## Payloads
@@ -308,23 +307,22 @@ This payload is used without modification from the SDS Spec.
 
 ```protobuf
 message HistoryEntry {
-    string message_id = 1;        
-    bytes retrieval_hint = 2;                      
-  }
-  
-message ReliablePayload {
-    string message_id = 2;      
-    string channel_id = 3;  
-    int32 lamport_timestamp = 10;    
-    repeated HistoryEntry causal_history = 11;   
-    bytes bloom_filter = 12; 
-    bytes content = 20;                           
-  }
+  string message_id = 1;                // Unique identifier of the SDS message, as defined in `Message`
+  optional bytes retrieval_hint = 2;    // Optional information to help remote parties retrieve this SDS message; For example, A Waku deterministic message hash or routing payload hash
+}
+
+message Message {
+  string sender_id = 1;           // Participant ID of the message sender
+  string message_id = 2;          // Unique identifier of the message
+  string channel_id = 3;          // Identifier of the channel to which the message belongs
+  optional int32 lamport_timestamp = 10;    // Logical timestamp for causal ordering in channel
+  repeated HistoryEntry causal_history = 11;  // List of preceding message IDs that this message causally depends on. Generally 2 or 3 message IDs are included.
+  optional bytes bloom_filter = 12;         // Bloom filter representing received message IDs in channel
+  optional bytes content = 20;             // Actual content of the message
+}
 ```
 
 **content:** This field is an protobuf encoded `Segment`
-
-!TODO: Why is SDS using signed int for timestamps?
 
 ### Segmentation 
 
@@ -401,7 +399,4 @@ Without proper authentication during initialization, an adversary could perform 
 
 Copyright and related rights waived via [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
 
-## References
-
-A list of references. use SHA256 or SAH256.
 
