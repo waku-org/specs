@@ -29,6 +29,12 @@ contributors:
       * [Function definitions](#function-definitions)
       * [Predefined values](#predefined-values)
       * [Extended definitions](#extended-definitions)
+  * [Send messages](#send-messages)
+      * [Type definitions](#type-definitions-1)
+      * [Function definitions](#function-definitions-1)
+      * [Extended definitions](#extended-definitions-1)
+  * [Event source](#event-source)
+      * [Type definitions](#type-definitions-2)
   * [The Validation API](#the-validation-api)
   * [Security/Privacy Considerations](#securityprivacy-considerations)
   * [Copyright](#copyright)
@@ -118,6 +124,10 @@ types:
   WakuNode:
     type: object
     description: "A Waku node instance."
+    fields:
+      messages:
+        type: MessageEventEmitter
+        description: "Event source for message-related events"
 
   NodeConfig:
     type: object
@@ -222,15 +232,6 @@ functions:
         description: "The Waku node configuration."
     returns:
         type: result<WakuNode, error>
-```
-
-#### Property definitions
-
-```yaml
-properties:
-  events:
-    type: EventEmitter
-    description: "Event source for message-related events"
 ```
 
 #### Predefined values
@@ -366,10 +367,6 @@ types:
   MessageSentEvent:
     type: object
     fields:
-      eventType:
-        type: string
-        default: "message:sent"
-        description: "Event type identifier"
       requestId:
         type: RequestId
         description: "The request ID associated with the sent message"
@@ -380,10 +377,6 @@ types:
   MessageErrorEvent:
     type: object
     fields:
-      eventType:
-        type: string
-        default: "message:error"
-        description: "Event type identifier"
       requestId:
         type: RequestId
         description: "The request ID associated with the failed message"
@@ -397,10 +390,6 @@ types:
   MessagePropagatedEvent:
     type: object
     fields:
-      eventType:
-        type: string
-        default: "message:propagated"
-        description: "Event type identifier"
       requestId:
         type: RequestId
         description: "The request ID associated with the propagated message in the network"
@@ -408,16 +397,19 @@ types:
         type: string
         description: "Hash of the message that got propagated within the network"
 
-  EventEmitter:
+  MessageEventEmitter:
     type: event_emitter
     description: "Event source for message-related events"
-    fields:
-      addEventListener:
-        type: function
-        description: "Callback for subscribing to events"
-        parameters:
-          - name: event
-            type: MessageSentEvent | MessageErrorEvent | MessagePropagatedEvent
+    events:
+        "message:sent":
+          type: MessageSentEvent
+          description: "Emitted when a message has been sent over the wire."
+        "message:error":
+          type: MessageErrorEvent
+          description: "Emitted when an error was encountered when sending a message."
+        "message:propagated":
+          type: MessagePropagatedEvent
+          description: "Emitted when indication that the message was propagated among p2p nodes has been received."
 ```
 
 ## The Validation API
