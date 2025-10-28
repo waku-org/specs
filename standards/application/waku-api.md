@@ -330,14 +330,16 @@ types:
 #### Extended definitions
 
 `Unhealthy` indicates that the node has lost connectivity for message reception,
-sending, or both, and as a result, it cannot reliably process or transmit messages.
+sending, or both, and as a result, it cannot reliably receive or transmit messages.
 
-`MinimallyHealthy` indicates that the node meets the minimum operational requirements: connect to at least one peer with a protocol to send messages ([LIGHT-PUSH]() or [RELAY]()) and one peer with a protocol to receive messages ([FILTER ] or [RELAY])
-and one peer with store service capabilities.
-although performance or reliability may be impacted.
+`MinimallyHealthy` indicates that the node meets the minimum operational requirements:
+it is connected to at least one peer with a protocol to send messages ([LIGHTPUSH](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/19/lightpush.md) or [RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md)), 
+one peer with a protocol to receive messages ([FILTER](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/12/filter.md) or [RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md)),
+and one peer with [STORE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/13/store.md) service capabilities,
+although performance or reliability may still be impacted.
 
 `Healthy` indicates that the node is operating optimally,
-with full support for message processing and transmission.
+with full support for message reception and transmission.
 
 ## Event Source
 
