@@ -320,7 +320,7 @@ types:
   MessageEnvelope:
     type: object
     fields:
-      contentTopic:
+      content_topic:
         type: string
         description: "Content-based filtering field as defined in [TOPICS](https://github.com/vacp2p/rfc-index/blob/main/waku/informational/23/topics.md#content-topics)"
       payload:
@@ -366,28 +366,28 @@ types:
   MessageSentEvent:
     type: object
     fields:
-      eventType:
+      event_type:
         type: string
         default: "message:sent"
         description: "Event type identifier"
-      requestId:
+      request_id:
         type: RequestId
         description: "The request ID associated with the sent message"
-      messageHash:
+      message_hash:
         type: string
         description: "Hash of the message that got sent to the network"
 
   MessageErrorEvent:
     type: object
     fields:
-      eventType:
+      event_type:
         type: string
         default: "message:error"
         description: "Event type identifier"
-      requestId:
+      request_id:
         type: RequestId
         description: "The request ID associated with the failed message"
-      messageHash:
+      message_hash:
         type: string
         description: "Optional property. Hash of the message that got error"
       error:
@@ -397,14 +397,14 @@ types:
   MessagePropagatedEvent:
     type: object
     fields:
-      eventType:
+      event_type:
         type: string
         default: "message:propagated"
         description: "Event type identifier"
-      requestId:
+      request_id:
         type: RequestId
         description: "The request ID associated with the propagated message in the network"
-      messageHash:
+      message_hash:
         type: string
         description: "Hash of the message that got propagated within the network"
 
