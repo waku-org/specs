@@ -41,7 +41,7 @@ The namespaces used to register and request MUST be in the format `rs/<cluster-i
 This allows for discovering peers with specific capabilities within a given cluster.
 Currently, this is used for Mix protocol discovery where the capability field specifies `mix`.
 
-Refer to [RELAY-SHARDING](https://github.com/waku-org/specs/blob/master/standards/core/relay-sharding.md) for cluster and shard information.
+Refer to [RELAY-SHARDING](https://github.com/waku-org/specs/blob/master/standards/core/relay-sharding.md) for cluster information.
 
 ### Registration and Discovery
 
@@ -49,7 +49,8 @@ Every [Waku Relay](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/
 
 Each relay node that participates in discovery
 MUST register with random rendezvous points at regular intervals.
-Nodes supporting the Mix protocol MUST advertise their `WakuPeerRecord`, which includes their multiaddresses, supported protocols, and Mix public key.
+
+All relay nodes participating in rendezvous discovery SHOULD advertise their information using `WakuPeerRecord`. For nodes supporting the Mix protocol, the `mix_public_key` field MUST be included. For non-Mix relay nodes, the `mix_public_key` field SHOULD be omitted. The standard libp2p PeerRecord is not used for Waku rendezvous; all advertised records MUST conform to the `WakuPeerRecord` specification.
 
 We RECOMMEND a registration interval of 10 seconds.
 
@@ -65,14 +66,30 @@ minimizes the load on rendezvous points.
 
 ### Peer Records
 
-Nodes advertise their information through `WakuPeerRecord`, which includes:
+Nodes advertise their information through `WakuPeerRecord`, a custom peer record structure designed for Waku rendezvous. The specification for `WakuPeerRecord` is as follows:
 
-- Multiaddresses for connectivity
-- Supported protocol codecs
-- Mix protocol public key (for nodes supporting the Mix protocol)
+**WakuPeerRecord fields:**
 
-When a node discovers peers through rendezvous, it receives the complete `WakuPeerRecord` for each peer,
-allowing it to make informed decisions about which peers to connect to based on their advertised information.
+- `peer_id`: The libp2p PeerId of the node.
+- `multiaddrs`: A list of multiaddresses for connectivity.
+- `protocols`: A list of supported protocol codecs (e.g., `/vac/waku/mix/1.0.0`).
+- `mix_public_key`: The Mix protocol public key (only present for nodes supporting Mix).
+- `timestamp`: The time at which the record was created or last updated (Unix epoch, seconds).
+
+**Encoding:**
+WakuPeerRecord is encoded as a protobuf message. The exact schema is:
+
+```protobuf
+message WakuPeerRecord {
+	string peer_id = 1;
+	repeated string multiaddrs = 2;
+	repeated string protocols = 3;
+	optional bytes mix_public_key = 4;
+	uint64 timestamp = 5;
+}
+```
+
+When a node discovers peers through rendezvous, it receives the complete `WakuPeerRecord` for each peer, allowing it to make informed decisions about which peers to connect to based on their advertised information.
 
 ### Operational Recommendations
 
