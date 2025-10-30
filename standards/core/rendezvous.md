@@ -50,23 +50,24 @@ Every [Waku Relay](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/
 Each relay node that participates in discovery
 MUST register with random rendezvous points at regular intervals.
 
-All relay nodes participating in rendezvous discovery SHOULD advertise their information using `WakuPeerRecord`. For nodes supporting the Mix protocol, the `mix_public_key` field MUST be included. For non-Mix relay nodes, the `mix_public_key` field SHOULD be omitted. The standard libp2p PeerRecord is not used for Waku rendezvous; all advertised records MUST conform to the `WakuPeerRecord` specification.
+All relay nodes participating in rendezvous discovery SHOULD advertise their information using `WakuPeerRecord`. For nodes supporting the Mix protocol, the `mix_public_key` field MUST be included. For non-Mix relay nodes, the `mix_public_key` field SHOULD be omitted. The standard libp2p PeerRecord is not used for Waku rendezvous; all advertised records MUST conform to the `WakuPeerRecord` definition.
 
-We RECOMMEND a registration interval of 10 seconds.
+The RECOMMENDED registration interval is 10 seconds.
 
-We RECOMMEND that rendezvous points expire registrations after 1 minute (60 seconds TTL)
+It is RECOMMENDED that rendezvous points expire registrations after 1 minute (60 seconds TTL)
 to keep discovered peer records limited to those recently online.
 
 At startup, every Waku node supporting Mix SHOULD discover peers by
 sending requests to random rendezvous points for the Mix capability namespace.
 
-We RECOMMEND a maximum of 12 peers be requested each time.
+It is RECOMMENDED a maximum of 12 peers be requested each time.
 This number is sufficient for good GossipSub connectivity and
 minimizes the load on rendezvous points.
 
 ### Peer Records
 
-Nodes advertise their information through `WakuPeerRecord`, a custom peer record structure designed for Waku rendezvous. The specification for `WakuPeerRecord` is as follows:
+Nodes advertise their information through `WakuPeerRecord`, a custom peer record structure designed for Waku rendezvous.
+The `WakuPeerRecord` is defined as follows:
 
 **WakuPeerRecord fields:**
 
@@ -93,7 +94,7 @@ When a node discovers peers through rendezvous, it receives the complete `WakuPe
 
 ### Operational Recommendations
 
-We RECOMMEND that bootstrap nodes participate in rendezvous discovery and
+It is RECOMMENDED that bootstrap nodes participate in rendezvous discovery and
 that other discovery methods are used in conjunction and
 continue discovering peers for the lifetime of the local node.
 
