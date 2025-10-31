@@ -67,15 +67,15 @@ minimizes the load on rendezvous points.
 ### Peer Records
 
 Nodes advertise their information through `WakuPeerRecord`, a custom peer record structure designed for Waku rendezvous.
+Since this is a customPeerRecord, it uses a private multicodec value of `0x300000` as per [multicodec table](https://github.com/multiformats/multicodec/blob/master/table.csv).
 The `WakuPeerRecord` is defined as follows:
 
 **WakuPeerRecord fields:**
 
 - `peer_id`: The libp2p PeerId of the node.
+- `seqNo`: The time at which the record was created or last updated (Unix epoch, seconds).
 - `multiaddrs`: A list of multiaddresses for connectivity.
-- `protocols`: A list of supported protocol codecs (e.g., `/vac/waku/mix/1.0.0`).
 - `mix_public_key`: The Mix protocol public key (only present for nodes supporting Mix).
-- `timestamp`: The time at which the record was created or last updated (Unix epoch, seconds).
 
 **Encoding:**
 WakuPeerRecord is encoded as a protobuf message. The exact schema is:
@@ -83,10 +83,9 @@ WakuPeerRecord is encoded as a protobuf message. The exact schema is:
 ```protobuf
 message WakuPeerRecord {
 	string peer_id = 1;
-	repeated string multiaddrs = 2;
-	repeated string protocols = 3;
+	uint64 seqNo = 2;
+	repeated string multiaddrs = 3;
 	optional bytes mix_public_key = 4;
-	uint64 timestamp = 5;
 }
 ```
 
