@@ -15,9 +15,11 @@ It supplements Discovery v5 and Waku peer exchange.
 
 ## Background and Rationale
 
-Waku nodes need a discovery mechanism that is both rapid and robust against attacks. Rendezvous enables quick identification of relevant peers, complementing slower but more resilient approaches like Discv5. For healthy network participation, nodes must connect to a diverse set of peers. However, the rendezvous protocol is vulnerable to denial of service attacks and depends on centralized rendezvous points, so it is best used in conjunction with other discovery methods such as Discv5.
-
-Ethereum Node Record (ENR) size constraints make it impractical to encode additional metadata, such as Mix public keys, in ENRs for Discv5-based discovery. Rendezvous, using a custom peer record (`WakuPeerRecord`), allows nodes to advertise Mix-specific information—including the Mix public key—without being restricted by ENR size. This serves as an interim solution until a comprehensive capability discovery mechanism is available.
+Waku needs discovery mechanism(s) that are both rapid and robust against attacks.
+Fully centralised discovery (such as DNS lookup) may be fast but is not secure.
+Fully decentralised discovery (such as discv5) may be robust, but too slow for some bootstrapping use cases
+Rendezvous provides a limited, balanced solution that trades off some robustness for speed.
+It's meant to complement not replaced fully decentralised discovery mechanisms, like discv5
 
 By combining rendezvous with
 [Discv5](https://github.com/ethereum/devp2p/blob/master/discv5/discv5.md#node-discovery-protocol-v5) and
@@ -34,40 +36,10 @@ This allows nodes to advertise additional Waku-specific metadata beyond what is 
 
 **Libp2p Protocol identifier**: `/vac/waku/rendezvous/1.0.0`
 
-### Namespace Format
-
-The namespaces used to register and request MUST be in the format `rs/<cluster-id>/<capability>`.
-
-This allows for discovering peers with specific capabilities within a given cluster.
-Currently, this is used for Mix protocol discovery where the capability field specifies `mix`.
-
-Refer to [RELAY-SHARDING](https://github.com/waku-org/specs/blob/master/standards/core/relay-sharding.md) for cluster information.
-
-### Registration and Discovery
-
-Every [Waku Relay](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md) node SHOULD be initialized as a rendezvous point.
-
-Each relay node that participates in discovery
-MUST register with random rendezvous points at regular intervals.
-
-All relay nodes participating in rendezvous discovery SHOULD advertise their information using `WakuPeerRecord`. For nodes supporting the Mix protocol, the `mix_public_key` field MUST be included. For non-Mix relay nodes, the `mix_public_key` field SHOULD be omitted. The standard libp2p PeerRecord is not used for Waku rendezvous; all advertised records MUST conform to the `WakuPeerRecord` definition.
-
-The RECOMMENDED registration interval is 10 seconds.
-
-It is RECOMMENDED that rendezvous points expire registrations after 1 minute (60 seconds TTL)
-to keep discovered peer records limited to those recently online.
-
-At startup, every Waku node supporting Mix SHOULD discover peers by
-sending requests to random rendezvous points for the Mix capability namespace.
-
-It is RECOMMENDED a maximum of 12 peers be requested each time.
-This number is sufficient for good GossipSub connectivity and
-minimizes the load on rendezvous points.
-
-### Peer Records
+### Wire Protocol
 
 Nodes advertise their information through `WakuPeerRecord`, a custom peer record structure designed for Waku rendezvous.
-Since this is a customPeerRecord, it uses a private multicodec value of `0x300000` as per [multicodec table](https://github.com/multiformats/multicodec/blob/master/table.csv).
+Since this is a customPeerRecord, we define a private multicodec value of `0x300000` as per [multicodec table](https://github.com/multiformats/multicodec/blob/master/table.csv).
 The `WakuPeerRecord` is defined as follows:
 
 **WakuPeerRecord fields:**
@@ -90,6 +62,41 @@ message WakuPeerRecord {
 ```
 
 When a node discovers peers through rendezvous, it receives the complete `WakuPeerRecord` for each peer, allowing it to make informed decisions about which peers to connect to based on their advertised information.
+
+### Namespace Format
+
+The [rendezvous namespaces](https://github.com/libp2p/specs/blob/69c4fdf5da3a07d2f392df6a892c07256c1885c0/rendezvous/README.md#the-protocol) used to register and request peer records
+MUST be in the format `rs/<cluster-id>/<capability>`.
+`<capability>` is a string representing the individual capability for which a discoverable Waku peer record is registered.
+The Waku peer record is separately registered against each capability for which discovery is desired.
+The only defined capability for now is `mix`, representing [Waku Mix](https://github.com/waku-org/specs/blob/master/standards/core/mix.md) support.
+For example, a Waku peer record for a node supporting mix protocol in cluster `1` will be registered against a namespace: `rs/1/mix`.
+
+This allows for discovering peers with specific capabilities within a given cluster.
+Currently, this is used for Mix protocol discovery where the capability field specifies `mix`.
+
+Refer to [RELAY-SHARDING](https://github.com/waku-org/specs/blob/master/standards/core/relay-sharding.md) for cluster information.
+
+### Registration and Discovery
+
+Every [Waku Relay](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md) node SHOULD be initialized as a rendezvous point.
+
+Each relay node that participates in discovery
+MUST register with random rendezvous points at regular intervals.
+The RECOMMENDED registration interval is 10 seconds.
+
+All relay nodes participating in rendezvous discovery SHOULD advertise their information using `WakuPeerRecord`. For nodes supporting the Mix protocol, the `mix_public_key` field MUST be included.
+All advertised records MUST conform to the `WakuPeerRecord` definition.
+
+It is RECOMMENDED that rendezvous points expire registrations after 1 minute (60 seconds TTL)
+to keep discovered peer records limited to those recently online.
+
+At startup, every Waku node supporting Mix SHOULD discover peers by
+sending requests to random rendezvous points for the Mix capability namespace.
+
+It is RECOMMENDED a maximum of 12 peers be requested each time.
+This number is sufficient for good GossipSub connectivity and
+minimizes the load on rendezvous points.
 
 ### Operational Recommendations
 
