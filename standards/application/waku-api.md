@@ -117,7 +117,7 @@ description: "Waku: a private and censorship-resistant message routing library."
 types:
   WakuNode:
     type: object
-    description: "A Waku node instance."
+    description: "A Waku node instance, created by the createNode function and MUST be used in any subsequent API call."
 
   NodeConfig:
     type: object
