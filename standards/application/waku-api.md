@@ -361,16 +361,12 @@ The node uses [P2P-RELIABILITY](/standards/application/p2p-reliability.md) strat
 
 #### Type definitions
 
-```yaml
+```yml
 types:
   MessageSentEvent:
     type: object
     description: "Event emitted when a message is sent to the network"
     fields:
-      event_type:
-        type: string
-        default: "message:sent"
-        description: "Event type identifier"
       request_id:
         type: RequestId
         description: "The request ID associated with the sent message"
@@ -382,10 +378,6 @@ types:
     type: object
     description: "Event emitted when a message send operation fails"
     fields:
-      event_type:
-        type: string
-        default: "message:error"
-        description: "Event type identifier"
       request_id:
         type: RequestId
         description: "The request ID associated with the failed message"
@@ -400,10 +392,6 @@ types:
     type: object
     description: "Confirmation that a message has been correctly delivered to the network"
     fields:
-      event_type:
-        type: string
-        default: "message:propagated"
-        description: "Event type identifier"
       request_id:
         type: RequestId
         description: "The request ID associated with the propagated message in the network"
@@ -411,16 +399,16 @@ types:
         type: string
         description: "Hash of the message that got propagated within the network"
 
-  EventEmitter:
+  EventEventEmitter:
     type: event_emitter
     description: "Event source for message-related events"
-    fields:
-      addEventListener:
-        type: function
-        description: "Callback for subscribing to events"
-        parameters:
-          - name: event
-            type: MessageSentEvent | MessageErrorEvent | MessagePropagatedEvent
+    events:
+      "message:sent":
+        type: MessageSentEvent
+      "message:error":
+        type: MessageErrorEvent
+      "message:propagated":
+        type: MessagePropagatedEvent
 ```
 
 ## The Validation API
