@@ -365,6 +365,7 @@ The node uses [P2P-RELIABILITY](/standards/application/p2p-reliability.md) strat
 types:
   MessageSentEvent:
     type: object
+    description: "Event emitted when a message is sent to the network"
     fields:
       event_type:
         type: string
@@ -379,6 +380,7 @@ types:
 
   MessageErrorEvent:
     type: object
+    description: "Event emitted when a message send operation fails"
     fields:
       event_type:
         type: string
@@ -396,6 +398,7 @@ types:
 
   MessagePropagatedEvent:
     type: object
+    description: "Confirmation that a message has been correctly delivered to the network"
     fields:
       event_type:
         type: string
