@@ -29,6 +29,12 @@ contributors:
       * [Function definitions](#function-definitions)
       * [Predefined values](#predefined-values)
       * [Extended definitions](#extended-definitions)
+  * [Send messages](#send-messages)
+      * [Type definitions](#type-definitions-1)
+      * [Function definitions](#function-definitions-1)
+      * [Extended definitions](#extended-definitions-1)
+  * [Event source](#event-source)
+      * [Type definitions](#type-definitions-2)
   * [The Validation API](#the-validation-api)
   * [Security/Privacy Considerations](#securityprivacy-considerations)
   * [Copyright](#copyright)
@@ -39,10 +45,10 @@ contributors:
 This document specifies an Application Programming Interface (API) that is RECOMMENDED for developers of the [WAKU2](https://github.com/vacp2p/rfc-index/blob/7b443c1aab627894e3f22f5adfbb93f4c4eac4f6/waku/standards/core/10/waku2.md) clients to implement,
 and for consumers to use as a single entry point to its functionalities.
 
-This API defines the RECOMMENDED interface for leveraging Waku protocols to send and receive messages. 
+This API defines the RECOMMENDED interface for leveraging Waku protocols to send and receive messages.
 Application developers SHOULD use it to access capabilities for peer discovery, message routing, and peer-to-peer reliability.
 
-TODO: This spec must be further extended to include connection health inspection, message sending, subscription and store hash queries.
+TODO: This spec must be further extended to include connection health inspection, subscription, and store hash queries.
 
 ## Motivation
 
@@ -72,9 +78,10 @@ An alternative would be to choose a programming language. However, such choice m
 - Primitive types are `string`, `int`, `bool`, `byte`, `enum` and `uint`
 - Complex pre-defined types are:
   - `object`: object and other nested types.
-  - `array`: iterable object containing values of all the same type.
+  - `array`: iterable object containing values of all the same type. Syntax: `array<T>` where `T` is the element type (e.g., `array<string>`, `array<byte>`).
   - `result`: an enum type that either contains a value or void (success), or an error (failure); The error is left to the implementor.
   - `error`: Left to the implementor on whether `error` types are `string` or `object` in the given language.
+  - `event_emitter`: an object that emits events with specific event names and associated event data types.
 - Usage of `result` is RECOMMENDED, usage of exceptions is NOT RECOMMENDED, no matter the language.
 
 TODO: Review whether to specify categories of errors.
@@ -90,11 +97,13 @@ language_mappings:
       - functions: "camelCase"
       - variables: "camelCase"
       - types: "PascalCase"
+    event_emitter: "Use EventEmitter object with `emit`, `addListener`, etc; with event name the string specified in IDL. For example. eventEmitter.emit('message:sent',...)"
   nim:
     naming_convention:
       - functions: "camelCase"
       - variables: "camelCase"
       - types: "PascalCase"
+    event_emitter: TBD
 ```
 
 ### Application
@@ -118,6 +127,10 @@ types:
   WakuNode:
     type: object
     description: "A Waku node instance."
+    fields:
+      message_events:
+        type: MessageEvents
+        description: "Message related events."
 
   NodeConfig:
     type: object
@@ -151,6 +164,7 @@ types:
         description: "The passed nodes are prioritised for store queries."
       cluster_id:
         type: uint
+        description: "The cluster ID for the Waku network. Cluster IDs are defined in [RELAY-SHARDING](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/51/relay-sharding.md) and allocated in [RELAY-STATIC-SHARD-ALLOC](https://github.com/waku-org/specs/blob/master/informational/relay-static-shard-alloc.md)."
       auto_sharding_config:
         type: AutoShardingConfig
         default: DefaultAutoShardingConfig
@@ -201,10 +215,10 @@ types:
     fields:
       contract_address:
         type: string
-        description: "The address of the RLN contract exposes `root` and `getMerkleRoot` ABIs"
+        description: "The address of the RLN contract that exposes `root` and `getMerkleRoot` ABIs"
       chain_id:
         type: uint
-        description: "The chain id on which the RLN contract is deployed"
+        description: "The chain ID on which the RLN contract is deployed"
       epoch_size_sec:
         type: uint
         description: "The epoch size to use for RLN, in seconds"
@@ -222,15 +236,6 @@ functions:
         description: "The Waku node configuration."
     returns:
         type: result<WakuNode, error>
-```
-
-#### Property definitions
-
-```yaml
-properties:
-  events:
-    type: EventEmitter
-    description: "Event source for message-related events"
 ```
 
 #### Predefined values
@@ -253,6 +258,7 @@ values:
       static_store_nodes: []
       cluster_id: 1
       auto_sharding_config:
+        type: AutoShardingConfig
         fields:
           num_shards_in_cluster: 8
       message_validation: TheWakuNetworkMessageValidation
@@ -262,6 +268,7 @@ values:
     fields:
       max_message_size: "150 KiB"
       rln_config:
+        type: RlnConfig
         fields:
           contract_address: "0xB9cd878C90E49F797B4431fBF4fb333108CB90e6"
           chain_id: 59141
@@ -300,7 +307,6 @@ If the `mode` set is `core`, the initialised `WakuNode` SHOULD use:
 - [RELAY](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md)
 - [LIGHTPUSH](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/19/lightpush.md) as service node
 - [FILTER](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/12/filter.md) as service node
-- [PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/34/peer-exchange.md) as service node
 - [STORE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/13/store.md) as client
 - [METADATA](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/66/metadata.md) as client and service node
 - [P2P-RELIABILITY](/standards/application/p2p-reliability.md)
@@ -390,7 +396,7 @@ types:
 
   MessagePropagatedEvent:
     type: object
-    description: "Confirmation that a message has been correctly delivered to the network"
+    description: "Confirmation that a message has been correctly delivered to some neighbouring nodes."
     fields:
       request_id:
         type: RequestId
@@ -399,7 +405,7 @@ types:
         type: string
         description: "Hash of the message that got propagated within the network"
 
-  EventEventEmitter:
+  MessageEvents:
     type: event_emitter
     description: "Event source for message-related events"
     events:
