@@ -22,14 +22,14 @@ Rendezvous provides a limited, balanced solution that trades off some robustness
 It's meant to complement not replaced fully decentralised discovery mechanisms, like discv5
 
 By combining rendezvous with
-[Discv5](https://github.com/ethereum/devp2p/blob/master/discv5/discv5.md#node-discovery-protocol-v5) and
-[34/WAKU2-PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/34/peer-exchange.md#abstract),
+[Discv5](https://github.com/ethereum/devp2p/blob/bc76b9809a30e6dc5c8dcda996273f0f9bcf7108/discv5/discv5.md#node-discovery-protocol-v5) and
+[34/WAKU2-PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/dd397adc594c121ce3e10b7e81b5c2ed4818c0a6/waku/standards/core/34/peer-exchange.md#abstract),
 Waku nodes can more quickly reach a meaningful set of peers
 than by relying on a single discovery method.
 
 ## Semantics
 
-Waku rendezvous extends the [libp2p rendezvous semantics](https://github.com/libp2p/specs/blob/master/rendezvous/README.md#rendezvous-protocol) by using `WakuPeerRecord` instead of the standard libp2p `PeerRecord`.
+Waku rendezvous extends the [libp2p rendezvous semantics](https://github.com/libp2p/specs/blob/69c4fdf5da3a07d2f392df6a892c07256c1885c0/rendezvous/README.md#rendezvous-protocol) by using `WakuPeerRecord` instead of the standard libp2p `PeerRecord`.
 This allows nodes to advertise additional Waku-specific metadata beyond what is available in the standard libp2p peer record.
 
 ## Specifications
@@ -39,7 +39,7 @@ This allows nodes to advertise additional Waku-specific metadata beyond what is 
 ### Wire Protocol
 
 Nodes advertise their information through `WakuPeerRecord`, a custom peer record structure designed for Waku rendezvous.
-Since this is a customPeerRecord, we define a private multicodec value of `0x300000` as per [multicodec table](https://github.com/multiformats/multicodec/blob/master/table.csv).
+Since this is a customPeerRecord, we define a private multicodec value of `0x300000` as per [multicodec table](https://github.com/multiformats/multicodec/blob/0c6c7d75f1580af329847dbc9900859a445ed980/table.csv).
 The `WakuPeerRecord` is defined as follows:
 
 **WakuPeerRecord fields:**
@@ -69,17 +69,17 @@ The [rendezvous namespaces](https://github.com/libp2p/specs/blob/69c4fdf5da3a07d
 MUST be in the format `rs/<cluster-id>/<capability>`.
 `<capability>` is a string representing the individual capability for which a discoverable Waku peer record is registered.
 The Waku peer record is separately registered against each capability for which discovery is desired.
-The only defined capability for now is `mix`, representing [Waku Mix](https://github.com/waku-org/specs/blob/master/standards/core/mix.md) support.
+The only defined capability for now is `mix`, representing [Waku Mix](https://github.com/waku-org/specs/blob/fe5cfdf823085b8c9560df81b38bc342d6b1cb38/standards/core/mix.md) support.
 For example, a Waku peer record for a node supporting mix protocol in cluster `1` will be registered against a namespace: `rs/1/mix`.
 
 This allows for discovering peers with specific capabilities within a given cluster.
 Currently, this is used for Mix protocol discovery where the capability field specifies `mix`.
 
-Refer to [RELAY-SHARDING](https://github.com/waku-org/specs/blob/master/standards/core/relay-sharding.md) for cluster information.
+Refer to [RELAY-SHARDING](https://github.com/waku-org/specs/blob/fe5cfdf823085b8c9560df81b38bc342d6b1cb38/standards/core/relay-sharding.md) for cluster information.
 
 ### Registration and Discovery
 
-Every [Waku Relay](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md) node SHOULD be initialized as a rendezvous point.
+Every [Waku Relay](https://github.com/vacp2p/rfc-index/blob/dd397adc594c121ce3e10b7e81b5c2ed4818c0a6/waku/standards/core/11/relay.md) node SHOULD be initialized as a rendezvous point.
 
 Each relay node that participates in discovery
 MUST register with random rendezvous points at regular intervals.
@@ -124,8 +124,8 @@ Copyright and related rights waived via
 
 # References
 
-- [Discv5](https://github.com/ethereum/devp2p/blob/master/discv5/discv5.md#node-discovery-protocol-v5)
-- [ENR](https://github.com/ethereum/devp2p/blob/master/enr.md)
-- [34/WAKU2-PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/34/peer-exchange.md#abstract)
-- [Libp2p Rendezvous](https://github.com/libp2p/specs/blob/master/rendezvous/README.md#rendezvous-protocol)
-- [Relay](https://github.com/vacp2p/rfc-index/blob/main/waku/standards/core/11/relay.md)
+- [Discv5](https://github.com/ethereum/devp2p/blob/bc76b9809a30e6dc5c8dcda996273f0f9bcf7108/discv5/discv5.md#node-discovery-protocol-v5)
+- [ENR](https://github.com/ethereum/devp2p/blob/bc76b9809a30e6dc5c8dcda996273f0f9bcf7108/enr.md)
+- [34/WAKU2-PEER-EXCHANGE](https://github.com/vacp2p/rfc-index/blob/dd397adc594c121ce3e10b7e81b5c2ed4818c0a6/waku/standards/core/34/peer-exchange.md#abstract)
+- [Libp2p Rendezvous](https://github.com/libp2p/specs/blob/69c4fdf5da3a07d2f392df6a892c07256c1885c0/rendezvous/README.md#rendezvous-protocol)
+- [Relay](https://github.com/vacp2p/rfc-index/blob/dd397adc594c121ce3e10b7e81b5c2ed4818c0a6/waku/standards/core/11/relay.md)
