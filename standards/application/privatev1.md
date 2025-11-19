@@ -212,9 +212,9 @@ Payloads are encrypted using the [Double Ratchet](https://signal.org/docs/specif
 **Double Ratchet Configuration**
 
 - `DH`: X25519 for Diffie-Hellman operations
-- `KDF_RK`: HKDF with SHA256, `info = "PrivateV1RootKey"`
-- `KDF_CK`: HKDF with SHA256, using `input`=`0x01` for message keys and `input`=`0x02` for chain keys
-- `KDF_MK`: HKDF with SHA256, `info = "PrivateV1MessageKey"`
+- `KDF_RK`: HKDF with BLAKE2b, `info = "PrivateV1RootKey"`
+- `KDF_CK`: HKDF with BLAKE2b, using `input`=`0x01` for message keys and `input`=`0x02` for chain keys
+- `KDF_MK`: HKDF with BLAKE2b, `info = "PrivateV1MessageKey"`
 - `ENCRYPT`: `AEAD_CHACHA20_POLY1305`
 
 **AEAD Implementation**
